@@ -73,7 +73,7 @@ namespace _2Deditor
         byte addHeight = 64;
         byte[] shadowMap;
         int angle = 45;
-        float gf = 2f;
+        float gf = 0.5f;
         float gfadd = 0.01f;
         //int[] heightMap; 
 
@@ -180,56 +180,59 @@ namespace _2Deditor
         private Bitmap switchMode(Bitmap heightMap)
         {
             
-            int bitmaSize = (int)(heightMap.Width * 1.5f);
-            Bitmap result = new Bitmap(bitmaSize*2, bitmaSize*2);
-            Bitmap thmp = new Bitmap(bitmaSize, bitmaSize);
-            Graphics g = Graphics.FromImage(thmp);
+            bitmapSize.Width = (int)(64*1.5f);
+            bitmapSize.Height = (int)(64 * 1.5f);
+            Bitmap result = new Bitmap((int)(bitmapSize.Width), (int)(bitmapSize.Height));
+            Graphics g = Graphics.FromImage(result);
 
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            g.TranslateTransform(bitmaSize / 2, bitmaSize/2);
+            g.TranslateTransform(bitmapSize.Width / 2, bitmapSize.Height / 2);
             g.RotateTransform(angle);
             //g.ScaleTransform(1, 0.5f);
             //g.DrawImage(heightMap,new Point(0,0));
-            g.DrawImage(heightMap, new RectangleF(-heightMap.Width/2, -heightMap.Width / 2, heightMap.Width, heightMap.Width), new RectangleF(0, 0, heightMap.Width, heightMap.Width), GraphicsUnit.Pixel);
+            g.DrawImage(heightMap, new RectangleF(-heightMap.Width/2, -heightMap.Height / 2, heightMap.Width, heightMap.Width), new RectangleF(0, 0, heightMap.Width, heightMap.Width), GraphicsUnit.Pixel);
             //g.FillRectangle(new SolidBrush(Color.FromArgb(0,10,0)),new Rectangle(0, 0, 10, 10));
             g.ResetTransform();
-            g = Graphics.FromImage(result);
-            float cf = 3.125f;
-            g.ScaleTransform(2, 1);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            g.DrawImage(thmp, new Point(0, 0));
-            ////LookBitmap heightLB = new LookBitmap(new Bitmap(bitmaSize, bitmaSize));
-            //LookBitmap heightLB = new LookBitmap(heightMap);
-            //LookBitmap resultLB = new LookBitmap(heightMap);
-            //byte[] heightRGB = heightLB.getRGB();
-            //byte[] resultRGB = resultLB.getRGB();
 
-            //int i = 0;
-            ////try {
-            //for (int ix = 0; ix < bitmaSize; ix++)
-            //{
-            //    for (int iy = bitmaSize - 1; iy >= 0; iy--)
-            //    {
-            //        i++;
-            //            int counter = (ix + iy * bitmaSize) * 4;
-            //            int counterIso = (ix + iy * bitmaSize) * 4;
-            //            //Console.WriteLine("counter    => " + counter);
-            //            //Console.WriteLine("counterIso => " + counterIso);
-            //            resultRGB[counterIso + 1] = (byte)(heightRGB[counter + 1]);
-            //    }
-            //}
-            //                   // }catch{}
-            //return resultLB.getBitmap();
-            return result;
+            LookBitmap heightLB = new LookBitmap(result);
+            LookBitmap resultLB = new LookBitmap(new Bitmap((int)(bitmapSize.Width), (int)(bitmapSize.Height)));
+            byte[] heightRGB = heightLB.getRGB();
+            byte[] resultRGB = resultLB.getRGB();
+
+            
+            int height = bitmapSize.Width * 4;
+            for (int ix = 0; ix < bitmapSize.Width; ix++)
+            {
+                for (int iy = (bitmapSize.Height - 1)/2; iy >= 0; iy--)
+                {
+                    int counterSrc = (ix + iy*2 * bitmapSize.Width) * 4;
+                    int counterDest = (ix + iy * bitmapSize.Width) * 4;
+                    if (heightRGB[counterSrc + 1] < heightRGB[counterSrc + 1+height])
+                    {
+                        resultRGB[counterDest + 1] = heightRGB[counterSrc + 1 + height];
+                        resultRGB[counterDest + 3] = heightRGB[counterSrc + 3 + height];
+                    }
+                    else
+                    {
+                        resultRGB[counterDest + 1] = heightRGB[counterSrc + 1];
+                        resultRGB[counterDest + 3] = heightRGB[counterSrc + 3];
+                    }
+                }
+            }
+
+            return resultLB.getBitmap();
+
+
+
+
         }
         private void renderHeight(Bitmap heightMap)
         {
-            int bitmaSize = heightMap.Width;
             Stopwatch now = new Stopwatch();
             now.Start();
             if (textureMap == null || heightMap == null) return;
             LookBitmap heightLB = new LookBitmap(heightMap);
-            LookBitmap resultLB = new LookBitmap(new Bitmap(bitmaSize, bitmaSize));
+            LookBitmap resultLB = new LookBitmap(new Bitmap(bitmapSize.Width, bitmapSize.Height));
             byte[] heightRGB = heightLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
 
@@ -243,12 +246,12 @@ namespace _2Deditor
             */
 
             int renderPixel = 0;
-            int height = bitmaSize * 4;
-            for (int ix = 1; ix < bitmaSize-1; ix++)
+            int height = bitmapSize.Width * 4;
+            for (int ix = 1; ix < bitmapSize.Width - 1; ix++)
             {
-                for (int iy = bitmaSize-2; iy >= 1; iy--)
+                for (int iy = bitmapSize.Height - 2; iy >= 1; iy--)
                 {
-                    int counter = (ix + iy * bitmaSize) * 4;
+                    int counter = (ix + iy * bitmapSize.Width) * 4;
 
                     resultRGB[counter + 1] = (byte)(heightRGB[counter + 1] * 5);
                     byte dd = 0;
@@ -297,7 +300,7 @@ namespace _2Deditor
                 for (int iy = bitmapSize.Height - 1; iy >= 0; iy--)
                 {
                     int counter = (ix + iy * bitmapSize.Width) * 4;
-                    for (int i = 0; i < heightRGB[counter + 1] * gf; i++)
+                    for (int i = 0; i < heightRGB[counter + 1]; i++)
                     {
                         if ((iy + addHeight) - i >= 0)//save
                         {
@@ -309,7 +312,7 @@ namespace _2Deditor
                                 //if (ix % 3 == 0 || iy % 3 == 0) resultRGB[counter2 + 1] = 100;
                                 resultRGB[counter2 + 3] = 255;
                                 renderPixel++;
-                                if (i + 1 == heightRGB[counter + 1] * gf) resultRGB[counter2] = 100;
+                                if (i + 1 == heightRGB[counter + 1]) resultRGB[counter2] = 100;
                                 if (shadowMap[counter / 4] > 0) resultRGB[counter2+1] = 255;
                                 //else if (heightDivMap[counter / 4] > 1) resultRGB[counter2 + 1] = 100;
                             }
@@ -335,10 +338,9 @@ namespace _2Deditor
         private void pBHeightMap_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            int width = height.Map.Width;
             if (height.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            g.DrawImage(height.Map, new RectangleF(height.MapPosX, height.MapPosY, (int)(width * height.MapSize), (int)(width * height.MapSize)), new RectangleF(0, 0, width, width), GraphicsUnit.Pixel);
+            g.DrawImage(height.Map, new RectangleF(height.MapPosX, height.MapPosY, (int)(height.Map.Width * height.MapSize), (int)(height.Map.Height * height.MapSize)), new RectangleF(0, 0, height.Map.Width, height.Map.Height), GraphicsUnit.Pixel);
         }
         private void pBTextureMap_Paint(object sender, PaintEventArgs e)
         {
@@ -385,11 +387,11 @@ namespace _2Deditor
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            Console.WriteLine(angle);
-            render(); angle++;
+            //Console.WriteLine(angle);
+            //render(); angle+=1;
             //gf += gfadd;
-            //if (gf <= 0.1f) gfadd = 0.01f;
-            //if (gf >= 1f) gfadd = -0.01f;
+            //if (gf <= 1f) gfadd = 0.01f;
+            //if (gf >= 10f) gfadd = -0.01f;
         }
     }
 }
