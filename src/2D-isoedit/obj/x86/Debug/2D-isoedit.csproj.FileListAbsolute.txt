@@ -6,3 +6,5 @@ E:\Project\Grillenstudios\Project\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-iso
 E:\Project\Grillenstudios\Project\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.pdb
 E:\Project\Grillenstudios\Project\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.csprojResolveAssemblyReference.cache
 E:\Project\Grillenstudios\Project\2D-isoedit\src\2D-isoedit\obj\x86\Debug\_2Deditor.Form1.resources
+G:\Project\Grillenstudios\Project\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.exe
+G:\Project\Grillenstudios\Project\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.pdb
