@@ -48,10 +48,12 @@
             // 
             // pBHeightMap
             // 
+            this.pBHeightMap.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.pBHeightMap.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(140)))));
-            this.pBHeightMap.Location = new System.Drawing.Point(12, 12);
+            this.pBHeightMap.Location = new System.Drawing.Point(12, 318);
             this.pBHeightMap.Name = "pBHeightMap";
-            this.pBHeightMap.Size = new System.Drawing.Size(300, 300);
+            this.pBHeightMap.Size = new System.Drawing.Size(600, 300);
             this.pBHeightMap.TabIndex = 0;
             this.pBHeightMap.TabStop = false;
             this.pBHeightMap.Paint += new System.Windows.Forms.PaintEventHandler(this.pBHeightMap_Paint);
@@ -62,9 +64,9 @@
             // pBTextureMap
             // 
             this.pBTextureMap.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(140)))));
-            this.pBTextureMap.Location = new System.Drawing.Point(318, 12);
+            this.pBTextureMap.Location = new System.Drawing.Point(12, 12);
             this.pBTextureMap.Name = "pBTextureMap";
-            this.pBTextureMap.Size = new System.Drawing.Size(300, 300);
+            this.pBTextureMap.Size = new System.Drawing.Size(600, 300);
             this.pBTextureMap.TabIndex = 1;
             this.pBTextureMap.TabStop = false;
             this.pBTextureMap.Paint += new System.Windows.Forms.PaintEventHandler(this.pBTextureMap_Paint);
@@ -74,10 +76,13 @@
             // 
             // pBRender
             // 
+            this.pBRender.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pBRender.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(140)))));
-            this.pBRender.Location = new System.Drawing.Point(624, 12);
+            this.pBRender.Location = new System.Drawing.Point(618, 12);
             this.pBRender.Name = "pBRender";
-            this.pBRender.Size = new System.Drawing.Size(300, 300);
+            this.pBRender.Size = new System.Drawing.Size(621, 606);
             this.pBRender.TabIndex = 3;
             this.pBRender.TabStop = false;
             this.pBRender.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
@@ -87,11 +92,12 @@
             // 
             // bExport
             // 
+            this.bExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bExport.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bExport.Enabled = false;
             this.bExport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bExport.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bExport.Location = new System.Drawing.Point(956, 246);
+            this.bExport.Location = new System.Drawing.Point(1267, 548);
             this.bExport.Name = "bExport";
             this.bExport.Size = new System.Drawing.Size(100, 30);
             this.bExport.TabIndex = 4;
@@ -100,10 +106,11 @@
             // 
             // bClose
             // 
+            this.bClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bClose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bClose.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bClose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bClose.Location = new System.Drawing.Point(956, 282);
+            this.bClose.Location = new System.Drawing.Point(1267, 584);
             this.bClose.Name = "bClose";
             this.bClose.Size = new System.Drawing.Size(100, 30);
             this.bClose.TabIndex = 5;
@@ -113,11 +120,12 @@
             // 
             // bLoad
             // 
+            this.bLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bLoad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bLoad.Enabled = false;
             this.bLoad.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bLoad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bLoad.Location = new System.Drawing.Point(956, 210);
+            this.bLoad.Location = new System.Drawing.Point(1267, 512);
             this.bLoad.Name = "bLoad";
             this.bLoad.Size = new System.Drawing.Size(100, 30);
             this.bLoad.TabIndex = 6;
@@ -126,10 +134,11 @@
             // 
             // bRotL
             // 
+            this.bRotL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bRotL.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bRotL.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bRotL.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRotL.Location = new System.Drawing.Point(956, 48);
+            this.bRotL.Location = new System.Drawing.Point(1267, 48);
             this.bRotL.Name = "bRotL";
             this.bRotL.Size = new System.Drawing.Size(100, 30);
             this.bRotL.TabIndex = 7;
@@ -139,10 +148,11 @@
             // 
             // bRotR
             // 
+            this.bRotR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bRotR.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bRotR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bRotR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRotR.Location = new System.Drawing.Point(956, 12);
+            this.bRotR.Location = new System.Drawing.Point(1267, 12);
             this.bRotR.Name = "bRotR";
             this.bRotR.Size = new System.Drawing.Size(100, 30);
             this.bRotR.TabIndex = 8;
@@ -152,23 +162,25 @@
             // 
             // bSave
             // 
+            this.bSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.bSave.Enabled = false;
             this.bSave.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bSave.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bSave.Location = new System.Drawing.Point(956, 174);
+            this.bSave.Location = new System.Drawing.Point(1267, 476);
             this.bSave.Name = "bSave";
             this.bSave.Size = new System.Drawing.Size(100, 30);
             this.bSave.TabIndex = 10;
             this.bSave.Text = "Save";
             this.bSave.UseVisualStyleBackColor = false;
+            this.bSave.Click += new System.EventHandler(this.bSave_Click);
             // 
             // bNew
             // 
+            this.bNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bNew.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bNew.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bNew.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bNew.Location = new System.Drawing.Point(956, 138);
+            this.bNew.Location = new System.Drawing.Point(1267, 440);
             this.bNew.Name = "bNew";
             this.bNew.Size = new System.Drawing.Size(100, 30);
             this.bNew.TabIndex = 11;
@@ -178,10 +190,11 @@
             // 
             // bSwitch
             // 
+            this.bSwitch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bSwitch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
             this.bSwitch.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bSwitch.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bSwitch.Location = new System.Drawing.Point(956, 84);
+            this.bSwitch.Location = new System.Drawing.Point(1267, 84);
             this.bSwitch.Name = "bSwitch";
             this.bSwitch.Size = new System.Drawing.Size(100, 30);
             this.bSwitch.TabIndex = 12;
@@ -191,7 +204,7 @@
             // 
             // timer1
             // 
-            this.timer1.Interval = 1;
+            this.timer1.Interval = 10;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form1
@@ -199,7 +212,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(44)))));
-            this.ClientSize = new System.Drawing.Size(1064, 324);
+            this.ClientSize = new System.Drawing.Size(1379, 626);
             this.Controls.Add(this.bSwitch);
             this.Controls.Add(this.bNew);
             this.Controls.Add(this.bSave);
@@ -211,8 +224,6 @@
             this.Controls.Add(this.pBRender);
             this.Controls.Add(this.pBTextureMap);
             this.Controls.Add(this.pBHeightMap);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "2D isoedit";
             this.Load += new System.EventHandler(this.Form1_Load);

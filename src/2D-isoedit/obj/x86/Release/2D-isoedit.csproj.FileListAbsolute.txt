@@ -1,0 +1,7 @@
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\bin\Release\2D-isoedit.exe
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\bin\Release\2D-isoedit.pdb
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Release\_2Deditor.Form1.resources
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Release\_2D_isoedit.Properties.Resources.resources
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Release\2D-isoedit.csproj.GenerateResource.Cache
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Release\2D-isoedit.exe
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Release\2D-isoedit.pdb
