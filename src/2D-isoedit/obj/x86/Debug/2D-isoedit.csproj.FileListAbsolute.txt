@@ -30,3 +30,4 @@ C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Debug\_2D_isoed
 C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.csproj.GenerateResource.Cache
 C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.exe
 C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.pdb
+C:\Users\Otto\Documents\GitHub\2D-isoedit\src\2D-isoedit\obj\x86\Debug\2D-isoedit.csprojResolveAssemblyReference.cache

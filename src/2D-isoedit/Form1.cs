@@ -101,7 +101,7 @@ namespace _2Deditor
         Editor result;
         Point lastMouse;
         Size bitmapSize;
-        byte addHeight = 64;
+        byte addHeight = 128;
         byte[] shadowMap;
         int angle = 45;
         float gf = 0.5f;
@@ -120,7 +120,10 @@ namespace _2Deditor
             new Texture(new Color[] {Color.FromArgb(80, 100, 50),Color.FromArgb(80, 105, 50),Color.FromArgb(80, 100, 50)},false),
             new Texture(new Color[] {Color.FromArgb(110, 100, 80)},false),
             new Texture(new Color[] {Color.FromArgb(80, 100, 50),Color.FromArgb(80, 110, 50)},true),
-            new Texture(new Color[] {Color.FromArgb(150, 150, 150),Color.FromArgb(140, 140, 160),Color.FromArgb(140, 140, 150),Color.FromArgb(110, 100, 120)},true)
+            new Texture(new Color[] {Color.FromArgb(150, 150, 150),Color.FromArgb(140, 140, 160),Color.FromArgb(140, 140, 150),Color.FromArgb(110, 100, 120)},true),
+            new Texture(new Color[] {Color.FromArgb(30, 70, 20),Color.FromArgb(40, 90, 30)},true),
+            new Texture(new Color[] {Color.FromArgb(220, 220, 255),Color.FromArgb(150, 150, 255)},true),
+            new Texture(new Color[] {Color.FromArgb(200, 200, 200),Color.FromArgb(200, 100, 50)},true),
             };
 
             InitializeComponent();
