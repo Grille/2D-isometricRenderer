@@ -109,6 +109,7 @@ namespace _2Deditor
         bool curTextureEdit;
         bool renderInTimer;
         byte editValue = 1;
+        float neigung = 2;
 
         public Form1()
         {
@@ -120,7 +121,7 @@ namespace _2Deditor
             new Texture(new Color[] {Color.FromArgb(80, 100, 50),Color.FromArgb(80, 105, 50),Color.FromArgb(80, 100, 50)},false),
             new Texture(new Color[] {Color.FromArgb(110, 100, 80)},false),
             new Texture(new Color[] {Color.FromArgb(80, 100, 50),Color.FromArgb(80, 110, 50)},true),
-            new Texture(new Color[] {Color.FromArgb(150, 150, 150),Color.FromArgb(140, 140, 160),Color.FromArgb(140, 140, 150),Color.FromArgb(110, 100, 120)},true),
+            new Texture(new Color[] {Color.FromArgb(150, 150, 150),Color.FromArgb(140, 140, 160),Color.FromArgb(140, 140, 150)},false),
             new Texture(new Color[] {Color.FromArgb(30, 70, 20),Color.FromArgb(40, 90, 30)},true),
             new Texture(new Color[] {Color.FromArgb(220, 220, 255),Color.FromArgb(150, 150, 255)},true),
             new Texture(new Color[] {Color.FromArgb(200, 200, 200),Color.FromArgb(200, 100, 50)},true),
@@ -129,127 +130,7 @@ namespace _2Deditor
             InitializeComponent();
         }
 
-        private void bClose_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-        private void pBHeightMap_MouseDown(object sender    , MouseEventArgs e){}
-        private void pBTextureMap_MouseDown(object sender, MouseEventArgs e) { Console.WriteLine(e.Clicks); }
-        private void pBRender_MouseDown(object sender       , MouseEventArgs e){}
-        private void pBHeightMap_MouseMove(object sender    , MouseEventArgs e)
-        {
-            pBHeightMap.Focus();
-            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
-            //{
-                if (e.Button == MouseButtons.Left)
-                {
-                    height.MapPosX -= (lastMouse.X - e.X);
-                    height.MapPosY -= (lastMouse.Y - e.Y);
-                    pBHeightMap.Refresh();
-                }
-            //}
-            lastMouse = e.Location;
-        }
-        private void pBHeightMap_MouseWheel(object sender    , MouseEventArgs e)
-        {
-            height.MapSize += (float)(height.MapSize*e.Delta) / 1000f;
-            pBHeightMap.Refresh();
-        }
-        private void pBTextureMap_MouseMove(object sender   , MouseEventArgs e)
-        {
-            pBEditorMap.Focus();
-            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
-            //{
-            if (e.Button == MouseButtons.Middle)
-            {
-                    texture.MapPosX -= (lastMouse.X - e.X);
-                    texture.MapPosY -= (lastMouse.Y - e.Y);
-                    pBEditorMap.Refresh();
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                if (radioButtonEditM.Checked)
-                {
-                    texture.MapPosX -= (lastMouse.X - e.X);
-                    texture.MapPosY -= (lastMouse.Y - e.Y);
-                    pBEditorMap.Refresh();
-                }
-                else
-                {
-                    Graphics g = Graphics.FromImage(this.heightMap);
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(0, editValue, listBoxTexture.SelectedIndex)), new RectangleF((lastMouse.X- texture.MapPosX) / texture.MapSize, (lastMouse.Y - texture.MapPosY) / texture.MapSize, 10, 10));
-                    renderInTimer = true;
-                }
-            }
-            //}
-            lastMouse = e.Location;
-        }
-        private void pBTextureMap_MouseWheel(object sender, MouseEventArgs e)
-        {
-            texture.MapSize += (float)(height.MapSize * e.Delta) / 1000f;
-            pBEditorMap.Refresh();
-        }
-        private void pBRender_MouseMove(object sender       , MouseEventArgs e)
-        {
-            pBRender.Focus();
-            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
-            //{
-            if (e.Button == MouseButtons.Middle)
-            {
-                result.MapPosX -= (lastMouse.X - e.X);
-                result.MapPosY -= (lastMouse.Y - e.Y);
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                if (radioButtonPreM.Checked)
-                {
-                    result.MapPosX -= (lastMouse.X - e.X);
-                    result.MapPosY -= (lastMouse.Y - e.Y);
-                }
-                else if (radioButtonPreR.Checked)
-                {
-                    angle += (lastMouse.X - e.X);
-                    lastMouse = e.Location;
-                    render(true);
-                }
-                pBRender.Refresh();
-            }
-            //}
-            lastMouse = e.Location;
-        }
-        private void pBRender_MouseWheel(object sender, MouseEventArgs e)
-        {
-            result.MapSize += (float)(height.MapSize * e.Delta) / 1000f;
-            pBRender.Refresh();
-        }
-        private void bNew_Click(object sender, EventArgs e)
-        {
-            heightMap = new Bitmap("../input/test.png");
-            render(true);
-            timer1.Enabled = true;
-        }
-
-        private void render(bool all)
-        {
-            //try
-            //{
-
-                Bitmap inputMap = switchMode(this.heightMap);
-                bitmapSize = inputMap.Size;
-                shadowMap = new byte[bitmapSize.Width * bitmapSize.Height];
-                if (all)
-                {
-                    renderHeight(this.heightMap);
-                    renderTexture(this.heightMap);
-                    pBHeightMap.Refresh();
-                    pBEditorMap.Refresh();
-                }
-                //result.Map = inputMap;
-                renderResult(inputMap);
-                pBRender.Refresh();
-            //}
-            //catch { }
-        }
+       
 
         private Bitmap switchMode(Bitmap heightMap)
         {
@@ -272,15 +153,16 @@ namespace _2Deditor
             byte[] heightRGB = heightLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
 
+            
 
             int width = bitmapSize.Width;
             int offsetWidth = width * 4;
             for (int ix = 0; ix < bitmapSize.Width; ix++)
             {
-                for (int iy = (bitmapSize.Height - 1) / 2; iy >= 0; iy--)
+                for (int iy = (int)((bitmapSize.Height - 1) / neigung); iy >= 0; iy--)
                 {
                     int counterDest = (ix + iy * width) * 4;
-                    int counterSrc = (ix + iy * 2 * width) * 4;
+                    int counterSrc = (int)((ix + iy * neigung * width) * 4);
                     if (heightRGB[counterSrc + 1] < heightRGB[counterSrc + 1 + offsetWidth])
                     {
                         resultRGB[counterDest + 1] = heightRGB[counterSrc + 1 + offsetWidth];
@@ -301,16 +183,17 @@ namespace _2Deditor
             {
                 for (int ix = 0; ix < bitmapSize.Width; ix++)
                 {
-                    for (int iy = (bitmapSize.Height - 1) / 2; iy >= 0; iy--)
+                    for (int iy = (int)((bitmapSize.Height - 1) / neigung); iy >= 0; iy--)
                     {
                         int counter = (ix + iy * width) * 4;
                         int i = 0;
-                        byte max = resultRGB[counter + 1];
-                        while (iy + i < bitmapSize.Height && resultRGB[counter + 2 + (i) * 4] < max && resultRGB[counter + 1 + (i) * 4] <= max+1)
+                        int max = (resultRGB[counter + 1]);
+                        while (iy + i < bitmapSize.Height && resultRGB[counter + 2] < max && resultRGB[counter + 1] <= max+1)
                         {
-                            if (i > 0) resultRGB[counter + 2 + (i) * 4] = max;
+                            if (i > 0) resultRGB[counter + 2] = (byte)(max*1f);
                             i++;
                             max--;
+                            counter += 4;
                         }
 
                     }
@@ -365,7 +248,7 @@ namespace _2Deditor
             Stopwatch now = new Stopwatch();
             now.Start();
             if (heightMap == null) return;
-            LookBitmap heightLB = new LookBitmap(heightMap, true);
+            LookBitmap heightLB = new LookBitmap(heightMap, false);
             LookBitmap resultLB = new LookBitmap(new Bitmap(heightMap.Width, heightMap.Height), false);
             byte[] heightRGB = heightLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
@@ -437,7 +320,7 @@ namespace _2Deditor
             Stopwatch now = new Stopwatch();
             now.Start();
             if (inputMap == null) return;
-            LookBitmap inputLB = new LookBitmap(inputMap, true);
+            LookBitmap inputLB = new LookBitmap(inputMap, false);
             LookBitmap resultLB = new LookBitmap(new Bitmap(inputMap.Width, inputMap.Height + addHeight),false);
             byte[] inputRGB = inputLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
@@ -455,7 +338,6 @@ namespace _2Deditor
                         if ((iy + addHeight) - i >= 0)//save
                         {
                             int counter2 = counter - (width * i * 4) + width * addHeight * 4;//pos + curent height
-                           
                             if (resultRGB[counter2 + 3] == 0)
                             {
                                 float shadow = 1f;
@@ -483,6 +365,32 @@ namespace _2Deditor
             result.Map = resultLB.getBitmap();
         }
 
+        private void render(bool all)
+        {
+            //try
+            //{
+
+            Bitmap inputMap = switchMode(this.heightMap);
+            bitmapSize = inputMap.Size;
+            shadowMap = new byte[bitmapSize.Width * bitmapSize.Height];
+            if (all)
+            {
+                if (curTextureEdit) renderTexture(this.heightMap);
+                else renderHeight(this.heightMap);
+                //renderTexture(this.heightMap);
+                //renderHeight(this.heightMap);
+                pBHeightMap.Refresh();
+                pBEditorMap.Refresh();
+            }
+            //result.Map = inputMap;
+            renderResult(inputMap);
+            pBRender.Refresh();
+            //}
+            //catch { }
+        }
+
+        #region EventArgs
+
         private void pBHeightMap_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -501,8 +409,8 @@ namespace _2Deditor
             Editor curEdit;
             if (curTextureEdit) curEdit = texture;
             else curEdit = height;
-            Rectangle dest = new Rectangle((int)texture.MapPosX, (int)texture.MapPosY, (int)(texture.Map.Width * texture.MapSize), (int)(texture.Map.Height * texture.MapSize));
-            g.DrawImage(curEdit.Map, dest, new RectangleF(0, 0, texture.Map.Width, texture.Map.Height), GraphicsUnit.Pixel);
+            Rectangle dest = new Rectangle((int)texture.MapPosX, (int)texture.MapPosY, (int)(curEdit.Map.Width * texture.MapSize), (int)(curEdit.Map.Height * texture.MapSize));
+            g.DrawImage(curEdit.Map, dest, new RectangleF(0, 0, curEdit.Map.Width, curEdit.Map.Height), GraphicsUnit.Pixel);
             g.DrawRectangle(Pens.White, dest);
             g.DrawString(curEdit.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
 
@@ -510,7 +418,7 @@ namespace _2Deditor
         private void pBRender_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            if(result.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+            if (result.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             Rectangle dest = new Rectangle((int)result.MapPosX, (int)result.MapPosY, (int)(result.Map.Width * result.MapSize), (int)((result.Map.Height) * result.MapSize));
             g.DrawImage(result.Map, dest, new RectangleF(0, 0, result.Map.Width, result.Map.Height), GraphicsUnit.Pixel);
@@ -518,10 +426,94 @@ namespace _2Deditor
             g.DrawString(result.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
         }
 
-        private void bRender_Click(object sender, EventArgs e)
+        private void pBHeightMap_MouseMove(object sender, MouseEventArgs e)
         {
-
+            pBHeightMap.Focus();
+            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
+            //{
+            if (e.Button == MouseButtons.Left)
+            {
+                height.MapPosX -= (lastMouse.X - e.X);
+                height.MapPosY -= (lastMouse.Y - e.Y);
+                pBHeightMap.Refresh();
+            }
+            //}
+            lastMouse = e.Location;
         }
+        private void pBHeightMap_MouseWheel(object sender, MouseEventArgs e)
+        {
+            height.MapSize += (float)(height.MapSize * e.Delta) / 1000f;
+            pBHeightMap.Refresh();
+        }
+        private void pBTextureMap_MouseMove(object sender, MouseEventArgs e)
+        {
+            pBEditorMap.Focus();
+            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
+            //{
+            if (e.Button == MouseButtons.Middle)
+            {
+                texture.MapPosX -= (lastMouse.X - e.X);
+                texture.MapPosY -= (lastMouse.Y - e.Y);
+                pBEditorMap.Refresh();
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (radioButtonEditM.Checked)
+                {
+                    texture.MapPosX -= (lastMouse.X - e.X);
+                    texture.MapPosY -= (lastMouse.Y - e.Y);
+                    pBEditorMap.Refresh();
+                }
+                else
+                {
+                    Graphics g = Graphics.FromImage(this.heightMap);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(0, editValue, listBoxTexture.SelectedIndex)), new RectangleF((lastMouse.X - texture.MapPosX) / texture.MapSize, (lastMouse.Y - texture.MapPosY) / texture.MapSize, 10, 10));
+                    renderInTimer = true;
+                }
+            }
+            //}
+            lastMouse = e.Location;
+        }
+        private void pBTextureMap_MouseWheel(object sender, MouseEventArgs e)
+        {
+            texture.MapSize += (float)(height.MapSize * e.Delta) / 1000f;
+            pBEditorMap.Refresh();
+        }
+        private void pBRender_MouseMove(object sender, MouseEventArgs e)
+        {
+            pBRender.Focus();
+            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
+            //{
+            if (e.Button == MouseButtons.Middle)
+            {
+                result.MapPosX -= (lastMouse.X - e.X);
+                result.MapPosY -= (lastMouse.Y - e.Y);
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (radioButtonPreM.Checked)
+                {
+                    result.MapPosX -= (lastMouse.X - e.X);
+                    result.MapPosY -= (lastMouse.Y - e.Y);
+                }
+                else if (radioButtonPreR.Checked)
+                {
+                    angle += (lastMouse.X - e.X);
+                    lastMouse = e.Location;
+
+                    render(true);
+                }
+                pBRender.Refresh();
+            }
+            //}
+            lastMouse = e.Location;
+        }
+        private void pBRender_MouseWheel(object sender, MouseEventArgs e)
+        {
+            result.MapSize += (float)(height.MapSize * e.Delta) / 1000f;
+            pBRender.Refresh();
+        }
+
         private void bRotL_Click(object sender, EventArgs e)
         {
             angle -= 45;
@@ -532,16 +524,31 @@ namespace _2Deditor
             angle += 45;
             render(false);
         }
+        private void bRot_Click(object sender, EventArgs e)
+        {
+            angle = 0;
+        }
 
+        private void bClose_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+        private void bNew_Click(object sender, EventArgs e)
+        {
+            heightMap = new Bitmap("../input/test.png");
+            render(true);
+            timer1.Enabled = true;
+        }
         private void bSwitch_Click(object sender, EventArgs e)
         {
             curTextureEdit = !curTextureEdit;
             render(true);
         }
-
-        private void Form1_Load(object sender, EventArgs e)
+        private void bSave_Click(object sender, EventArgs e)
         {
-
+            render(false);
+            Bitmap save = new Bitmap(result.Map);
+            result.Map.Save("../output/test.png", System.Drawing.Imaging.ImageFormat.Png);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -557,42 +564,16 @@ namespace _2Deditor
             //if (gf <= 1f) gfadd = 0.01f;
             //if (gf >= 10f) gfadd = -0.01f;
         }
-
-        private void bSave_Click(object sender, EventArgs e)
-        {
-            render(false);
-            Bitmap save = new Bitmap(result.Map);
-            result.Map.Save("../output/test.png", System.Drawing.Imaging.ImageFormat.Png);
-        }
-
-        private void panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void radioButton3_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void bRot_Click(object sender, EventArgs e)
-        {
-            angle = 0;
-        }
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             try
             {
                 editValue = (byte)Convert.ToInt16(textBoxValue.Text);
-                textBoxValue.Text = ""+editValue;
+                textBoxValue.Text = "" + editValue;
             }
-            catch { textBoxValue.Text = ""+0; }
+            catch { textBoxValue.Text = "" + 0; }
         }
+
+        #endregion
     }
 }

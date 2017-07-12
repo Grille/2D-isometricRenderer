@@ -1,0 +1,61 @@
+{
+Name = grass
+EndColor = true
+Colors = 
+  {
+  (80, 100, 50),
+  (80, 105, 50),
+  (80, 100, 50)
+  }
+}
+{
+Name = sand
+Colors = 
+  {
+  (110, 100, 80)
+  }
+}
+{
+Name = dirt
+EndColor = true
+Colors = 
+  {
+  (80, 100, 50),
+  (80, 110, 50)
+  }
+}
+{
+Name = rock
+EndColor = true
+Colors = 
+  {
+  (150, 150, 150),
+  (140, 140, 160),
+  (140, 140, 150),
+  (110, 100, 120)
+  }
+}
+Name = tree
+EndColor = true
+Colors = 
+  {
+  (30, 70, 20),
+  (40, 90, 30)
+  }
+}
+Name = water
+EndColor = true
+Colors = 
+  {
+  (220, 220, 255),
+  (150, 150, 255)
+  }
+}
+Name = build
+EndColor = true
+Colors = 
+  {
+  (200, 200, 200),
+  (200, 100, 50)
+  }
+}

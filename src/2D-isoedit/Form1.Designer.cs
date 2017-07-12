@@ -92,7 +92,6 @@
             this.pBHeightMap.TabIndex = 0;
             this.pBHeightMap.TabStop = false;
             this.pBHeightMap.Paint += new System.Windows.Forms.PaintEventHandler(this.pBHeightMap_Paint);
-            this.pBHeightMap.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pBHeightMap_MouseDown);
             this.pBHeightMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBHeightMap_MouseMove);
             this.pBHeightMap.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBHeightMap_MouseWheel);
             // 
@@ -109,7 +108,6 @@
             this.pBEditorMap.TabIndex = 1;
             this.pBEditorMap.TabStop = false;
             this.pBEditorMap.Paint += new System.Windows.Forms.PaintEventHandler(this.pBTextureMap_Paint);
-            this.pBEditorMap.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseDown);
             this.pBEditorMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseMove);
             this.pBEditorMap.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseWheel);
             // 
@@ -126,7 +124,6 @@
             this.pBRender.TabIndex = 3;
             this.pBRender.TabStop = false;
             this.pBRender.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
-            this.pBRender.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseDown);
             this.pBRender.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseMove);
             this.pBRender.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseWheel);
             // 
@@ -266,7 +263,6 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(498, 453);
             this.panel2.TabIndex = 14;
-            this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
             // 
             // label36
             // 
@@ -557,7 +553,6 @@
             this.radioButton3.TabIndex = 24;
             this.radioButton3.Text = "add +=";
             this.radioButton3.UseVisualStyleBackColor = true;
-            this.radioButton3.CheckedChanged += new System.EventHandler(this.radioButton3_CheckedChanged);
             // 
             // radioButton4
             // 
@@ -694,7 +689,6 @@
             this.MinimumSize = new System.Drawing.Size(1210, 530);
             this.Name = "Form1";
             this.Text = "2D isoedit";
-            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pBHeightMap)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pBEditorMap)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pBRender)).EndInit();
