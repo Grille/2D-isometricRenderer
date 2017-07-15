@@ -1,6 +1,6 @@
 ﻿namespace _2Deditor
 {
-    partial class FormEditor
+    partial class FormEditor 
     {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.pBEditorMap = new System.Windows.Forms.PictureBox();
-            this.pBRender = new System.Windows.Forms.PictureBox();
+            this.pBResult = new System.Windows.Forms.PictureBox();
             this.bExport = new System.Windows.Forms.Button();
             this.bClose = new System.Windows.Forms.Button();
             this.bLoad = new System.Windows.Forms.Button();
@@ -71,7 +71,7 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.button3 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pBEditorMap)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pBRender)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pBResult)).BeginInit();
             this.panel2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -96,25 +96,26 @@
             this.pBEditorMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseMove);
             this.pBEditorMap.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseWheel);
             // 
-            // pBRender
+            // pBResult
             // 
-            this.pBRender.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.pBResult.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pBRender.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(140)))));
-            this.pBRender.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pBRender.Location = new System.Drawing.Point(3, 70);
-            this.pBRender.Name = "pBRender";
-            this.pBRender.Size = new System.Drawing.Size(660, 378);
-            this.pBRender.TabIndex = 3;
-            this.pBRender.TabStop = false;
-            this.pBRender.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
-            this.pBRender.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseMove);
-            this.pBRender.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseWheel);
+            this.pBResult.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(140)))));
+            this.pBResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pBResult.Location = new System.Drawing.Point(3, 70);
+            this.pBResult.Name = "pBResult";
+            this.pBResult.Size = new System.Drawing.Size(660, 378);
+            this.pBResult.TabIndex = 3;
+            this.pBResult.TabStop = false;
+            this.pBResult.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
+            this.pBResult.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseMove);
+            this.pBResult.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseWheel);
             // 
             // bExport
             // 
             this.bExport.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.bExport.Enabled = false;
             this.bExport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bExport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bExport.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -143,6 +144,7 @@
             // bLoad
             // 
             this.bLoad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.bLoad.Enabled = false;
             this.bLoad.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bLoad.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bLoad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -187,6 +189,7 @@
             // bSave
             // 
             this.bSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.bSave.Enabled = false;
             this.bSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bSave.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bSave.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -542,7 +545,7 @@
             this.panel1.Controls.Add(this.radioButtonPreM);
             this.panel1.Controls.Add(this.bRotR);
             this.panel1.Controls.Add(this.bRotL);
-            this.panel1.Controls.Add(this.pBRender);
+            this.panel1.Controls.Add(this.pBResult);
             this.panel1.Location = new System.Drawing.Point(525, 51);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(666, 453);
@@ -551,8 +554,6 @@
             // checkBoxGame
             // 
             this.checkBoxGame.AutoSize = true;
-            this.checkBoxGame.Checked = true;
-            this.checkBoxGame.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxGame.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkBoxGame.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.checkBoxGame.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -693,7 +694,7 @@
             this.Name = "FormEditor";
             this.Text = "2D isoedit";
             ((System.ComponentModel.ISupportInitialize)(this.pBEditorMap)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pBRender)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pBResult)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -709,7 +710,7 @@
 
         #endregion
         private System.Windows.Forms.PictureBox pBEditorMap;
-        private System.Windows.Forms.PictureBox pBRender;
+        private System.Windows.Forms.PictureBox pBResult;
         private System.Windows.Forms.Button bExport;
         private System.Windows.Forms.Button bClose;
         private System.Windows.Forms.Button bLoad;

@@ -10,6 +10,7 @@ using System.IO;
 
 namespace _2Deditor
 {
+    partial class hide { } //Hide Designer in VS 
     public partial class FormEditor
     {
         //Draw Rendered Images
@@ -18,7 +19,7 @@ namespace _2Deditor
             Graphics g = e.Graphics;
             if (input.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            Editor curEdit;
+            RenderInfo curEdit;
             if (curTextureEdit) curEdit = input;
             else curEdit = input;
             Rectangle dest = new Rectangle((int)input.MapPosX, (int)input.MapPosY, (int)(curEdit.Map.Width * input.MapSize), (int)(curEdit.Map.Height * input.MapSize));
@@ -89,7 +90,7 @@ namespace _2Deditor
         }
         private void pBRender_MouseMove(object sender, MouseEventArgs e)
         {
-            pBRender.Focus();
+            pBResult.Focus();
             //if (e.X > heightMapPosX && e.Y > heightMapPosY)
             //{
             if (e.Button == MouseButtons.Middle)
@@ -111,7 +112,7 @@ namespace _2Deditor
 
                     render(true);
                 }
-                pBRender.Refresh();
+                pBResult.Refresh();
             }
             //}
             lastMousePos = e.Location;
@@ -119,7 +120,7 @@ namespace _2Deditor
         private void pBRender_MouseWheel(object sender, MouseEventArgs e)
         {
             result.MapSize += (float)(result.MapSize * e.Delta) / 1000f;
-            pBRender.Refresh();
+            pBResult.Refresh();
         }
 
         //Buttons
@@ -144,8 +145,8 @@ namespace _2Deditor
         }
         private void bNew_Click(object sender, EventArgs e)
         {
-            //inputMap = new Bitmap("../input/test_512x512.png");
-            inputMap = new Bitmap("../input/test_flat_64x64.png");
+             inputMap = new Bitmap("../input/test_512x512.png");
+            //inputMap = new Bitmap("../input/test_flat_64x64.png");
             render(true);
             timer1.Enabled = true;
         }
