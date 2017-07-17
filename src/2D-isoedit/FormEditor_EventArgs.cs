@@ -10,7 +10,7 @@ using System.IO;
 
 namespace _2Deditor
 {
-    partial class hide { } //Hide Designer in VS 
+    //partial class hide { } //Hide Designer in VS 
     public partial class FormEditor
     {
         //Draw Rendered Images

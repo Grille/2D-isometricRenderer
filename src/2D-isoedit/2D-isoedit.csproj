@@ -46,11 +46,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormEditor.cs" />
+    <Compile Include="Classes.cs" />
+    <Compile Include="FormEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FormEditor.Designer.cs">
       <DependentUpon>FormEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="FormEditor_EventArgs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormEditor_Logik.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormFileExplorer.cs">
