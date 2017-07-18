@@ -27,8 +27,10 @@ namespace _2Deditor
             MapSize = 1;
         }
     }
-    class LookBitmap
+    class LockBitmap
     {
+        public int Width;
+        public int Height;
         private Bitmap bmp;
         private Rectangle rect;
         private System.Drawing.Imaging.BitmapData bmpData;
@@ -37,8 +39,11 @@ namespace _2Deditor
         private byte[] rgbValues;
 
 
-        public LookBitmap(Bitmap input, bool byValue)
+        public LockBitmap(Bitmap input, bool byValue)
         {
+             Width = input.Width;
+             Height = input.Height;
+
             if (byValue) bmp = new Bitmap(input);
             else bmp = input;
             rect = new Rectangle(0, 0, bmp.Width, bmp.Height);

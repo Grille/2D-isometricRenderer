@@ -86,6 +86,7 @@ namespace _2Deditor
         private void pBTextureMap_MouseWheel(object sender, MouseEventArgs e)
         {
             input.MapSize += (float)(input.MapSize * e.Delta) / 1000f;
+            input.MapPosX -= 1;
             pBEditorMap.Refresh();
         }
         private void pBRender_MouseMove(object sender, MouseEventArgs e)

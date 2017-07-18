@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace _2Deditor
 {
@@ -32,9 +33,9 @@ namespace _2Deditor
         bool curTextureEdit;
         bool renderAllInTimer;
         byte editValue = 1;
-
         public void init()
         {
+            
             input.init();
             result.init();
 
@@ -50,43 +51,66 @@ namespace _2Deditor
 
             //InitializeComponent();
         }
-
+        Thread jlk;
         //Prepare the heightMap (rotate, compress y and add shadow)
-        private Bitmap prepareMap(Bitmap heightMap)
+        private LockBitmap prepareMap(Bitmap heightMap)
         {
             Stopwatch now = new Stopwatch();
             now.Start();
             int width = heightMap.Width;
             int height = heightMap.Height;
-            Bitmap heightBM;
+            Bitmap heightBM = new Bitmap(heightMap); 
+            LockBitmap heightLB;
+            byte[] heightRGB;
 
-            //Rotate graphic
+
+            ////Rotate graphic
             if (checkBoxGame.Checked)//game render
             {
-                heightBM = new Bitmap(heightMap);
                 if (angle >= 270) heightBM.RotateFlip(RotateFlipType.Rotate270FlipNone);
                 else if (angle >= 180) heightBM.RotateFlip(RotateFlipType.Rotate180FlipNone);
                 else if (angle >= 90) heightBM.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                Console.WriteLine(angle);
+                heightLB = new LockBitmap(heightBM, false);
+                heightRGB = heightLB.getRGB();
             }
             else//dynamic render
             {
+                int oldWidth = width, oldHeight = height;
                 width = (int)(width * 1.5f); height = (int)(height * 1.5f);
-                heightBM = new Bitmap((int)(width), (int)(height));
-                Graphics g = Graphics.FromImage(heightBM);
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
-                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-                g.TranslateTransform(width / 2, height / 2);
-                g.RotateTransform(angle, System.Drawing.Drawing2D.MatrixOrder.Prepend);
-                g.DrawImage(heightMap, new Rectangle(-heightMap.Width / 2, -heightMap.Height / 2, heightMap.Width, heightMap.Height), new RectangleF(0, 0, heightMap.Width, heightMap.Width), GraphicsUnit.Pixel);
-                g.ResetTransform();
+                heightLB = new LockBitmap(new Bitmap(width, height), false);
+                heightRGB = heightLB.getRGB();
+                LockBitmap baseLB = new LockBitmap(heightBM, false);
+                byte[] baseRGB = baseLB.getRGB();
+                int midx = baseLB.Width / 2;
+                int midy = baseLB.Height / 2;
+
+                int tx = 0, ty = 0;
+                float sin = (float)Math.Sin(angle * 3.14159265 / 180), cos = (float)Math.Cos(angle * 3.14159265 / 180);
+                for (int ix = 0; ix < oldWidth; ix++)//x 0 to 1
+                {
+                    for (int iy = (int)((oldHeight - 1)); iy >= 0; iy--)//y 1 to 0
+                    {
+                        tx = (int)((ix - midx) * cos - (iy - midy) * sin) + (int)(midx*1.5f);
+                        ty = (int)((iy - midy) * cos + (ix - midx) * sin) + (int)(midy*1.5f);
+                        //get pixel in 1D byte arrey
+                        int counterDest = (tx + ty * width) * 4;
+                        int counterSrc = (ix + iy * oldWidth) * 4;
+                        //Prefer height
+                        if (ty > 0 && tx > 0 && ty < height && tx < width)
+                        {
+                            heightRGB[counterDest + 1] = baseRGB[counterSrc + 1];
+                            //heightRGB[counterDest + 2] = baseRGB[counterSrc + 2];
+                            heightRGB[counterDest + 3] = baseRGB[counterSrc + 3];
+                            heightRGB[counterDest + 0] = baseRGB[counterSrc + 0];
+                        }
+                    }
+                }
             }
 
+
+
             //Look bitmap and set ref to RGB byte array
-            LookBitmap heightLB = new LookBitmap(heightBM, false);
-            LookBitmap resultLB = new LookBitmap(new Bitmap((int)(width), (int)(height * tilt)), false);
-            byte[] heightRGB = heightLB.getRGB();
+            LockBitmap resultLB = new LockBitmap(new Bitmap((int)(width), (int)(height * tilt)), false);
             byte[] resultRGB = resultLB.getRGB();
 
             //stored var to Y move
@@ -148,6 +172,7 @@ namespace _2Deditor
             }
 
             //render shadows?
+            //shadowHeightMap = new byte[width * height];
             if (checkBoxShadow.Checked)
             {
                 for (int ix = 0; ix < width; ix++)//x 0 to 1
@@ -155,7 +180,8 @@ namespace _2Deditor
                     for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
                     {
                         //get pixel in 1D byte arrey
-                        int counter = (ix + iy * width) * 4;
+                        int counterBase = (ix + iy * width);
+                        int counter = counterBase * 4;
                         int i = 0, max = (resultRGB[counter + 1]);
                         while (iy + i < height && resultRGB[counter + 2] < max && resultRGB[counter + 1] <= max + 1)
                         {
@@ -166,16 +192,17 @@ namespace _2Deditor
                     }
                 }
             }
-            return resultLB.getBitmap();
+            Console.WriteLine(now.ElapsedMilliseconds);
+            return resultLB;
         }
         //Rendering the image from heightmap (elevate and apply textures & shadows)
-        private void renderResult(Bitmap inputMap)
+        private void renderResult(LockBitmap inputMap)
         {
             Stopwatch now = new Stopwatch();
             now.Start();
             if (inputMap == null) return;
-            LookBitmap inputLB = new LookBitmap(inputMap, false);
-            LookBitmap resultLB = new LookBitmap(new Bitmap(inputMap.Width, inputMap.Height + heightExcess), false);
+            LockBitmap inputLB = inputMap;
+            LockBitmap resultLB = new LockBitmap(new Bitmap(inputMap.Width, inputMap.Height + heightExcess), false);
             byte[] inputRGB = inputLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
 
@@ -194,6 +221,7 @@ namespace _2Deditor
                             int counter2 = counter - (width * i * 4) + width * heightExcess * 4;//pos + curent height
                             if (resultRGB[counter2 + 3] == 0)
                             {
+                                
                                 float shadow = 1f;
                                 if (i < inputRGB[counter + 2]) shadow = 0.75f;
                                 textures[inputRGB[counter]].setColor(resultRGB, counter2, (byte)(i - 1), inputRGB[counter + 1], shadow);
@@ -218,13 +246,13 @@ namespace _2Deditor
         }
 
         //render the high editor map
-        private void renderHeight(Bitmap inputMap)
+        private void renderHeight(LockBitmap inputMap)
         {
             Stopwatch now = new Stopwatch();
             now.Start();
             if (inputMap == null) return;
-            LookBitmap heightLB = new LookBitmap(inputMap, true);
-            LookBitmap resultLB = new LookBitmap(new Bitmap(inputMap.Width, inputMap.Height), false);
+            LockBitmap heightLB = inputMap;
+            LockBitmap resultLB = new LockBitmap(new Bitmap(inputMap.Width, inputMap.Height), false);
             byte[] heightRGB = heightLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
             int renderPixel = 0;
@@ -254,13 +282,13 @@ namespace _2Deditor
             this.input.Map = resultLB.getBitmap();
         }
         //render the high texture map
-        private void renderTexture(Bitmap inputMap)
+        private void renderTexture(LockBitmap inputMap)
         {
             Stopwatch now = new Stopwatch();
             now.Start();
             if (inputMap == null) return;
-            LookBitmap heightLB = new LookBitmap(inputMap, true);
-            LookBitmap resultLB = new LookBitmap(new Bitmap(inputMap.Width, inputMap.Height), false);
+            LockBitmap heightLB = inputMap;
+            LockBitmap resultLB = new LockBitmap(new Bitmap(inputMap.Width, inputMap.Height), false);
             byte[] heightRGB = heightLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
             int renderPixel = 0;
@@ -331,15 +359,16 @@ namespace _2Deditor
         private void render(bool renderEditor)
         {
 
-            Bitmap inputMap = prepareMap(this.inputMap);
-            if (renderEditor)
+            LockBitmap inputLB = prepareMap(this.inputMap);
+            if (true||renderEditor)
             {
                 //render editor graphic with native inputMap
-                if (curTextureEdit) renderTexture(this.inputMap);
-                else renderHeight(this.inputMap);
+                LockBitmap baseLB = new LockBitmap(this.inputMap,true);
+                if (curTextureEdit) renderTexture(inputLB);
+                else renderHeight(inputLB);
                 pBEditorMap.Refresh();
             }
-            renderResult(inputMap);
+            renderResult(inputLB);
             pBResult.Refresh();
         }
 

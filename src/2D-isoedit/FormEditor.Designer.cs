@@ -597,8 +597,6 @@
             // checkBoxPreAR
             // 
             this.checkBoxPreAR.AutoSize = true;
-            this.checkBoxPreAR.Checked = true;
-            this.checkBoxPreAR.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxPreAR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkBoxPreAR.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.checkBoxPreAR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
