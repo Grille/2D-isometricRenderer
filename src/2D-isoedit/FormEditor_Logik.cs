@@ -20,6 +20,8 @@ namespace _2Deditor
         RenderInfo result;
         Point lastMousePos;
 
+        Stopwatch fps;
+
         //Rendering Values
         byte heightExcess = 128;
         byte[] shadowHeightMap;
@@ -34,6 +36,8 @@ namespace _2Deditor
         bool renderAllInTimer;
         byte editValue = 1;
         public void init()
+        
+
         {
             
             input.init();
@@ -51,7 +55,6 @@ namespace _2Deditor
 
             //InitializeComponent();
         }
-        Thread jlk;
         //Prepare the heightMap (rotate, compress y and add shadow)
         private LockBitmap prepareMap(Bitmap heightMap)
         {
@@ -192,7 +195,7 @@ namespace _2Deditor
                     }
                 }
             }
-            Console.WriteLine(now.ElapsedMilliseconds);
+            //Console.WriteLine(now.ElapsedMilliseconds);
             return resultLB;
         }
         //Rendering the image from heightmap (elevate and apply textures & shadows)
@@ -208,29 +211,48 @@ namespace _2Deditor
 
 
             int renderPixel = 0;
+            Thread[] thread = new Thread[(int)cores];
+            for (int i = 0; i < cores; i++)
+            {
+                thread[i] = new Thread(() =>
+                    elevate(inputRGB, resultRGB, inputMap, i / cores - 1/ cores, i/ cores));
+                thread[i].Start();
+                //thread[i].Join();
+            }
+            for (int i = 0; i < cores; i++)
+            {
+                thread[i].Join();
+                Console.WriteLine("thread"+i+" join");
+            }
+            Console.WriteLine("return\n\n");
+            result.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
+            result.Map = resultLB.getBitmap();
+        }
+
+        void elevate(byte[] inputRGB, byte[] resultRGB, LockBitmap inputMap, float start, float end)
+        {
             int width = inputMap.Width, height = inputMap.Height;
-            for (int ix = 0; ix < width; ix++)
+            for (int ix = (int)(width* start); ix < (int)(width* end); ix++)
             {
                 for (int iy = height - 1; iy >= 0; iy--) //Downwards
                 {
                     int counter = (ix + iy * width) * 4;
-                    for (byte i = inputRGB[counter + 1]; i > 0; i--) //Downwards
+                    for (byte iz = inputRGB[counter + 1]; iz > 0; iz--) //Downwards
                     {
-                        if ((iy + heightExcess) - i >= 0)//save
+                        if ((iy + heightExcess) - iz >= 0)//save
                         {
-                            int counter2 = counter - (width * i * 4) + width * heightExcess * 4;//pos + curent height
+                            int counter2 = counter - (width * iz * 4) + width * heightExcess * 4;//pos + curent height
                             if (resultRGB[counter2 + 3] == 0)
                             {
-                                
-                                float shadow = 1f;
-                                if (i < inputRGB[counter + 2]) shadow = 0.75f;
-                                textures[inputRGB[counter]].setColor(resultRGB, counter2, (byte)(i - 1), inputRGB[counter + 1], shadow);
 
+                                float shadow = 1f;
+                                if (iz < inputRGB[counter + 2]) shadow = 0.75f;
+                                textures[inputRGB[counter]].setColor(resultRGB, counter2, (byte)(iz - 1), inputRGB[counter + 1], shadow);
                                 //resultRGB[counter2 + 3] = 255;
                                 //if (i == inputRGB[counter + 1]) resultRGB[counter2] = 100;
                                 //resultRGB[counter2 + 1] = (byte)(((byte)(i * 100)) / 4 + 30);
 
-                                renderPixel++;
+                                //renderPixel++;
                             }
                             else
                             {
@@ -240,9 +262,6 @@ namespace _2Deditor
                     }
                 }
             }
-
-            result.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
-            result.Map = resultLB.getBitmap();
         }
 
         //render the high editor map
@@ -360,6 +379,8 @@ namespace _2Deditor
         {
 
             LockBitmap inputLB = prepareMap(this.inputMap);
+            renderResult(inputLB);
+            pBResult.Refresh();
             if (true||renderEditor)
             {
                 //render editor graphic with native inputMap
@@ -368,8 +389,6 @@ namespace _2Deditor
                 else renderHeight(inputLB);
                 pBEditorMap.Refresh();
             }
-            renderResult(inputLB);
-            pBResult.Refresh();
         }
 
         private void addAngle(int value)
