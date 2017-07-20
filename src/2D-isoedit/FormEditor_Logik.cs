@@ -211,6 +211,7 @@ namespace _2Deditor
 
 
             int renderPixel = 0;
+            float cores = 1;
             Thread[] thread = new Thread[(int)cores];
             for (int i = 0; i < cores; i++)
             {
