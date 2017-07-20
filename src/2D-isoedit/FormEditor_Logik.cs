@@ -15,29 +15,6 @@ namespace _2Deditor
     //partial class hide { } //Hide Designer in VS 
     public partial class FormEditor
     {
-        Texture[] textures;
-        Bitmap inputMap;
-        RenderInfo input;
-        RenderInfo result;
-        Point lastMousePos;
-
-        Stopwatch fps;
-
-        float cores = Environment.ProcessorCount;
-
-        //Rendering Values
-        byte heightExcess = 128;
-        byte[] shadowHeightMap;
-        byte[] shadowSmoothMap;
-
-        //Rendering orientation
-        int angle = 45;
-        float tilt = 0.5f;//fixed
-
-        //Editor Values
-        bool curTextureEdit;
-        bool renderAllInTimer;
-        byte editValue = 1;
         public void init()
         
 
@@ -100,9 +77,12 @@ namespace _2Deditor
                 for (int i = 0; i < cores; i++) thread[i].Start();
                 for (int i = 0; i < cores; i++) thread[i].Wait();
 
+
             }
 
             //Look bitmap and set ref to RGB byte array
+
+            if (checkBoxGame.Checked) tilt = 0.5f;
             LockBitmap resultLB = new LockBitmap(new Bitmap((int)(width), (int)(height * tilt)), false);
             byte[] resultRGB = resultLB.getRGB();
 
@@ -120,6 +100,7 @@ namespace _2Deditor
             }
             else //dynamic render
             {
+                //compress(heightRGB, resultRGB, width, height, 0, 1, tilt);
                 for (int i = 0; i < cores; i++)
                 {
                     int thmp = (int)(i + 1);
@@ -139,7 +120,7 @@ namespace _2Deditor
         //rotate byte pixel array
         private void rotate(byte[] inputRGB, byte[] resultRGB, int width, int height, float start, float end) 
         {
-            int oldWidth = (int)(width / 1.5), oldHeight = (int)(height / 1.5);
+            int oldWidth = (int)(width / 1.5f), oldHeight = (int)(height / 1.5f);
             int midx = oldWidth / 2;
             int midy = oldHeight / 2;
 
@@ -201,11 +182,11 @@ namespace _2Deditor
             int offsetWidth = width * 4;
             for (int ix = (int)(width * start); ix < (int)(width * end); ix++)//x 0 to 1
             {
-                for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
+                for (int iy = 0; iy < (int)(height * tilt); iy++)//y 0 to 1
                 {
                     //get pixel in 1D byte arrey
                     int counterDest = (ix + iy * width) * 4;
-                    int counterSrc = (int)((ix + iy / tilt * width) * 4);
+                    int counterSrc = (int)((ix + (int)(iy / tilt) * width) * 4);
                     //Prefer height
                     if (inputRGB[counterSrc + 1] < inputRGB[counterSrc + 1 + offsetWidth])
                     {
@@ -227,16 +208,21 @@ namespace _2Deditor
         {
             for (int ix = 0; ix < width; ix++)//x 0 to 1
             {
-                for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
-                {
+                    for (int iy = 0; iy < (int)(height * tilt); iy++)//y 0 to 1
+                    {
                     //get pixel in 1D byte arrey
                     int counterBase = (ix + iy * width);
                     int counter = counterBase * 4;
-                    int i = 0, max = (resultRGB[counter + 1]);
-                    while (iy + i < height && resultRGB[counter + 2] < max && resultRGB[counter + 1] <= max + 1)
+
+                    int i = 0;
+                    //shadowHeight = curent terrainHeight
+                    float shadowHeight = (resultRGB[counter + 1]);
+                    while (iy + i < height && resultRGB[counter + 2] < shadowHeight)
                     {
-                        if (i > 0) resultRGB[counter + 2] = (byte)(max * 1f);
-                        i++; max--; counter += 4;
+                        if (i > 0) resultRGB[counter + 2] = (byte)(shadowHeight * 1f);
+
+                        if (resultRGB[counter + 1] > shadowHeight + 1) break;
+                        i++; shadowHeight -= 1f; counter += 4;
                     }
 
                 }
@@ -277,13 +263,15 @@ namespace _2Deditor
         //Rendering the part of image from heightmap (elevate and apply textures & shadows)
         void elevate(byte[] inputRGB, byte[] resultRGB, int width,int height, float start, float end)
         {
-            
+            float tiltFactor;
+            if (tilt >= 0.5) tiltFactor = (2 - tilt * 2);
+            else tiltFactor = (1.5f-tilt);
             for (int ix = (int)(width* start); ix < (int)(width* end); ix++)
             {
                 for (int iy = height - 1; iy >= 0; iy--) //Downwards
                 {
                     int counter = (ix + iy * width) * 4;
-                    for (byte iz = inputRGB[counter + 1]; iz > 0; iz--) //Downwards
+                    for (byte iz = (byte)(inputRGB[counter + 1] * tiltFactor); iz > 0; iz--) //Downwards
                     {
                         if ((iy + heightExcess) - iz >= 0)//save
                         {
@@ -292,8 +280,8 @@ namespace _2Deditor
                             {
 
                                 float shadow = 1f;
-                                if (iz < inputRGB[counter + 2]) shadow = 0.75f;
-                                textures[inputRGB[counter]].setColor(resultRGB, counter2, (byte)(iz - 1), inputRGB[counter + 1], shadow);
+                                if (iz/ tiltFactor < inputRGB[counter + 2]-2) shadow = 0.75f;
+                                textures[inputRGB[counter]].setColor(resultRGB, (int)(counter2), (byte)(iz - 1), inputRGB[counter + 1], shadow);
                                 //resultRGB[counter2 + 3] = 255;
                                 //if (i == inputRGB[counter + 1]) resultRGB[counter2] = 100;
                                 //resultRGB[counter2 + 1] = (byte)(((byte)(i * 100)) / 4 + 30);
@@ -423,17 +411,16 @@ namespace _2Deditor
 
         private void render(bool renderEditor)
         {
-
             LockBitmap inputLB = prepareMap(this.inputMap);
 
             renderResult(inputLB);
             
-            if (true||renderEditor)
+            if (renderEditor)
             {
                 //render editor graphic with native inputMap
                 LockBitmap baseLB = new LockBitmap(this.inputMap,true);
-                if (curTextureEdit) renderTexture(inputLB);
-                else renderHeight(inputLB);
+                if (curTextureEdit) renderTexture(baseLB);
+                else renderHeight(baseLB);
                 
             }
             pBEditorMap.Refresh();
@@ -445,6 +432,13 @@ namespace _2Deditor
             angle += value;
             if (angle <= 0) angle += 360;
             else if (angle >= 360) angle -= 360;
+        }
+        private void addTilt(int value)
+        {
+            tilt += value/100f;
+            if (tilt < 0.2) tilt = 0.2f;
+            else if (tilt > 0.8) tilt = 0.8f;
+            tilt = (int)(tilt * 100)/100f;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace _2Deditor
             Graphics g = e.Graphics;
             if (result.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            Rectangle dest = new Rectangle((int)result.MapPosX, (int)result.MapPosY, (int)(result.Map.Width * result.MapSize), (int)((result.Map.Height) * result.MapSize));
+            Rectangle dest = new Rectangle((int)(result.MapPosX), (int)(result.MapPosY- ((result.Map.Height+ heightExcess) /2*result.MapSize)), (int)(result.Map.Width * result.MapSize), (int)((result.Map.Height) * result.MapSize));
             g.DrawImage(result.Map, dest, new RectangleF(0, 0, result.Map.Width, result.Map.Height), GraphicsUnit.Pixel);
             g.DrawRectangle(Pens.White, dest);
             g.DrawString(result.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
@@ -50,19 +50,17 @@ namespace _2Deditor
                 addAngle(1);
             }
 
-            //Task[] thread = new Task[(int)cores];
-            //for (int i = 0; i < cores; i++)
+            //if (renderTask == null || renderTask.IsCompleted)
             //{
-            //    int thmp = (int)(i + 1);
-            //    thread[i] = new Task(() =>
-            //        elevate(inputRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
-            //    //thread[i].Start();
-            //    //thread[i].Join();
+            //    Console.WriteLine("start");
+            //    bool thmp = (bool)(renderAllInTimer);
+            //    renderTask = new Task(() =>
+            //        render(true)
+            //    );
+            //    renderTask.Start();
+                render(renderAllInTimer);
+                renderAllInTimer = false;
             //}
-            //for (int i = 0; i < cores; i++) thread[i].Start();
-            //for (int i = 0; i < cores; i++) thread[i].Wait();
-            render(renderAllInTimer);
-            renderAllInTimer = false;
             //gf += gfadd;
             //if (gf <= 1f) gfadd = 0.01f;
             //if (gf >= 10f) gfadd = -0.01f;
@@ -123,6 +121,7 @@ namespace _2Deditor
                 else if (radioButtonPreR.Checked)
                 {
                     addAngle(lastMousePos.X - e.X);
+                    addTilt(lastMousePos.Y - e.Y);
                     lastMousePos = e.Location;
 
                     render(true);
