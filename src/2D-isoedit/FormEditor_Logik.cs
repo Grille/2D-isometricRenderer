@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace _2Deditor
 {
@@ -21,6 +22,8 @@ namespace _2Deditor
         Point lastMousePos;
 
         Stopwatch fps;
+
+        float cores = Environment.ProcessorCount;
 
         //Rendering Values
         byte heightExcess = 128;
@@ -55,11 +58,15 @@ namespace _2Deditor
 
             //InitializeComponent();
         }
-        //Prepare the heightMap (rotate, compress y and add shadow)
+        
+        //Prepare the heightMap control multi threading (rotate, compress y and add shadow)      
         private LockBitmap prepareMap(Bitmap heightMap)
         {
             Stopwatch now = new Stopwatch();
             now.Start();
+
+            Task[] thread = new Task[(int)cores];
+
             int width = heightMap.Width;
             int height = heightMap.Height;
             Bitmap heightBM = new Bitmap(heightMap); 
@@ -78,127 +85,165 @@ namespace _2Deditor
             }
             else//dynamic render
             {
-                int oldWidth = width, oldHeight = height;
                 width = (int)(width * 1.5f); height = (int)(height * 1.5f);
                 heightLB = new LockBitmap(new Bitmap(width, height), false);
                 heightRGB = heightLB.getRGB();
                 LockBitmap baseLB = new LockBitmap(heightBM, false);
                 byte[] baseRGB = baseLB.getRGB();
-                int midx = baseLB.Width / 2;
-                int midy = baseLB.Height / 2;
 
-                int tx = 0, ty = 0;
-                float sin = (float)Math.Sin(angle * 3.14159265 / 180), cos = (float)Math.Cos(angle * 3.14159265 / 180);
-                for (int ix = 0; ix < oldWidth; ix++)//x 0 to 1
+                for (int i = 0; i < cores; i++)
                 {
-                    for (int iy = (int)((oldHeight - 1)); iy >= 0; iy--)//y 1 to 0
-                    {
-                        tx = (int)((ix - midx) * cos - (iy - midy) * sin) + (int)(midx*1.5f);
-                        ty = (int)((iy - midy) * cos + (ix - midx) * sin) + (int)(midy*1.5f);
-                        //get pixel in 1D byte arrey
-                        int counterDest = (tx + ty * width) * 4;
-                        int counterSrc = (ix + iy * oldWidth) * 4;
-                        //Prefer height
-                        if (ty > 0 && tx > 0 && ty < height && tx < width)
-                        {
-                            heightRGB[counterDest + 1] = baseRGB[counterSrc + 1];
-                            //heightRGB[counterDest + 2] = baseRGB[counterSrc + 2];
-                            heightRGB[counterDest + 3] = baseRGB[counterSrc + 3];
-                            heightRGB[counterDest + 0] = baseRGB[counterSrc + 0];
-                        }
-                    }
+                    int thmp = (int)(i + 1);
+                    thread[i] = new Task(() =>
+                        rotate(baseRGB, heightRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
                 }
+                for (int i = 0; i < cores; i++) thread[i].Start();
+                for (int i = 0; i < cores; i++) thread[i].Wait();
+
             }
-
-
 
             //Look bitmap and set ref to RGB byte array
             LockBitmap resultLB = new LockBitmap(new Bitmap((int)(width), (int)(height * tilt)), false);
             byte[] resultRGB = resultLB.getRGB();
 
-            //stored var to Y move
-            int offsetWidth = width * 4;
-
             //Scale graphic
-            if (checkBoxGame.Checked) //game render
+            if (checkBoxGame.Checked)//game render
             {
-                for (int ix = 0; ix < width; ix++)//x 0 to 1
+                for (int i = 0; i < cores; i++)
                 {
-                    for (int iy = (int)((height) / 4); iy >= 0; iy--) //y 0.5 to 0
-                    {
-                        //get pixel in 1D byte arrey
-                        int counterDest = (ix + iy * width) * 4 + offsetWidth;
-                        int counterSrc = (int)((ix + iy * 2 * width) * 4) + 0;
-
-                        resultRGB[counterDest + 1] = heightRGB[counterSrc + 1];
-                        resultRGB[counterDest + 3] = heightRGB[counterSrc + 3];
-                        resultRGB[counterDest + 0] = heightRGB[counterSrc + 0];
-                    }
-                    for (int iy = (int)((height) / 4); iy < (int)((height) / 2) - 1; iy++) //y 0.5 to 1
-                    {
-                        //get pixel in 1D byte arrey
-                        int counterDest = (ix + iy * width) * 4 + offsetWidth;
-                        int counterSrc = (int)((ix + iy * 2 * width) * 4) + offsetWidth;
-
-                        resultRGB[counterDest + 1] = heightRGB[counterSrc + 1];
-                        resultRGB[counterDest + 3] = heightRGB[counterSrc + 3];
-                        resultRGB[counterDest + 0] = heightRGB[counterSrc + 0];
-                    }
-
-
+                    int thmp = (int)(i + 1);
+                    thread[i] = new Task(() =>
+                        compress(heightRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
                 }
+                for (int i = 0; i < cores; i++) thread[i].Start();
+                for (int i = 0; i < cores; i++) thread[i].Wait();
             }
             else //dynamic render
             {
-                for (int ix = 0; ix < width; ix++)//x 0 to 1
+                for (int i = 0; i < cores; i++)
                 {
-                    for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
-                    {
-                        //get pixel in 1D byte arrey
-                        int counterDest = (ix + iy * width) * 4;
-                        int counterSrc = (int)((ix + iy / tilt * width) * 4);
-                        //Prefer height
-                        if (heightRGB[counterSrc + 1] < heightRGB[counterSrc + 1 + offsetWidth])
-                        {
-                            resultRGB[counterDest + 1] = heightRGB[counterSrc + 1 + offsetWidth];
-                            resultRGB[counterDest + 3] = heightRGB[counterSrc + 3 + offsetWidth];
-                            resultRGB[counterDest + 0] = heightRGB[counterSrc + 0 + offsetWidth];
-                        }
-                        else
-                        {
-                            resultRGB[counterDest + 1] = heightRGB[counterSrc + 1];
-                            resultRGB[counterDest + 3] = heightRGB[counterSrc + 3];
-                            resultRGB[counterDest + 0] = heightRGB[counterSrc + 0];
-                        }
-                    }
+                    int thmp = (int)(i + 1);
+                    thread[i] = new Task(() =>
+                        compress(heightRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores, tilt));
                 }
+                for (int i = 0; i < cores; i++) thread[i].Start();
+                for (int i = 0; i < cores; i++) thread[i].Wait();
             }
 
             //render shadows?
-            //shadowHeightMap = new byte[width * height];
-            if (checkBoxShadow.Checked)
-            {
-                for (int ix = 0; ix < width; ix++)//x 0 to 1
-                {
-                    for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
-                    {
-                        //get pixel in 1D byte arrey
-                        int counterBase = (ix + iy * width);
-                        int counter = counterBase * 4;
-                        int i = 0, max = (resultRGB[counter + 1]);
-                        while (iy + i < height && resultRGB[counter + 2] < max && resultRGB[counter + 1] <= max + 1)
-                        {
-                            if (i > 0) resultRGB[counter + 2] = (byte)(max * 1f);
-                            i++; max--; counter += 4;
-                        }
+            if (checkBoxShadow.Checked) shadows(resultRGB, width, height);
 
+            Console.WriteLine(now.ElapsedMilliseconds);
+            return resultLB;
+        }
+        //rotate byte pixel array
+        private void rotate(byte[] inputRGB, byte[] resultRGB, int width, int height, float start, float end) 
+        {
+            int oldWidth = (int)(width / 1.5), oldHeight = (int)(height / 1.5);
+            int midx = oldWidth / 2;
+            int midy = oldHeight / 2;
+
+            int tx = 0, ty = 0;
+            float sin = (float)Math.Sin(angle * 3.14159265 / 180), cos = (float)Math.Cos(angle * 3.14159265 / 180);
+            for (int ix = (int)(oldWidth * start); ix < (int)(oldWidth * end); ix++)//x 0 to 1
+            {
+                for (int iy = (int)((oldHeight - 1)); iy >= 0; iy--)//y 1 to 0
+                {
+                    tx = (int)((ix - midx) * cos - (iy - midy) * sin) + (int)(midx * 1.5f);
+                    ty = (int)((iy - midy) * cos + (ix - midx) * sin) + (int)(midy * 1.5f);
+                    //get pixel in 1D byte arrey
+                    int counterDest = (tx + ty * width) * 4;
+                    int counterSrc = (ix + iy * oldWidth) * 4;
+                    //Prefer height
+                    if (ty > 0 && tx > 0 && ty < height && tx < width)
+                    {
+                        resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
+                        //heightRGB[counterDest + 2] = baseRGB[counterSrc + 2];
+                        resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
+                        resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
                     }
                 }
             }
-            //Console.WriteLine(now.ElapsedMilliseconds);
-            return resultLB;
         }
-        //Rendering the image from heightmap (elevate and apply textures & shadows)
+        //compress y of byte pixel array (iso scale)
+        private void compress(byte[] inputRGB, byte[] resultRGB, int width, int height, float start, float end)
+        {
+            int offsetWidth = width * 4;
+            for (int ix = (int)(width * start); ix < (int)(width * end); ix++)//x 0 to 1
+            {
+                for (int iy = (int)((height) / 4); iy >= 0; iy--) //y 0.5 to 0
+                {
+                    //get pixel in 1D byte arrey
+                    int counterDest = (ix + iy * width) * 4 + offsetWidth;
+                    int counterSrc = (int)((ix + iy * 2 * width) * 4) + 0;
+
+                    resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
+                    resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
+                    resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
+                }
+                for (int iy = (int)((height) / 4); iy < (int)((height) / 2) - 1; iy++) //y 0.5 to 1
+                {
+                    //get pixel in 1D byte arrey
+                    int counterDest = (ix + iy * width) * 4 + offsetWidth;
+                    int counterSrc = (int)((ix + iy * 2 * width) * 4) + offsetWidth;
+
+                    resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
+                    resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
+                    resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
+                }
+
+
+            }
+        }
+        //compress y of byte pixel array (dynamic scale)
+        private void compress(byte[] inputRGB,byte[] resultRGB, int width, int height,float start, float end,float tilt) 
+        {
+            int offsetWidth = width * 4;
+            for (int ix = (int)(width * start); ix < (int)(width * end); ix++)//x 0 to 1
+            {
+                for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
+                {
+                    //get pixel in 1D byte arrey
+                    int counterDest = (ix + iy * width) * 4;
+                    int counterSrc = (int)((ix + iy / tilt * width) * 4);
+                    //Prefer height
+                    if (inputRGB[counterSrc + 1] < inputRGB[counterSrc + 1 + offsetWidth])
+                    {
+                        resultRGB[counterDest + 1] = inputRGB[counterSrc + 1 + offsetWidth];
+                        resultRGB[counterDest + 3] = inputRGB[counterSrc + 3 + offsetWidth];
+                        resultRGB[counterDest + 0] = inputRGB[counterSrc + 0 + offsetWidth];
+                    }
+                    else
+                    {
+                        resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
+                        resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
+                        resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
+                    }
+                }
+            }
+        }
+        //add shadows
+        private void shadows(byte[] resultRGB,int width,int height) 
+        {
+            for (int ix = 0; ix < width; ix++)//x 0 to 1
+            {
+                for (int iy = (int)((height - 1) * tilt); iy >= 0; iy--)//y 1 to 0
+                {
+                    //get pixel in 1D byte arrey
+                    int counterBase = (ix + iy * width);
+                    int counter = counterBase * 4;
+                    int i = 0, max = (resultRGB[counter + 1]);
+                    while (iy + i < height && resultRGB[counter + 2] < max && resultRGB[counter + 1] <= max + 1)
+                    {
+                        if (i > 0) resultRGB[counter + 2] = (byte)(max * 1f);
+                        i++; max--; counter += 4;
+                    }
+
+                }
+            }
+        }
+        
+        //Rendering the image control multi threading
         private void renderResult(LockBitmap inputMap)
         {
             Stopwatch now = new Stopwatch();
@@ -209,30 +254,30 @@ namespace _2Deditor
             byte[] inputRGB = inputLB.getRGB();
             byte[] resultRGB = resultLB.getRGB();
 
-
             int renderPixel = 0;
-            float cores = 1;
-            Thread[] thread = new Thread[(int)cores];
+
+            int width = inputMap.Width, height = inputMap.Height;
+
+            Task[] thread = new Task[(int)cores];
             for (int i = 0; i < cores; i++)
             {
-                thread[i] = new Thread(() =>
-                    elevate(inputRGB, resultRGB, inputMap, i / cores - 1/ cores, i/ cores));
-                thread[i].Start();
+                int thmp = (int)(i+1);
+                thread[i] = new Task(() =>
+                    elevate(inputRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
+                //thread[i].Start();
                 //thread[i].Join();
             }
-            for (int i = 0; i < cores; i++)
-            {
-                thread[i].Join();
-                Console.WriteLine("thread"+i+" join");
-            }
-            Console.WriteLine("return\n\n");
+            for (int i = 0; i < cores; i++) thread[i].Start();
+            for (int i = 0; i < cores; i++) thread[i].Wait();
+
+           
             result.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
             result.Map = resultLB.getBitmap();
         }
-
-        void elevate(byte[] inputRGB, byte[] resultRGB, LockBitmap inputMap, float start, float end)
+        //Rendering the part of image from heightmap (elevate and apply textures & shadows)
+        void elevate(byte[] inputRGB, byte[] resultRGB, int width,int height, float start, float end)
         {
-            int width = inputMap.Width, height = inputMap.Height;
+            
             for (int ix = (int)(width* start); ix < (int)(width* end); ix++)
             {
                 for (int iy = height - 1; iy >= 0; iy--) //Downwards
@@ -380,16 +425,19 @@ namespace _2Deditor
         {
 
             LockBitmap inputLB = prepareMap(this.inputMap);
+
             renderResult(inputLB);
-            pBResult.Refresh();
+            
             if (true||renderEditor)
             {
                 //render editor graphic with native inputMap
                 LockBitmap baseLB = new LockBitmap(this.inputMap,true);
                 if (curTextureEdit) renderTexture(inputLB);
                 else renderHeight(inputLB);
-                pBEditorMap.Refresh();
+                
             }
+            pBEditorMap.Refresh();
+            pBResult.Refresh();
         }
 
         private void addAngle(int value)

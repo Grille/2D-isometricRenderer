@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace _2Deditor
 {
@@ -47,6 +49,18 @@ namespace _2Deditor
             {
                 addAngle(1);
             }
+
+            //Task[] thread = new Task[(int)cores];
+            //for (int i = 0; i < cores; i++)
+            //{
+            //    int thmp = (int)(i + 1);
+            //    thread[i] = new Task(() =>
+            //        elevate(inputRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
+            //    //thread[i].Start();
+            //    //thread[i].Join();
+            //}
+            //for (int i = 0; i < cores; i++) thread[i].Start();
+            //for (int i = 0; i < cores; i++) thread[i].Wait();
             render(renderAllInTimer);
             renderAllInTimer = false;
             //gf += gfadd;
@@ -146,7 +160,7 @@ namespace _2Deditor
         }
         private void bNew_Click(object sender, EventArgs e)
         {
-             inputMap = new Bitmap("../input/test_512x512.png");
+            inputMap = new Bitmap("../input/test_512x512.png");
             //inputMap = new Bitmap("../input/test_flat_64x64.png");
             render(true);
             timer1.Enabled = true;
