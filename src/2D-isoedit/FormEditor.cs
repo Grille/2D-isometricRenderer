@@ -15,15 +15,17 @@ namespace _2Deditor
 
     public partial class FormEditor : Form
     {
-
+        //Bitmap
         Texture[] textures;
-        Bitmap inputMap;
+        LockBitmap inputLB;       
         RenderInfo input;
         RenderInfo result;
+
+        //mouse
         Point lastMousePos;
+        Point startMousePos;
 
-        Stopwatch fps;
-
+        //setings
         float cores = Environment.ProcessorCount;
 
         //Tasks

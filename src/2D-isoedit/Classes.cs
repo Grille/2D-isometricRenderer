@@ -53,6 +53,18 @@ namespace _2Deditor
             rgbValues = new byte[bytes];
             System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
         }
+        public LockBitmap(int width,int height)
+        {
+            Width = width;
+            Height = height;
+            bmp = new Bitmap(Width, Height);
+            rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
+            ptr = bmpData.Scan0;
+            bytes = Math.Abs(bmpData.Stride) * bmp.Height;
+            rgbValues = new byte[bytes];
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+        }
         public Bitmap getBitmap()
         {
             System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);

@@ -66,7 +66,28 @@ namespace _2Deditor
             //if (gf >= 10f) gfadd = -0.01f;
         }
 
-        private void pBTextureMap_MouseMove(object sender, MouseEventArgs e)
+        private void pBEditorMap_MouseDown(object sender, MouseEventArgs e)
+        {
+            startMousePos = e.Location;
+        }
+        private void pBEditorMap_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle)
+            {
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (radioButtonEditM.Checked)
+                {
+                }
+                else
+                {
+                    draw(inputLB, startMousePos, e.Location);
+                    renderAllInTimer = true;
+                }
+            }
+        }
+        private void pBEditorMap_MouseMove(object sender, MouseEventArgs e)
         {
             pBEditorMap.Focus();
             //if (e.X > heightMapPosX && e.Y > heightMapPosY)
@@ -87,20 +108,19 @@ namespace _2Deditor
                 }
                 else
                 {
-                    Graphics g = Graphics.FromImage(this.inputMap);
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(0, editValue, listBoxTexture.SelectedIndex)), new RectangleF((lastMousePos.X - input.MapPosX) / input.MapSize, (lastMousePos.Y - input.MapPosY) / input.MapSize, 10, 10));
                     renderAllInTimer = true;
                 }
             }
             //}
             lastMousePos = e.Location;
         }
-        private void pBTextureMap_MouseWheel(object sender, MouseEventArgs e)
+        private void pBEditorMap_MouseWheel(object sender, MouseEventArgs e)
         {
             input.MapSize += (float)(input.MapSize * e.Delta) / 1000f;
             input.MapPosX -= 1;
             pBEditorMap.Refresh();
         }
+
         private void pBRender_MouseMove(object sender, MouseEventArgs e)
         {
             pBResult.Focus();
@@ -121,7 +141,7 @@ namespace _2Deditor
                 else if (radioButtonPreR.Checked)
                 {
                     addAngle(lastMousePos.X - e.X);
-                    addTilt(lastMousePos.Y - e.Y);
+                    addTilt(-(lastMousePos.Y - e.Y));
                     lastMousePos = e.Location;
 
                     render(true);
@@ -159,8 +179,9 @@ namespace _2Deditor
         }
         private void bNew_Click(object sender, EventArgs e)
         {
-            inputMap = new Bitmap("../input/test_512x512.png");
+
             //inputMap = new Bitmap("../input/test_flat_64x64.png");
+            inputLB = new LockBitmap(new Bitmap("../input/test_512x512.png"), false);
             render(true);
             timer1.Enabled = true;
         }

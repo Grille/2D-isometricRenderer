@@ -93,8 +93,10 @@
             this.pBEditorMap.TabIndex = 1;
             this.pBEditorMap.TabStop = false;
             this.pBEditorMap.Paint += new System.Windows.Forms.PaintEventHandler(this.pBTextureMap_Paint);
-            this.pBEditorMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseMove);
-            this.pBEditorMap.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBTextureMap_MouseWheel);
+            this.pBEditorMap.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pBEditorMap_MouseDown);
+            this.pBEditorMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBEditorMap_MouseMove);
+            this.pBEditorMap.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pBEditorMap_MouseUp);
+            this.pBEditorMap.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBEditorMap_MouseWheel);
             // 
             // pBResult
             // 
