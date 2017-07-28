@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace _2Deditor
+namespace program
 {
     static class Program
     {

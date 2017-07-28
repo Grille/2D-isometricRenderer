@@ -6,7 +6,8 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace _2Deditor
+using GrillesGameLibrary;
+namespace program
 {
     public partial class FormFileExplorer : Form
     {

@@ -1,4 +1,4 @@
-﻿namespace _2Deditor
+﻿namespace program
 {
     partial class FormEditor 
     {

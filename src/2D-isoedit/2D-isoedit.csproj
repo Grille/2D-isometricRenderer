@@ -8,7 +8,7 @@
     <ProjectGuid>{D87893FC-ABFB-466B-BA6A-A79830B293E2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>_2D_isoedit</RootNamespace>
+    <RootNamespace>program</RootNamespace>
     <AssemblyName>2D-isoedit</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -69,6 +69,7 @@
     <Compile Include="FormFileExplorer.Designer.cs">
       <DependentUpon>FormFileExplorer.cs</DependentUpon>
     </Compile>
+    <Compile Include="LockBitmap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FormEditor.resx">

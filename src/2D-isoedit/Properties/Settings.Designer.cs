@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace _2D_isoedit.Properties {
+namespace program.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

@@ -10,7 +10,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace _2Deditor
+using GrillesGameLibrary;
+namespace program
 {
     //partial class hide { } //Hide Designer in VS 
     public partial class FormEditor
@@ -180,7 +181,7 @@ namespace _2Deditor
         private void bNew_Click(object sender, EventArgs e)
         {
 
-            //inputMap = new Bitmap("../input/test_flat_64x64.png");
+            //inputLB = new LockBitmap(new Bitmap("../input/test_flat_64x64.png"), false);
             inputLB = new LockBitmap(new Bitmap("../input/test_512x512.png"), false);
             render(true);
             timer1.Enabled = true;

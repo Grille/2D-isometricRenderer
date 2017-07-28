@@ -10,7 +10,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace _2Deditor
+using GrillesGameLibrary;
+namespace program
 {
     //partial class hide { } //Hide Designer in VS 
     public partial class FormEditor
@@ -254,7 +255,7 @@ namespace _2Deditor
             for (int i = 0; i < cores; i++) thread[i].Wait();
 
             result.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
-            result.Map = resultLB.getBitmap();
+            result.Map = resultLB.returnBitmap();
         }
         //Rendering the part of image from heightmap (elevate and apply textures & shadows)
         private void elevate(byte[] inputRGB, byte[] resultRGB, int width,int height, float start, float end)
@@ -328,7 +329,7 @@ namespace _2Deditor
             }
 
             this.input.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
-            this.input.Map = resultLB.getBitmap();
+            this.input.Map = resultLB.returnBitmap();
         }
         //render the high texture map
         private void renderTexture(LockBitmap inputMap)
@@ -401,7 +402,7 @@ namespace _2Deditor
             }
 
             this.input.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
-            this.input.Map = resultLB.getBitmap();
+            this.input.Map = resultLB.returnBitmap();
         }
 
         //Render
@@ -432,51 +433,52 @@ namespace _2Deditor
 
             drawLine(inputMap, posX1, posY1, posX2, posY2);
         }
-        private void drawLine(LockBitmap inputMap, int posX1,int posY1, int posX2, int posY2)
+        private void drawLine(LockBitmap inputMap, int posX1, int posY1, int posX2, int posY2)
         {
             byte[] resultRGB = inputMap.getRGB();
             int offsetWidth = inputMap.Width * 4;
 
-            Console.WriteLine("X="+posX2 + " Y="+ posY2);
+            Console.WriteLine("X=" + posX2 + " Y=" + posY2);
 
-            //int counter = posY2 * offsetWidth + ((posX2) * 4);
-            //resultRGB[counter + 0] = 1;
-            int back;
-
-
-            if (posX1> posX2)
+            if (posX2 < posX1)
             {
-                back = posX1;
+                int tmp = posX1;
                 posX1 = posX2;
-                posX2 = back;
+                posX2 = tmp;
+                    tmp = posY1;
+                    posY1 = posY2;
+                    posY2 = tmp;
+
             }
-            //if (posY1 > posY2)
+            posX2++; posY2++;
+            //if (posY2 < posY1)
             //{
-            //    back = posY1;
+            //    int tmp = posY1;
             //    posY1 = posY2;
-            //    posY2 = back;
+            //    posY2 = tmp;
             //}
 
-
-
             int distX = posX2 - posX1;
-
             int distY = posY2 - posY1;
 
-            float addY = (distY/ (float)distX);
-
-            float y = posY1;
-            for (int ix = posX1; ix <= posX2; ix++)
+            float factor = (distY / (float)distX);
+            Console.WriteLine(factor);
+            for (int ix = posX1; ix < posX2; ix++)
             {
-                y += addY;
-                float max = addY;
-                if (max < 0) max = -max;
-                for (float iy = 0; iy <= max; iy++)
+                int addY = (int)((ix - posX1) * factor);
+                int y = posY1 + addY;
+                int iy = 0;
+                while (iy < factor) 
                 {
-                    int counter = ((int)y+ (int)iy) * offsetWidth + ((ix) * 4);
+                    int counter = (int)(ix + (y+iy) * inputMap.Width) * 4;
                     resultRGB[counter + 0] = 1;
-                }
-            }        
+                    iy++;
+                } 
+
+
+            }
+
+
         }
 
         private void addAngle(int value)
