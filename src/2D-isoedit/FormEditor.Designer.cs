@@ -43,12 +43,12 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTexture = new System.Windows.Forms.CheckBox();
             this.listBoxTexture = new System.Windows.Forms.ListBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxHeight = new System.Windows.Forms.CheckBox();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxValue = new System.Windows.Forms.TextBox();
@@ -146,7 +146,6 @@
             // bLoad
             // 
             this.bLoad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.bLoad.Enabled = false;
             this.bLoad.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bLoad.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bLoad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -169,7 +168,7 @@
             this.bRotL.Name = "bRotL";
             this.bRotL.Size = new System.Drawing.Size(100, 30);
             this.bRotL.TabIndex = 7;
-            this.bRotL.Text = "Rotate - 90°";
+            this.bRotL.Text = "Rotate - 45°";
             this.bRotL.UseVisualStyleBackColor = false;
             this.bRotL.Click += new System.EventHandler(this.bRotL_Click);
             // 
@@ -184,14 +183,13 @@
             this.bRotR.Name = "bRotR";
             this.bRotR.Size = new System.Drawing.Size(100, 30);
             this.bRotR.TabIndex = 8;
-            this.bRotR.Text = "Rotate + 90°";
+            this.bRotR.Text = "Rotate + 45°";
             this.bRotR.UseVisualStyleBackColor = false;
             this.bRotR.Click += new System.EventHandler(this.bRotR_Click);
             // 
             // bSave
             // 
             this.bSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.bSave.Enabled = false;
             this.bSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bSave.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bSave.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -233,7 +231,7 @@
             // 
             // timer1
             // 
-            this.timer1.Interval = 10;
+            this.timer1.Interval = 17;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // panel2
@@ -260,7 +258,7 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox1.Controls.Add(this.button1);
-            this.groupBox1.Controls.Add(this.checkBox2);
+            this.groupBox1.Controls.Add(this.checkBoxTexture);
             this.groupBox1.Controls.Add(this.listBoxTexture);
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.groupBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -285,20 +283,20 @@
             this.button1.Text = "edit texture";
             this.button1.UseVisualStyleBackColor = false;
             // 
-            // checkBox2
+            // checkBoxTexture
             // 
-            this.checkBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.checkBox2.Checked = true;
-            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox2.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.checkBox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.checkBox2.Location = new System.Drawing.Point(6, 20);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(116, 19);
-            this.checkBox2.TabIndex = 26;
-            this.checkBox2.Text = "enabled";
-            this.checkBox2.UseVisualStyleBackColor = false;
+            this.checkBoxTexture.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.checkBoxTexture.Checked = true;
+            this.checkBoxTexture.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxTexture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkBoxTexture.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.checkBoxTexture.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.checkBoxTexture.Location = new System.Drawing.Point(6, 20);
+            this.checkBoxTexture.Name = "checkBoxTexture";
+            this.checkBoxTexture.Size = new System.Drawing.Size(116, 19);
+            this.checkBoxTexture.TabIndex = 26;
+            this.checkBoxTexture.Text = "enabled";
+            this.checkBoxTexture.UseVisualStyleBackColor = false;
             // 
             // listBoxTexture
             // 
@@ -310,11 +308,6 @@
             this.listBoxTexture.FormattingEnabled = true;
             this.listBoxTexture.IntegralHeight = false;
             this.listBoxTexture.ItemHeight = 15;
-            this.listBoxTexture.Items.AddRange(new object[] {
-            "grass",
-            "earth",
-            "sand",
-            "brick"});
             this.listBoxTexture.Location = new System.Drawing.Point(6, 69);
             this.listBoxTexture.Margin = new System.Windows.Forms.Padding(0);
             this.listBoxTexture.Name = "listBoxTexture";
@@ -325,7 +318,7 @@
             // 
             this.groupBox2.Controls.Add(this.radioButton4);
             this.groupBox2.Controls.Add(this.radioButton3);
-            this.groupBox2.Controls.Add(this.checkBox1);
+            this.groupBox2.Controls.Add(this.checkBoxHeight);
             this.groupBox2.Controls.Add(this.radioButton1);
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.textBoxValue);
@@ -366,20 +359,20 @@
             this.radioButton3.Text = "add +=";
             this.radioButton3.UseVisualStyleBackColor = true;
             // 
-            // checkBox1
+            // checkBoxHeight
             // 
-            this.checkBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.checkBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.checkBox1.Location = new System.Drawing.Point(6, 20);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(116, 19);
-            this.checkBox1.TabIndex = 23;
-            this.checkBox1.Text = "enabled";
-            this.checkBox1.UseVisualStyleBackColor = false;
+            this.checkBoxHeight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.checkBoxHeight.Checked = true;
+            this.checkBoxHeight.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxHeight.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkBoxHeight.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.checkBoxHeight.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.checkBoxHeight.Location = new System.Drawing.Point(6, 20);
+            this.checkBoxHeight.Name = "checkBoxHeight";
+            this.checkBoxHeight.Size = new System.Drawing.Size(116, 19);
+            this.checkBoxHeight.TabIndex = 23;
+            this.checkBoxHeight.Text = "enabled";
+            this.checkBoxHeight.UseVisualStyleBackColor = false;
             // 
             // radioButton1
             // 
@@ -732,12 +725,12 @@
         private System.Windows.Forms.ListBox listBoxTexture;
         private System.Windows.Forms.TextBox textBoxValue;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox checkBoxHeight;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox checkBoxTexture;
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.RadioButton radioButton1;

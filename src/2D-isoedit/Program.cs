@@ -4,17 +4,18 @@ using System.Windows.Forms;
 
 namespace program
 {
-    static class Program
+    public static class Program
     {
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
-        /// </summary>
+        /// </summary>    
+        //Application.SetCompatibleTextRenderingDefault(false);
+        public static FormEditor mainForm = new FormEditor();
         [STAThread]
         static void Main()
         {
             //Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormEditor());
+            Application.Run(mainForm);
         }
     }
 }

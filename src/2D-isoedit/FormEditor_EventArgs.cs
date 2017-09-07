@@ -25,7 +25,12 @@ namespace program
             RenderInfo curEdit;
             if (curTextureEdit) curEdit = input;
             else curEdit = input;
-            Rectangle dest = new Rectangle((int)input.MapPosX, (int)input.MapPosY, (int)(curEdit.Map.Width * input.MapSize), (int)(curEdit.Map.Height * input.MapSize));
+            Rectangle dest = new Rectangle(
+                (int)input.MapPosX,
+                (int)input.MapPosY,
+                (int)(curEdit.Map.Width * input.MapSize),
+                (int)(curEdit.Map.Height * input.MapSize)
+                );
             g.DrawImage(curEdit.Map, dest, new RectangleF(0, 0, curEdit.Map.Width, curEdit.Map.Height), GraphicsUnit.Pixel);
             g.DrawRectangle(Pens.White, dest);
             g.DrawString(curEdit.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
@@ -36,7 +41,12 @@ namespace program
             Graphics g = e.Graphics;
             if (result.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            Rectangle dest = new Rectangle((int)(result.MapPosX), (int)(result.MapPosY- ((result.Map.Height+ heightExcess) /2*result.MapSize)), (int)(result.Map.Width * result.MapSize), (int)((result.Map.Height) * result.MapSize));
+            Rectangle dest = new Rectangle(
+                (int)(result.MapPosX - ((result.Map.Width) / 2 * result.MapSize)),
+                (int)(result.MapPosY- ((result.Map.Height+heightExcess) /2*result.MapSize)),
+                (int)(result.Map.Width * result.MapSize),
+                (int)((result.Map.Height) * result.MapSize)
+                );
             g.DrawImage(result.Map, dest, new RectangleF(0, 0, result.Map.Width, result.Map.Height), GraphicsUnit.Pixel);
             g.DrawRectangle(Pens.White, dest);
             g.DrawString(result.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
@@ -45,26 +55,17 @@ namespace program
         //RenderLoop & AutoRotate
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //Console.WriteLine(angle);
             if (checkBoxPreAR.Checked)
             {
                 addAngle(1);
             }
-
-            //if (renderTask == null || renderTask.IsCompleted)
-            //{
-            //    Console.WriteLine("start");
-            //    bool thmp = (bool)(renderAllInTimer);
-            //    renderTask = new Task(() =>
-            //        render(true)
-            //    );
-            //    renderTask.Start();
-                render(renderAllInTimer);
-                renderAllInTimer = false;
-            //}
-            //gf += gfadd;
-            //if (gf <= 1f) gfadd = 0.01f;
-            //if (gf >= 10f) gfadd = -0.01f;
+            if (!isRenering)
+            {
+                Task thread = new Task(() => render(renderEditor));
+                thread.Start();
+            }
+            pBEditorMap.Refresh();
+            pBResult.Refresh();
         }
 
         private void pBEditorMap_MouseDown(object sender, MouseEventArgs e)
@@ -84,7 +85,7 @@ namespace program
                 else
                 {
                     draw(inputLB, startMousePos, e.Location);
-                    renderAllInTimer = true;
+                    renderEditor = true;
                 }
             }
         }
@@ -109,7 +110,6 @@ namespace program
                 }
                 else
                 {
-                    renderAllInTimer = true;
                 }
             }
             //}
@@ -142,7 +142,7 @@ namespace program
                 else if (radioButtonPreR.Checked)
                 {
                     addAngle(lastMousePos.X - e.X);
-                    addTilt(-(lastMousePos.Y - e.Y));
+                    //addTilt(-(lastMousePos.Y - e.Y));
                     lastMousePos = e.Location;
 
                     render(true);
@@ -161,13 +161,11 @@ namespace program
         //Buttons
         private void bRotL_Click(object sender, EventArgs e)
         {
-            addAngle(-90);
-            render(false);
+            addAngle(-45);
         }
         private void bRotR_Click(object sender, EventArgs e)
         {
-            addAngle(90);
-            render(false);
+            addAngle(45);
         }
         private void bRot_Click(object sender, EventArgs e)
         {
@@ -181,26 +179,43 @@ namespace program
         private void bNew_Click(object sender, EventArgs e)
         {
 
-            //inputLB = new LockBitmap(new Bitmap("../input/test_flat_64x64.png"), false);
-            inputLB = new LockBitmap(new Bitmap("../input/test_512x512.png"), false);
+            //inputLB = new LockBitmap(new Bitmap("../input/test_256x256.png"), false);
+            inputLB = new LockBitmap(new Bitmap(128,128), false);
             render(true);
             timer1.Enabled = true;
         }
         private void bSwitch_Click(object sender, EventArgs e)
         {
             curTextureEdit = !curTextureEdit;
-            renderAllInTimer = true;
+            renderEditor = true;
         }
         private void bSave_Click(object sender, EventArgs e)
         {
             render(false);
             Bitmap save = new Bitmap(result.Map);
-            result.Map.Save("../output/test.png", System.Drawing.Imaging.ImageFormat.Png);
+            result.Map.Save("../output/render.png", System.Drawing.Imaging.ImageFormat.Png);
+            save = inputLB.returnBitmap();
+            save.Save("../output/work.png", System.Drawing.Imaging.ImageFormat.Png);
+            save.Save("../input/autoSave.png", System.Drawing.Imaging.ImageFormat.Png);
+            inputLB = new LockBitmap(save, false);
         }
         private void bLoad_Click(object sender, EventArgs e)
         {
             Form fileExplorer = new FormFileExplorer();
-            //FormFileExplorer.
+            fileExplorer.Show();
+            //inputLB = new LockBitmap(new Bitmap("../input/test_256x256.png"), false);
+            //inputLB = new LockBitmap(new Bitmap("../input/test_512x512.png"), false);
+            //render(true);
+            //timer1.Enabled = true;
+        }
+        public void load(string path)
+        {
+            using (var bmpTemp = new Bitmap(path))
+            {
+                inputLB = new LockBitmap(new Bitmap(bmpTemp), false);
+            }
+            render(true);
+            timer1.Enabled = true;
         }
 
         //Input

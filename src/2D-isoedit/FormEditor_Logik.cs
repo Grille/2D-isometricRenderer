@@ -17,278 +17,215 @@ namespace program
     public partial class FormEditor
     {
         public void init()
-        
-
         {
-            
             input.init();
             result.init();
 
+
             textures = new Texture[] {
-            new Texture(new Color[] {Color.FromArgb(80, 100, 50),Color.FromArgb(80, 105, 50),Color.FromArgb(80, 100, 50)},false),
-            new Texture(new Color[] {Color.FromArgb(110, 100, 80)},false),
-            new Texture(new Color[] {Color.FromArgb(80, 100, 50),Color.FromArgb(80, 110, 50)},true),
-            new Texture(new Color[] {Color.FromArgb(150, 150, 150),Color.FromArgb(140, 140, 160),Color.FromArgb(140, 140, 150)},false),
-            new Texture(new Color[] {Color.FromArgb(30, 70, 20),Color.FromArgb(40, 90, 30)},true),
-            new Texture(new Color[] {Color.FromArgb(220, 220, 255),Color.FromArgb(150, 150, 255)},true),
-            new Texture(new Color[] {Color.FromArgb(200, 200, 200),Color.FromArgb(200, 100, 50)},true),
+            new Texture("grass", new byte[] {1,0, 255,70,100,40,255 }),
+            new Texture("dirt", new byte[] {1,0, 255,110,100,80,255 }),
+            new Texture("sand", new byte[] {2,1, 255,80,100,50,255, 1,80,110,50,255 }),
+            new Texture("stone", new byte[] {2,0, 2,150,150,150,255, 6,130,130,130,255}),
+            new Texture("dark grass", new byte[] {2,1, 1,30,70,20,255, 1,40,90,30,255}),
+            new Texture("water", new byte[] {2,0, 1,220,220,255,255, 1,150,150,255,255}),
+            new Texture("grass", new byte[] {2,1, 1,200,200,200,255, 1,200,100,50,255}),
+            new Texture("wall 1", new byte[] {1,0, 255,200,200,200,255}),
+            new Texture("wall 2", new byte[] {1,0, 255,150,150,150,255}),
+            new Texture("wall 3", new byte[] {2,0, 4,100,100,100,255, 4,75,75,75,255}),
+            new Texture("wall 4", new byte[] {2,0, 6,120,120,120,255, 2,150,0,0,255}),
+            new Texture("window 1", new byte[] {3,0, 3,200,200,200,255, 2,50,50,100,255, 255,200,200,200,255}),
             };
+
+            for (int i = 0;i< textures.Length;i++) listBoxTexture.Items.Add(textures[i].getName());
+            //255 
 
             //InitializeComponent();
         }
         
-        //Prepare the heightMap control multi threading (rotate, compress y and add shadow)      
+        //Prepare the heightMap call rotate and shadow    
         private LockBitmap prepareMap(LockBitmap inputLB)
         {
-            Stopwatch now = new Stopwatch();
-            now.Start();
-
-            Task[] thread = new Task[(int)cores];
-
-            int width = inputLB.Width;
-            int height = inputLB.Height;
-            LockBitmap heightLB;
-            byte[] heightRGB;
-
-
-            ////Rotate graphic
-            if (checkBoxGame.Checked)//game render
+            LockBitmap resultLB = new LockBitmap((int)(inputLB.Width*1.5), (int)(inputLB.Height*1.5));
+            if (cores == 1)
+                rotate(inputLB, resultLB, 0, 1);
+            else
             {
-                //if (angle >= 270) heightBM.RotateFlip(RotateFlipType.Rotate270FlipNone);
-                //else if (angle >= 180) heightBM.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                //else if (angle >= 90) heightBM.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                heightLB = inputLB;
-                heightRGB = heightLB.getRGB();
-            }
-            else//dynamic render
-            {
-                width = (int)(width * 1.5f); height = (int)(height * 1.5f);
-                heightLB = new LockBitmap(width, height);
-                heightRGB = heightLB.getRGB();
-                LockBitmap baseLB = inputLB;
-                byte[] baseRGB = baseLB.getRGB();
+                Task[] thread = new Task[(int)cores];
 
                 for (int i = 0; i < cores; i++)
                 {
                     int thmp = (int)(i + 1);
                     thread[i] = new Task(() =>
-                        rotate(baseRGB, heightRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
-                }
-                for (int i = 0; i < cores; i++) thread[i].Start();
-                for (int i = 0; i < cores; i++) thread[i].Wait();
-
-
-            }
-
-            //Look bitmap and set ref to RGB byte array
-
-            if (checkBoxGame.Checked) tilt = 0.5f;
-            LockBitmap resultLB = new LockBitmap((int)(width), (int)(height * tilt));
-            byte[] resultRGB = resultLB.getRGB();
-
-            //Scale graphic
-            if (checkBoxGame.Checked)//game render
-            {
-                for (int i = 0; i < cores; i++)
-                {
-                    int thmp = (int)(i + 1);
-                    thread[i] = new Task(() =>
-                        compress(heightRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
-                }
-                for (int i = 0; i < cores; i++) thread[i].Start();
-                for (int i = 0; i < cores; i++) thread[i].Wait();
-            }
-            else //dynamic render
-            {
-                //compress(heightRGB, resultRGB, width, height, 0, 1, tilt);
-                for (int i = 0; i < cores; i++)
-                {
-                    int thmp = (int)(i + 1);
-                    thread[i] = new Task(() =>
-                        compress(heightRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores, tilt));
+                        rotate(inputLB, resultLB, thmp / cores - 1 / cores, thmp / cores));
                 }
                 for (int i = 0; i < cores; i++) thread[i].Start();
                 for (int i = 0; i < cores; i++) thread[i].Wait();
             }
 
-            //render shadows?
-            if (checkBoxShadow.Checked) shadows(resultRGB, width, height);
+            if (checkBoxShadow.Checked) shadows(resultLB);
 
-            //Console.WriteLine(now.ElapsedMilliseconds);
             return resultLB;
         }
         //rotate byte pixel array
-        private void rotate(byte[] inputRGB, byte[] resultRGB, int width, int height, float start, float end) 
+        private void rotate(LockBitmap inputLB, LockBitmap resultLB, float start, float end) 
         {
-            int oldWidth = (int)(width / 1.5f), oldHeight = (int)(height / 1.5f);
-            int midx = oldWidth / 2;
-            int midy = oldHeight / 2;
+            byte[] inputRGB = inputLB.getData();
+            byte[] resultRGB = resultLB.getData();
+            int inputW = inputLB.Width, inputH = inputLB.Height,resultW = resultLB.Width, resultH = resultLB.Height;
 
-            int tx = 0, ty = 0;
-            float sin = (float)Math.Sin(angle * 3.14159265 / 180), cos = (float)Math.Cos(angle * 3.14159265 / 180);
-            for (int ix = (int)(oldWidth * start); ix < (int)(oldWidth * end); ix++)//x 0 to 1
+            double sinma = Math.Sin(-angle * 3.14159265 / 180);
+            double cosma = Math.Cos(-angle * 3.14159265 / 180);
+
+            for (int x = (int)(resultW * start); x < (int)(resultW * end); x++)
             {
-                for (int iy = (int)((oldHeight - 1)); iy >= 0; iy--)//y 1 to 0
+                for (int y = 0; y < resultH; y++)
                 {
-                    tx = (int)((ix - midx) * cos - (iy - midy) * sin) + (int)(midx * 1.5f);
-                    ty = (int)((iy - midy) * cos + (ix - midx) * sin) + (int)(midy * 1.5f);
-                    //get pixel in 1D byte arrey
-                    int counterDest = (tx + ty * width) * 4;
-                    int counterSrc = (ix + iy * oldWidth) * 4;
-                    //Prefer height
-                    if (ty > 0 && tx > 0 && ty < height && tx < width)
+                    int hwidth = (int)(inputW /2);
+                    int hheight = (int)(inputH /2);
+
+                    int xt = (int)(x - hwidth*1.5);
+                    int yt = (int)(y - hheight*1.5);
+
+                    int xs = (int)((cosma * (xt) - sinma * (yt)) + hwidth);
+                    int ys = (int)((sinma * (xt) + cosma * (yt)) + hheight);
+
+                    int offsetDst = (x + y * resultW) * 4;
+                    int offsetSrc = (xs + ys * inputW) * 4;
+                    if (xs >= 0 && xs < inputW && ys >= 0 && ys < inputH)
                     {
-                        resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
-                        //heightRGB[counterDest + 2] = baseRGB[counterSrc + 2];
-                        resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
-                        resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
+                        resultRGB[offsetDst + 0] = inputRGB[offsetSrc + 0];//texture
+                        resultRGB[offsetDst + 1] = inputRGB[offsetSrc + 1];//height
                     }
                 }
             }
-        }
-        //compress y of byte pixel array (iso scale)
-        private void compress(byte[] inputRGB, byte[] resultRGB, int width, int height, float start, float end)
-        {
-            int offsetWidth = width * 4;
-            for (int ix = (int)(width * start); ix < (int)(width * end); ix++)//x 0 to 1
-            {
-                for (int iy = (int)((height) / 4); iy >= 0; iy--) //y 0.5 to 0
-                {
-                    //get pixel in 1D byte arrey
-                    int counterDest = (ix + iy * width) * 4 + offsetWidth;
-                    int counterSrc = (int)((ix + iy * 2 * width) * 4) + 0;
-
-                    resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
-                    resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
-                    resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
-                }
-                for (int iy = (int)((height) / 4); iy < (int)((height) / 2) - 1; iy++) //y 0.5 to 1
-                {
-                    //get pixel in 1D byte arrey
-                    int counterDest = (ix + iy * width) * 4 + offsetWidth;
-                    int counterSrc = (int)((ix + iy * 2 * width) * 4) + offsetWidth;
-
-                    resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
-                    resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
-                    resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
-                }
-
 
             }
-        }
-        //compress y of byte pixel array (dynamic scale)
-        private void compress(byte[] inputRGB,byte[] resultRGB, int width, int height,float start, float end,float tilt) 
-        {
-            int offsetWidth = width * 4;
-            for (int ix = (int)(width * start); ix < (int)(width * end); ix++)//x 0 to 1
-            {
-                for (int iy = 0; iy < (int)(height * tilt); iy++)//y 0 to 1
-                {
-                    //get pixel in 1D byte arrey
-                    int counterDest = (ix + iy * width) * 4;
-                    int counterSrc = (int)((ix + (int)(iy / tilt) * width) * 4);
-                    //Prefer height
-                    if (inputRGB[counterSrc + 1] < inputRGB[counterSrc + 1 + offsetWidth])
-                    {
-                        resultRGB[counterDest + 1] = inputRGB[counterSrc + 1 + offsetWidth];
-                        resultRGB[counterDest + 3] = inputRGB[counterSrc + 3 + offsetWidth];
-                        resultRGB[counterDest + 0] = inputRGB[counterSrc + 0 + offsetWidth];
-                    }
-                    else
-                    {
-                        resultRGB[counterDest + 1] = inputRGB[counterSrc + 1];
-                        resultRGB[counterDest + 3] = inputRGB[counterSrc + 3];
-                        resultRGB[counterDest + 0] = inputRGB[counterSrc + 0];
-                    }
-                }
-            }
-        }
         //add shadows
-        private void shadows(byte[] resultRGB,int width,int height) 
+        private void shadows(LockBitmap resultLB) 
         {
+            byte[] resultRGB = resultLB.getData();
+            int width = resultLB.Width, height = resultLB.Height;
             for (int ix = 0; ix < width; ix++)//x 0 to 1
             {
-                    for (int iy = 0; iy < (int)(height * tilt); iy++)//y 0 to 1
+                    for (int iy = 0; iy < (int)(height); iy++)//y 0 to 1
                     {
-                    //get pixel in 1D byte arrey
-                    int counterBase = (ix + iy * width);
-                    int counter = counterBase * 4;
+                    //get position
+                    int offset = (ix + iy * width) * 4;
 
                     int i = 0;
                     //shadowHeight = curent terrainHeight
-                    float shadowHeight = (resultRGB[counter + 1]);
-                    while (iy + i < height && resultRGB[counter + 2] < shadowHeight)
+                    float shadowHeight = (resultRGB[offset + 1]);
+                    while (iy + i < height && resultRGB[offset + 2] < shadowHeight)
                     {
-                        if (i > 0) resultRGB[counter + 2] = (byte)(shadowHeight * 1f);
+                        if (i > 0) resultRGB[offset + 2] = (byte)(shadowHeight * 1f);
 
-                        if (resultRGB[counter + 1] > shadowHeight + 1) break;
-                        i++; shadowHeight -= 1f; counter += 4;
+                        if (resultRGB[offset + 1] > shadowHeight + 1) break;
+                        i++; shadowHeight -= 1f; offset += 4;
                     }
 
                 }
             }
         }
-        
-        //Rendering the image control multi threading
+
+        //Rendering the image call elevate
         private void renderResult(LockBitmap inputMap)
         {
             Stopwatch now = new Stopwatch();
             now.Start();
             if (inputMap == null) return;
             LockBitmap inputLB = inputMap;
-            LockBitmap resultLB = new LockBitmap(new Bitmap(inputMap.Width, inputMap.Height + heightExcess), false);
-            byte[] inputRGB = inputLB.getRGB();
-            byte[] resultRGB = resultLB.getRGB();
+            LockBitmap resultLB = new LockBitmap(new Bitmap((int)(inputMap.Width), (int)(inputMap.Height*0.5) + heightExcess), false);
+            byte[] inputRGB = inputLB.getData();
+            byte[] resultRGB = resultLB.getData();
 
             int renderPixel = 0;
 
-            int width = inputMap.Width, height = inputMap.Height;
-
-            Task[] thread = new Task[(int)cores];
-            for (int i = 0; i < cores; i++)
+            if (cores == 1)
+                elevate(inputLB, resultLB, 0, 1);
+            else
             {
-                int thmp = (int)(i + 1);
-                thread[i] = new Task(() =>
-                    elevate(inputRGB, resultRGB, width, height, thmp / cores - 1 / cores, thmp / cores));
+                Task[] thread = new Task[(int)cores];
+                for (int i = 0; i < cores; i++)
+                {
+                    int thmp = (int)(i + 1);
+                    thread[i] = new Task(() =>
+                        elevate(inputLB, resultLB, thmp / cores - 1 / cores, thmp / cores));
+                }
+                for (int i = 0; i < cores; i++) thread[i].Start();
+                for (int i = 0; i < cores; i++) thread[i].Wait();
             }
-            for (int i = 0; i < cores; i++) thread[i].Start();
-            for (int i = 0; i < cores; i++) thread[i].Wait();
-
             result.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
             result.Map = resultLB.returnBitmap();
         }
         //Rendering the part of image from heightmap (elevate and apply textures & shadows)
-        private void elevate(byte[] inputRGB, byte[] resultRGB, int width,int height, float start, float end)
+        private void elevate(LockBitmap inputLB, LockBitmap resultLB, float start, float end)
         {
-            float tiltFactor;
-            if (tilt >= 0.5) tiltFactor = (2 - tilt * 2);
-            else tiltFactor = (1.5f-tilt);
-            for (int ix = (int)(width* start); ix < (int)(width* end); ix++)
+            byte[] inputRGB = inputLB.getData();
+            byte[] resultRGB = resultLB.getData();
+            int widthSrc = inputLB.Width, heightSrc = inputLB.Height, widthDst = resultLB.Width, heightDst = resultLB.Height;
+
+            for (int ix = (int)(widthSrc * start); ix < (int)(widthSrc * end); ix++)//Upwards
             {
-                for (int iy = height - 1; iy >= 0; iy--) //Downwards
+                for (int iy = (heightSrc - 1); iy >= 0; iy-=1)//Downwards
                 {
-                    int counter = (ix + iy * width) * 4;
-                    for (int iz = (int)(inputRGB[counter + 1] * tiltFactor); iz > 0; iz--) //Downwards
+                    //get positions
+                    int offSrc = (ix + iy * widthSrc) * 4;
+                    int offDst = (ix + iy/2 * widthDst) * 4;
+
+                    //height > 0
+                    if (inputRGB[offSrc + 1] > 0)
                     {
-                        if ((iy + heightExcess) - iz >= 0)//save
+                        //get colorList & find color pos
+                        byte[] refColor = textures[inputRGB[offSrc]].getData();
+                        int colorSize = refColor[0] - refColor[1];
+                        int colorStart = 0;
+                        int colorListPos = -1;
+                        int colorPos = 0;
+                        while (colorStart < inputRGB[offSrc + 1])
                         {
-                            int counter2 = counter - (width * iz * 4) + width * heightExcess * 4;//pos + curent height
-                            if (resultRGB[counter2 + 3] == 0)
-                            {
+                            colorListPos++;
+                            if (colorListPos >= colorSize) colorListPos = 0;
+                            colorStart += refColor[2 + colorListPos * 5];
+                        }
+                        colorPos = refColor[2 + colorListPos * 5] - (colorStart - inputRGB[offSrc + 1]);
 
-                                float shadow = 1f;
-                                if (iz < inputRGB[counter + 2] * tiltFactor) shadow = 0.75f;
-                                textures[inputRGB[counter]].setColor(resultRGB, (int)(counter2), (byte)(iz - 1), (byte)(inputRGB[counter + 1]), shadow);
-                                //resultRGB[counter2 + 3] = 255;
-                                //if (iz == inputRGB[counter + 1]) resultRGB[counter2] = 100;
-                                //resultRGB[counter2 + 1] = (byte)(((byte)(iz * 100)) / 4 + 30);
-
-                                //renderPixel++;
-                            }
-                            else
+                        int iz = inputRGB[offSrc + 1];
+                        while (iz > 0) //Downwards
+                        {
+                            //Repeat until color is changed | ground reached
+                            while (iz > 0 && colorPos > 0) 
                             {
-                                break;
+                                //save
+                                if ((iy + heightExcess) - iz >= 0)
+                                {
+                                    //get position on z axe
+                                    int offDstZ = offDst - (widthDst * iz * 4) + widthDst * heightExcess * 4;//pos + curent height
+                                    //pixel not yet drawn
+                                    if (resultRGB[offDstZ + 3] == 0)
+                                    {
+                                        //draw pixel
+                                        float shadow = 1f;
+                                        if (iz < inputRGB[offSrc + 2]) shadow = 0.75f;
+                                        resultRGB[offDstZ + 0] = (byte)(refColor[5 + colorListPos * 5] * shadow);//b
+                                        resultRGB[offDstZ + 1] = (byte)(refColor[4 + colorListPos * 5] * shadow);//g
+                                        resultRGB[offDstZ + 2] = (byte)(refColor[3 + colorListPos * 5] * shadow);//r
+                                        resultRGB[offDstZ + 3] = (byte)(refColor[6 + colorListPos * 5]);//a
+                                    }
+                                    else
+                                    {
+                                        iz = 0;
+                                        break;
+                                    }
+                                }
+                                //get next z & color pos
+                                iz--;
+                                colorPos--;
                             }
+                            //get next color
+                            colorListPos--;
+                            if (colorListPos < 0) colorListPos = colorSize - 1;
+                            colorPos = refColor[2 + colorListPos * 5];
                         }
                     }
                 }
@@ -303,8 +240,8 @@ namespace program
             if (inputMap == null) return;
             LockBitmap heightLB = inputMap;
             LockBitmap resultLB = new LockBitmap(inputMap.Width, inputMap.Height);
-            byte[] heightRGB = heightLB.getRGB();
-            byte[] resultRGB = resultLB.getRGB();
+            byte[] heightRGB = heightLB.getData();
+            byte[] resultRGB = resultLB.getData();
             int renderPixel = 0;
             int offsetWidth = inputMap.Width * 4;
             int width = inputMap.Width, height = inputMap.Height;
@@ -327,7 +264,7 @@ namespace program
                     }
                 }
             }
-
+            //draw(resultLB, startMousePos, new Point(0,0));
             this.input.renderInfo = ("renderPixels => " + renderPixel) + '\n' + ("renderTime => " + now.ElapsedMilliseconds);
             this.input.Map = resultLB.returnBitmap();
         }
@@ -339,8 +276,8 @@ namespace program
             if (inputMap == null) return;
             LockBitmap heightLB = inputMap;
             LockBitmap resultLB = new LockBitmap(inputMap.Width, inputMap.Height);
-            byte[] heightRGB = heightLB.getRGB();
-            byte[] resultRGB = resultLB.getRGB();
+            byte[] heightRGB = heightLB.getData();
+            byte[] resultRGB = resultLB.getData();
             int renderPixel = 0;
             int offsetWidth = inputMap.Width * 4;
             int width = inputMap.Width, height = inputMap.Height;
@@ -355,18 +292,18 @@ namespace program
                     {
                         float h, s, v;
                         h = (byte)(heightRGB[counter + 0] * 30);
+                        //v = (byte)(heightRGB[counter + 0] * 120);
+                        //v /= 255*2;
+                        //v += 0.5f;
 
-                        if (ix < width - 1 && heightRGB[counter + 1] != heightRGB[counter + 1 + 4]) s = 0.7f;
-                        else if (ix > 0 && heightRGB[counter + 1] != heightRGB[counter + 1 - 4]) s = 0.7f;
-                        else if (iy < height - 1 && heightRGB[counter + 1] != heightRGB[counter + 1 + offsetWidth]) s = 0.7f;
-                        else if (iy > 0 && heightRGB[counter + 1] != heightRGB[counter + 1 - offsetWidth]) s = 0.7f;
+                        if ((ix < width - 1 && heightRGB[counter + 1] > heightRGB[counter + 1 + 4])||
+                         (ix > 0 && heightRGB[counter + 1] > heightRGB[counter + 1 - 4])||
+                         (iy < height - 1 && heightRGB[counter + 1] > heightRGB[counter + 1 + offsetWidth])||
+                         (iy > 0 && heightRGB[counter + 1] > heightRGB[counter + 1 - offsetWidth])) s = 0.7f;
                         else s = 1;
 
-                        if (ix < width - 1 && heightRGB[counter + 0] != heightRGB[counter + 0 + 4]) v = 0.7f;
-                        else if (ix > 0 && heightRGB[counter + 0] != heightRGB[counter + 0 - 4]) v = 0.7f;
-                        else if (iy < height - 1 && heightRGB[counter + 0] != heightRGB[counter + 0 + offsetWidth]) v = 0.7f;
-                        else if (iy > 0 && heightRGB[counter + 0] != heightRGB[counter + 0 - offsetWidth]) v = 0.7f;
-                        else v = 1;
+
+                        v = 1;
 
                         int pos = (int)(h / 256 * 6);
                         int x = (int)(h / 256 * (256 * 6));
@@ -408,17 +345,17 @@ namespace program
         //Render
         private void render(bool renderEditor)
         {
+            isRenering = true;
             renderResult(prepareMap(this.inputLB));
-            
+
             if (renderEditor)
             {
                 //render editor graphic with native inputMap
                 if (curTextureEdit) renderTexture(this.inputLB);
                 else renderHeight(this.inputLB);
-                
+                this.renderEditor = false;
             }
-            pBEditorMap.Refresh();
-            pBResult.Refresh();
+            isRenering = false;
         }
 
         //
@@ -431,55 +368,78 @@ namespace program
             int posX2 = (int)((endMouse.X - input.MapPosX) / input.MapSize + 0.5f);
             int posY2 = (int)((endMouse.Y - input.MapPosY) / input.MapSize + 0.5f);
 
-            drawLine(inputMap, posX1, posY1, posX2, posY2);
+            if (radioButton5.Checked) drawLine(inputMap, posX1, posY1, posX2, posY2);
+            if (radioButton7.Checked) fill(inputMap, posX1, posY1);
         }
-        private void drawLine(LockBitmap inputMap, int posX1, int posY1, int posX2, int posY2)
+        private void drawLine(LockBitmap inputMap, int startX, int startY, int endX, int endY)
         {
-            byte[] resultRGB = inputMap.getRGB();
+            byte[] resultRGB = inputMap.getData();
             int offsetWidth = inputMap.Width * 4;
+            int x, y, t, dx, dy, incx, incy, pdx, pdy, ddx, ddy, deltaslowdirection, deltafastdirection, err;
 
-            Console.WriteLine("X=" + posX2 + " Y=" + posY2);
+            dx = endX - startX;
+            dy = endY - startY;
 
-            if (posX2 < posX1)
+            incx = Math.Sign(dx);
+            incy = Math.Sign(dy);
+            if (dx < 0) dx = -dx;
+            if (dy < 0) dy = -dy;
+
+            if (dx > dy)
             {
-                int tmp = posX1;
-                posX1 = posX2;
-                posX2 = tmp;
-                    tmp = posY1;
-                    posY1 = posY2;
-                    posY2 = tmp;
-
+                pdx = incx; pdy = 0;
+                ddx = incx; ddy = incy;
+                deltaslowdirection = dy; deltafastdirection = dx; 
             }
-            posX2++; posY2++;
-            //if (posY2 < posY1)
-            //{
-            //    int tmp = posY1;
-            //    posY1 = posY2;
-            //    posY2 = tmp;
-            //}
-
-            int distX = posX2 - posX1;
-            int distY = posY2 - posY1;
-
-            float factor = (distY / (float)distX);
-            Console.WriteLine(factor);
-            for (int ix = posX1; ix < posX2; ix++)
+            else
             {
-                int addY = (int)((ix - posX1) * factor);
-                int y = posY1 + addY;
-                int iy = 0;
-                while (iy < factor) 
+                pdx = 0; pdy = incy; 
+                ddx = incx; ddy = incy; 
+                deltaslowdirection = dx; deltafastdirection = dy; 
+            }
+
+            x = startX;
+            y = startY;
+            err = deltafastdirection / 2;
+            int counter = (x + (int)y * inputMap.Width) * 4;
+            if (checkBoxHeight.Checked) resultRGB[counter + 1] = Convert.ToByte(textBoxValue.Text);
+            if (checkBoxTexture.Checked) resultRGB[counter + 0] = (byte)listBoxTexture.SelectedIndex;
+
+            for (t = 0; t < deltafastdirection; ++t) 
+            {
+                err -= deltaslowdirection;
+                if (err < 0)
                 {
-                    int counter = (int)(ix + (y+iy) * inputMap.Width) * 4;
-                    resultRGB[counter + 0] = 1;
-                    iy++;
-                } 
-
-
+                    err += deltafastdirection;
+                    x += ddx;
+                    y += ddy;
+                }
+                else
+                {
+                    x += pdx;
+                    y += pdy;
+                }
+                counter = (x + (int)y * inputMap.Width) * 4;
+                if (checkBoxHeight.Checked) resultRGB[counter + 1] = Convert.ToByte(textBoxValue.Text);
+                if (checkBoxTexture.Checked) resultRGB[counter + 0] = (byte)listBoxTexture.SelectedIndex;
             }
+        } 
+        private void fill(LockBitmap inputMap, int startX, int startY)
+        {
+            //LockBitmap resultLB = new LockBitmap((int)(inputLB.Width), (int)(inputLB.Height));
+            //byte[] inputRGB = inputLB.getRGB();
+            //byte[] resultRGB = resultLB.getRGB();
+            //int offsetWidth = inputMap.Width * 4;
+            ////int offSrc = (startX + startY * inputMap.Width) * 4;
+            //byte baseColor = inputRGB[((startX + startY * inputMap.Width) * 4)+0];
 
-
+            //for (int i = 0; i < inputRGB.Length; i += 4) if (inputRGB[i + 1] == baseColor)
+            //{
+            //    if (checkBoxHeight.Checked) resultRGB[i + 1] = Convert.ToByte(textBoxValue.Text);
+            //    if (checkBoxTexture.Checked) resultRGB[i + 0] = (byte)listBoxTexture.SelectedIndex;
+            //}
         }
+    
 
         private void addAngle(int value)
         {

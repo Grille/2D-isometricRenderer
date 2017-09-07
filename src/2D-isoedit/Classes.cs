@@ -29,36 +29,15 @@ namespace program
     }
     class Texture
     {
-        private bool endColor;
-        private byte size;
-        private Color[] colorsZ;
-        public Texture(Color[] colors, bool endColor)
+        private string name;
+        private byte[] data;//[r,g,b,a,l]
+        public Texture(string name,byte[] input)
         {
-            this.endColor = endColor;
-            colorsZ = colors;
-            size = (byte)(colorsZ.Length);
-            if (endColor) size--;
+            this.name = name;
+            data = input;
         }
-
-        public void setColor(byte[] arrayRGB, int offset, byte height, byte maxHeight, float shadow)
-        {
-            if (endColor && height + 1 == maxHeight)
-            {
-                arrayRGB[offset + 0] = (byte)(colorsZ[size].B * shadow);
-                arrayRGB[offset + 1] = (byte)(colorsZ[size].G * shadow);
-                arrayRGB[offset + 2] = (byte)(colorsZ[size].R * shadow);
-                arrayRGB[offset + 3] = (byte)(colorsZ[size].A);
-            }
-            else
-            {
-                while (height >= size) height -= size;
-                arrayRGB[offset + 0] = (byte)(colorsZ[height].B * shadow);
-                arrayRGB[offset + 1] = (byte)(colorsZ[height].G * shadow);
-                arrayRGB[offset + 2] = (byte)(colorsZ[height].R * shadow);
-                arrayRGB[offset + 3] = (byte)(colorsZ[height].A);
-            }
-        }
-
+        public byte[] getData() { return data; }
+        public string getName() { return name; }
     }
     class ByteArray
     {

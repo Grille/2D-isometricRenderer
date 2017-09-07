@@ -51,7 +51,7 @@ namespace GrillesGameLibrary
             bmp.UnlockBits(bmpData);
             return bmp;
         }
-        public byte[] getRGB()
+        public byte[] getData()
         {
             return rgbValues;
         }

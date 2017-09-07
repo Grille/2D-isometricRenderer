@@ -34,9 +34,8 @@ namespace program
         Task renderTask;
 
         //Rendering Values
+        bool isRenering = false;
         byte heightExcess = 255;
-        byte[] shadowHeightMap;
-        byte[] shadowSmoothMap;
 
         //Rendering orientation
         int angle = 45;
@@ -44,7 +43,7 @@ namespace program
 
         //Editor Values
         bool curTextureEdit;
-        bool renderAllInTimer;
+        bool renderEditor;
         byte editValue = 1;
 
         public FormEditor()
@@ -52,5 +51,6 @@ namespace program
             InitializeComponent();
             init();
         }
+
     }
 }
