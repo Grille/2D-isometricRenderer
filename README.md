@@ -15,7 +15,8 @@ Run 2D-isoedit.exe in the bin folder<br>
 Load any heightmap<br>
 ## Heightmap format
 The green rgb channel is used for the height<br>
-G = 100 => height = 100px
+G = 100 => height = 100px<br>
+
 The blue rgb channel defines the used texture<br>
 List of Textures:<br>
   - 0 = grass<br>
