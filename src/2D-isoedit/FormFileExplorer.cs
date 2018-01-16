@@ -13,17 +13,22 @@ namespace program
     public partial class FormFileExplorer : Form
     {
         private string fullPath;
-        public FormFileExplorer()
+        public FormFileExplorer(string path)
         {
             InitializeComponent();
-            move("../input/");
+            move(path);
         }
         private void move(string path)
         {
-
+            int[] a = new int[]{3,4};
             textBoxDst.Text = fullPath = System.IO.Path.GetFullPath(path);
             listBoxExplorer.Items.Clear();
-            foreach (string dateien in Directory.GetFiles(path)) listBoxExplorer.Items.Add(System.IO.Path.GetFileName(dateien));
+            foreach (string dateien in Directory.GetFiles(path))
+            {
+                string item = (System.IO.Path.GetFileName(dateien));
+                //if (item.Split(new char[1]{'.'},1)[0]=="png")
+                    listBoxExplorer.Items.Add(item);
+            }
         }
         private void button1_Click(object sender, EventArgs e)
         {

@@ -28,3 +28,13 @@ C:\Users\Otto\Documents\GitHub\2D-isometricEditor v0.2.1\src\2D-isoedit\obj\x86\
 C:\Users\Otto\Documents\GitHub\2D-isometricEditor v0.2.1\src\2D-isoedit\obj\x86\Debug\program.FormFileExplorer.resources
 C:\Users\Otto\Documents\GitHub\2D-isometricEditor v0.2.1\src\2D-isoedit\obj\x86\Debug\program.Properties.Resources.resources
 C:\Users\Otto\Documents\GitHub\2D-isometricEditor v0.2.1\src\2D-isoedit\obj\x86\Debug\2D-isoedit.csproj.GenerateResource.Cache
+G:\projecte\2D-isometricEditor\src\2D-isoedit\bin\Debug\2D-isoedit.exe.config
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\2D-isoedit.exe
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\2D-isoedit.pdb
+G:\projecte\2D-isometricEditor\src\2D-isoedit\bin\Debug\2D-isoedit.exe
+G:\projecte\2D-isometricEditor\src\2D-isoedit\bin\Debug\2D-isoedit.pdb
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\2D-isoedit.csprojResolveAssemblyReference.cache
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\program.FormEditor.resources
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\program.FormFileExplorer.resources
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\program.Properties.Resources.resources
+G:\projecte\2D-isometricEditor\src\2D-isoedit\obj\x86\Debug\2D-isoedit.csproj.GenerateResource.Cache

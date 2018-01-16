@@ -9,37 +9,18 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Drawing.Drawing2D;
 
 using GrillesGameLibrary;
 namespace program
 {
-    //partial class hide { } //Hide Designer in VS 
-    public partial class FormEditor
+    public partial class FormEditor : Form
     {
         //Draw Rendered Images
-        private void pBTextureMap_Paint(object sender, PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
-            if (input.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
-            else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            RenderInfo curEdit;
-            if (curTextureEdit) curEdit = input;
-            else curEdit = input;
-            Rectangle dest = new Rectangle(
-                (int)input.MapPosX,
-                (int)input.MapPosY,
-                (int)(curEdit.Map.Width * input.MapSize),
-                (int)(curEdit.Map.Height * input.MapSize)
-                );
-            g.DrawImage(curEdit.Map, dest, new RectangleF(0, 0, curEdit.Map.Width, curEdit.Map.Height), GraphicsUnit.Pixel);
-            g.DrawRectangle(Pens.White, dest);
-            g.DrawString(curEdit.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
-
-        }
         private void pBRender_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            if (result.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+            if (result.MapSize < 1) g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             else g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             Rectangle dest = new Rectangle(
                 (int)(result.MapPosX - ((result.Map.Width) / 2 * result.MapSize)),
@@ -47,13 +28,15 @@ namespace program
                 (int)(result.Map.Width * result.MapSize),
                 (int)((result.Map.Height) * result.MapSize)
                 );
+            Rectangle windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
+            g.FillRectangle(new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15,15,30),LinearGradientMode.Vertical), windowRect);
             g.DrawImage(result.Map, dest, new RectangleF(0, 0, result.Map.Width, result.Map.Height), GraphicsUnit.Pixel);
             g.DrawRectangle(Pens.White, dest);
             g.DrawString(result.renderInfo, new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
         }
 
         //RenderLoop & AutoRotate
-        private void timer1_Tick(object sender, EventArgs e)
+        private void renderTimer_Tick(object sender, EventArgs e)
         {
             if (checkBoxPreAR.Checked)
             {
@@ -64,62 +47,7 @@ namespace program
                 Task thread = new Task(() => render(renderEditor));
                 thread.Start();
             }
-            pBEditorMap.Refresh();
             pBResult.Refresh();
-        }
-
-        private void pBEditorMap_MouseDown(object sender, MouseEventArgs e)
-        {
-            startMousePos = e.Location;
-        }
-        private void pBEditorMap_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Middle)
-            {
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                if (radioButtonEditM.Checked)
-                {
-                }
-                else
-                {
-                    draw(inputLB, startMousePos, e.Location);
-                    renderEditor = true;
-                }
-            }
-        }
-        private void pBEditorMap_MouseMove(object sender, MouseEventArgs e)
-        {
-            pBEditorMap.Focus();
-            //if (e.X > heightMapPosX && e.Y > heightMapPosY)
-            //{
-            if (e.Button == MouseButtons.Middle)
-            {
-                input.MapPosX -= (lastMousePos.X - e.X);
-                input.MapPosY -= (lastMousePos.Y - e.Y);
-                pBEditorMap.Refresh();
-            }
-            else if (e.Button == MouseButtons.Left)
-            {
-                if (radioButtonEditM.Checked)
-                {
-                    input.MapPosX -= (lastMousePos.X - e.X);
-                    input.MapPosY -= (lastMousePos.Y - e.Y);
-                    pBEditorMap.Refresh();
-                }
-                else
-                {
-                }
-            }
-            //}
-            lastMousePos = e.Location;
-        }
-        private void pBEditorMap_MouseWheel(object sender, MouseEventArgs e)
-        {
-            input.MapSize += (float)(input.MapSize * e.Delta) / 1000f;
-            input.MapPosX -= 1;
-            pBEditorMap.Refresh();
         }
 
         private void pBRender_MouseMove(object sender, MouseEventArgs e)
@@ -201,12 +129,17 @@ namespace program
         }
         private void bLoad_Click(object sender, EventArgs e)
         {
-            Form fileExplorer = new FormFileExplorer();
+            Form fileExplorer = new FormFileExplorer("../maps/");
             fileExplorer.Show();
             //inputLB = new LockBitmap(new Bitmap("../input/test_256x256.png"), false);
             //inputLB = new LockBitmap(new Bitmap("../input/test_512x512.png"), false);
             //render(true);
             //timer1.Enabled = true;
+        }
+        private void bLoadTexture_Click(object sender, EventArgs e)
+        {
+            Form fileExplorer = new FormFileExplorer("../textures/");
+            fileExplorer.Show();
         }
         public void load(string path)
         {
@@ -216,17 +149,6 @@ namespace program
             }
             render(true);
             timer1.Enabled = true;
-        }
-
-        //Input
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                editValue = (byte)Convert.ToInt16(textBoxValue.Text);
-                textBoxValue.Text = "" + editValue;
-            }
-            catch { textBoxValue.Text = "" + 0; }
         }
     }
 }

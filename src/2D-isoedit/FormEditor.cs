@@ -13,8 +13,8 @@ using GrillesGameLibrary;
 /// <summary>-</summary>
 namespace program
 {
-    
 
+    //[System.ComponentModel.DesignerCategory("code")]
     public partial class FormEditor : Form
     {
         //Bitmap
@@ -28,7 +28,7 @@ namespace program
         Point startMousePos;
 
         //setings
-        float cores = Environment.ProcessorCount;
+        float cores = (int)(Environment.ProcessorCount*1.5f);
 
         //Tasks
         Task renderTask;
@@ -51,6 +51,5 @@ namespace program
             InitializeComponent();
             init();
         }
-
     }
 }

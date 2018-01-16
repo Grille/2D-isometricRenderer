@@ -24,5 +24,6 @@ List of Textures:<br>
   - 2 = sand<br>
   - 3 = stone<br>
   - 4 = dark grass<br>
+  - 5 = water<br>
   
 The red and alpha rgb channels are ignored<br>

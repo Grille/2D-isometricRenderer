@@ -1,61 +1,32 @@
 {
-Name = grass
-EndColor = true
-Colors = 
-  {
-  (80, 100, 50),
-  (80, 105, 50),
-  (80, 100, 50)
-  }
-}
-{
-Name = sand
-Colors = 
-  {
-  (110, 100, 80)
-  }
-}
-{
-Name = dirt
-EndColor = true
-Colors = 
-  {
-  (80, 100, 50),
-  (80, 110, 50)
-  }
-}
-{
-Name = rock
-EndColor = true
-Colors = 
-  {
-  (150, 150, 150),
-  (140, 140, 160),
-  (140, 140, 150),
-  (110, 100, 120)
-  }
-}
-Name = tree
-EndColor = true
-Colors = 
-  {
-  (30, 70, 20),
-  (40, 90, 30)
-  }
-}
-Name = water
-EndColor = true
-Colors = 
-  {
-  (220, 220, 255),
-  (150, 150, 255)
-  }
-}
-Name = build
-EndColor = true
-Colors = 
-  {
-  (200, 200, 200),
-  (200, 100, 50)
-  }
+	Template{
+		bool EndColor = false;
+		int[] Colors = [[255,255, 255, 255]];//[loop,r,gh,b]
+
+	}ID=0;{//grass
+		EndColor = true
+		Colors = [[255,70,100,40]];
+	}ID=1;{//sand
+		Colors = [[255,110, 100, 80]];
+	}ID=2;{//dirt
+		Colors = [[255,80, 100, 50]];
+	}ID=3;{//rock
+		Colors = [[2,150,150,150], [6,130,130,130]];
+	}ID=4;{//tree
+		Colors = [[255,30,70,20]];
+	}ID=5;{//water
+		Colors = [[1,220,220,255][1,150,150,255]];
+	}ID=6;{//build
+		Colors = [[200, 200, 200],[200, 100, 50]];
+	}ID=7;{//build
+		Colors = [[200, 200, 200],[200, 100, 50]];
+	}ID=8;{//build
+		Colors = [[200, 200, 200],[200, 100, 50]];
+	}ID=9;{//build
+		Colors = [[200, 200, 200],[200, 100, 50]];
+	}ID=10;{//build
+		Colors = [[200, 200, 200],[200, 100, 50]];
+	}ID=11;{//build
+		Colors = [[200, 200, 200],[200, 100, 50]];
+	}
 }
