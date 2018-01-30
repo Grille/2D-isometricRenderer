@@ -5,7 +5,7 @@ using System.Text;
 
 using System.Drawing;
 
-namespace GrillesGameLibrary
+namespace GGL
 {
     class LockBitmap
     {
@@ -22,7 +22,7 @@ namespace GrillesGameLibrary
         public LockBitmap(Bitmap input, bool byValue)
         {
             Width = input.Width;
-            Height = input.Height;
+            Height = input.Height; 
 
             if (byValue) bmp = new Bitmap(input);
             else bmp = input;

@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-using GrillesGameLibrary;
+using GGL;
 namespace program
 {
     public partial class FormFileExplorer : Form

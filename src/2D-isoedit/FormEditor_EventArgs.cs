@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Drawing.Drawing2D;
 
-using GrillesGameLibrary;
+using GGL;
 namespace program
 {
     public partial class FormEditor : Form
@@ -42,12 +42,18 @@ namespace program
             {
                 addAngle(1);
             }
-            if (!isRenering)
+            if (!isRenering && viewChange)
             {
-                Task thread = new Task(() => render(renderEditor));
-                thread.Start();
+                Console.WriteLine("render");
+                Task renderThread = new Task(() => render(renderEditor));
+                renderThread.Start();
+                viewChange = false;
             }
-            pBResult.Refresh();
+            if (drawImage)
+            {
+                pBResult.Refresh();
+                drawImage = false;
+            }
         }
 
         private void pBRender_MouseMove(object sender, MouseEventArgs e)
@@ -59,6 +65,7 @@ namespace program
             {
                 result.MapPosX -= (lastMousePos.X - e.X);
                 result.MapPosY -= (lastMousePos.Y - e.Y);
+                pBResult.Refresh();
             }
             else if (e.Button == MouseButtons.Left)
             {
@@ -90,14 +97,17 @@ namespace program
         private void bRotL_Click(object sender, EventArgs e)
         {
             addAngle(-45);
+            viewChange = true;
         }
         private void bRotR_Click(object sender, EventArgs e)
         {
             addAngle(45);
+            viewChange = true;
         }
         private void bRot_Click(object sender, EventArgs e)
         {
             angle = 0;
+            viewChange = true;
         }
 
         private void bClose_Click(object sender, EventArgs e)
@@ -140,6 +150,7 @@ namespace program
         {
             Form fileExplorer = new FormFileExplorer("../textures/");
             fileExplorer.Show();
+            viewChange = true;
         }
         public void load(string path)
         {
@@ -147,8 +158,20 @@ namespace program
             {
                 inputLB = new LockBitmap(new Bitmap(bmpTemp), false);
             }
-            render(true);
             timer1.Enabled = true;
+            viewChange = true;
+        }
+        private void radioButtonShadowHigh_CheckedChanged(object sender, EventArgs e)
+        {
+            viewChange = true;
+        }
+        private void radioButtonShadowLow_CheckedChanged(object sender, EventArgs e)
+        {
+            viewChange = true;
+        }
+        private void radioButtonShadowOf_CheckedChanged(object sender, EventArgs e)
+        {
+            viewChange = true;
         }
     }
 }

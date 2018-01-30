@@ -29,32 +29,12 @@ namespace program
     }
     class Texture
     {
-        private string name;
-        private byte[] data;//[r,g,b,a,l]
+        public string Name;
+        public byte[] Data;//[r,g,b,a,l]
         public Texture(string name,byte[] input)
         {
-            this.name = name;
-            data = input;
-        }
-        public byte[] getData() { return data; }
-        public string getName() { return name; }
-    }
-    class ByteArray
-    {
-        public int Width;
-        public int Height;
-        public int Offset;
-        private byte[] values;
-        public ByteArray(int Width, int Height, int Offset)
-        {
-            this.Width = Width;
-            this.Height = Height;
-            this.Offset = Offset;
-            values = new byte[Width * Height * Offset];
-        }
-        public byte[] getValue()
-        {
-            return values;
+            this.Name = name;
+            Data = input;
         }
     }
 }

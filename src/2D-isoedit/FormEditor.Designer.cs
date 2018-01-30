@@ -238,6 +238,7 @@
             this.radioButtonShadowLow.TabIndex = 27;
             this.radioButtonShadowLow.Text = "low";
             this.radioButtonShadowLow.UseVisualStyleBackColor = true;
+            this.radioButtonShadowLow.CheckedChanged += new System.EventHandler(this.radioButtonShadowLow_CheckedChanged);
             // 
             // radioButtonShadowOf
             // 
@@ -251,6 +252,7 @@
             this.radioButtonShadowOf.TabIndex = 28;
             this.radioButtonShadowOf.Text = "of";
             this.radioButtonShadowOf.UseVisualStyleBackColor = true;
+            this.radioButtonShadowOf.CheckedChanged += new System.EventHandler(this.radioButtonShadowOf_CheckedChanged);
             // 
             // radioButtonShadowHigh
             // 
@@ -266,6 +268,7 @@
             this.radioButtonShadowHigh.TabStop = true;
             this.radioButtonShadowHigh.Text = "high";
             this.radioButtonShadowHigh.UseVisualStyleBackColor = true;
+            this.radioButtonShadowHigh.CheckedChanged += new System.EventHandler(this.radioButtonShadowHigh_CheckedChanged);
             // 
             // shapeContainer2
             // 
@@ -417,6 +420,7 @@
             // bLoadTexture
             // 
             this.bLoadTexture.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
+            this.bLoadTexture.Enabled = false;
             this.bLoadTexture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bLoadTexture.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bLoadTexture.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
@@ -432,6 +436,7 @@
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
+            this.button3.Enabled = false;
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));

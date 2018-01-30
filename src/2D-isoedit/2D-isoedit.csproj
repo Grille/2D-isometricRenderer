@@ -53,18 +53,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes.cs" />
-    <Compile Include="FormEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ByteStream.cs" />
+    <Compile Include="FormEditor.cs" />
     <Compile Include="FormEditor.Designer.cs">
       <DependentUpon>FormEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormEditor_EventArgs.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormEditor_Logik.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="FormEditor_EventArgs.cs" />
+    <Compile Include="FormEditor_Logik.cs" />
     <Compile Include="FormFileExplorer.cs">
       <SubType>Form</SubType>
     </Compile>

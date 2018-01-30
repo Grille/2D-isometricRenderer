@@ -10,7 +10,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using GrillesGameLibrary;
+using GGL;
+using GGL.IO;
+
 namespace program
 {
     //partial class hide { } //Hide Designer in VS 
@@ -18,29 +20,53 @@ namespace program
     {
         public void init()
         {
+            Console.WriteLine("init\n{");
             input.init();
             result.init();
+            Console.WriteLine(" load Texture");
+            ByteStream bs = new ByteStream("../textures/default.tex");
+            bs.ResetIndex();
+            int length = bs.ReadInt();
+            textures = new Texture[255];
+            for (int i = 0; i < 255; i++)
+            {
+                if (i<length)textures[i] = new Texture(bs.ReadString(), bs.ReadByteArray());
+                else textures[i] = new Texture("-", new byte[] { 6, 0, 4, 150,0,0,255, 4,150,150,0,255, 4,0,150,0,255, 4,0,150,150,255, 4,0,0,150,255, 4,150,0,150,255 });
+                //textures[i].Data = new byte[] { 1, 0, 8,70,100, 40, 255, 8, 70, 100, 40, 255 };//[bs.ReadByteArray();
+            }
 
 
-            textures = new Texture[] {
-            new Texture("grass", new byte[] {1,0, 255,70,100,40,255 }),
-            new Texture("dirt", new byte[] {1,0, 255,110,100,80,255 }),
-            new Texture("sand", new byte[] {2,1, 255,80,100,50,255, 1,80,110,50,255 }),
-            new Texture("stone", new byte[] {2,0, 2,150,150,150,255, 6,130,130,130,255}),
-            new Texture("dark grass", new byte[] {2,1, 1,30,70,20,255, 1,40,90,30,255}),
-            new Texture("water", new byte[] {2,0, 1,220,220,255,255, 1,150,150,255,255}),
-            new Texture("grass", new byte[] {2,1, 1,200,200,200,255, 1,200,100,50,255}),
-            new Texture("wall 1", new byte[] {1,0, 255,200,200,200,255}),
-            new Texture("wall 2", new byte[] {1,0, 255,150,150,150,255}),
-            new Texture("wall 3", new byte[] {2,0, 4,100,100,100,255, 4,75,75,75,255}),
-            new Texture("wall 4", new byte[] {2,0, 6,120,120,120,255, 2,150,0,0,255}),
-            new Texture("window 1", new byte[] {3,0, 3,200,200,200,255, 2,50,50,100,255, 255,200,200,200,255}),
-            };
+            //textures = new Texture[] {
+            //new Texture("grass", new byte[] {1,0, 255,70,100,40,255 }),
+            //new Texture("dirt", new byte[] {1,0, 255,110,100,80,255 }),
+            //new Texture("sand", new byte[] {2,1, 255,80,100,50,255, 1,80,110,50,255 }),
+            //new Texture("stone", new byte[] {2,0, 2,150,150,150,255, 6,130,130,130,255}),
+            //new Texture("dark grass", new byte[] {2,1, 1,30,70,20,255, 1,40,90,30,255}),
+            //new Texture("water", new byte[] {2,0, 1,220,220,255,255, 1,150,150,255,255}),
+            //new Texture("grass", new byte[] {2,1, 1,200,200,200,255, 1,200,100,50,255}),
+            //new Texture("wall 1", new byte[] {1,0, 255,200,200,200,255}),
+            //new Texture("wall 2", new byte[] {1,0, 255,150,150,150,255}),
+            //new Texture("wall 3", new byte[] {2,0, 4,100,100,100,255, 4,75,75,75,255}),
+            //new Texture("wall 4", new byte[] {2,0, 6,120,120,120,255, 2,150,0,0,255}),
+            //new Texture("window 1", new byte[] {3,0, 3,200,200,200,255, 2,50,50,100,255, 255,200,200,200,255}),
+            //};
 
+            //ByteStream bs = new ByteStream();
+            //bs.ResetIndex();
+            //bs.WriteInt(textures.Length);
+            //for (int i = 0; i < textures.Length; i++)
+            //{
+            //    bs.WriteString(textures[i].Name);
+            //    bs.WriteByteArray(textures[i].Data);
+            //}
+            //bs.Save("Texture.tex");
+
+            Console.WriteLine(" load Autosave");
             load("../maps/autosave.png");
             //255 
 
             //InitializeComponent();
+            Console.WriteLine("}");
         }
         
         //Prepare the heightMap call rotate and shadow    
@@ -137,8 +163,6 @@ namespace program
             byte[] inputRGB = inputLB.getData();
             byte[] resultRGB = resultLB.getData();
 
-            int renderPixel = 0;
-
             if (cores == 1)
                 elevate(inputLB, resultLB, 0, 1);
             else
@@ -175,7 +199,7 @@ namespace program
                             if (inputRGB[offSrc + 1] > 0)
                             {
                                 //get colorList & find color pos
-                                byte[] refColor = textures[inputRGB[offSrc]].getData();
+                                byte[] refColor = textures[inputRGB[offSrc]].Data;
                                 int colorSize = refColor[0] - refColor[1];
                                 int colorStart = 0;
                                 int colorListPos = -1;
@@ -205,14 +229,14 @@ namespace program
                                                 //draw pixel
                                                 float shadow = 1f;
                                                 if (iz < inputRGB[offSrc + 2]+1) shadow = 0.75f;
-                                                //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
-                                                //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
-                                                //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
-                                                //resultRGB[offDstZ + 3] = (byte)(255);//a
-                                                resultRGB[offDstZ + 0] = (byte)(refColor[5 + colorListPos * 5] * shadow);//b
-                                                resultRGB[offDstZ + 1] = (byte)(refColor[4 + colorListPos * 5] * shadow);//g
-                                                resultRGB[offDstZ + 2] = (byte)(refColor[3 + colorListPos * 5] * shadow);//r
-                                                resultRGB[offDstZ + 3] = (byte)(refColor[6 + colorListPos * 5]);//a
+                                                    //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
+                                                    //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
+                                                    //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
+                                                    //resultRGB[offDstZ + 3] = (byte)(255);//a
+                                                    resultRGB[offDstZ + 0] = (byte)(refColor[5 + colorListPos * 5] * shadow);//b
+                                                    resultRGB[offDstZ + 1] = (byte)(refColor[4 + colorListPos * 5] * shadow);//g
+                                                    resultRGB[offDstZ + 2] = (byte)(refColor[3 + colorListPos * 5] * shadow);//r
+                                                    resultRGB[offDstZ + 3] = (byte)(refColor[6 + colorListPos * 5]);//a
                                             }
                                             else
                                             {
@@ -243,11 +267,13 @@ namespace program
             isRenering = true;
             renderResult(prepareMap(this.inputLB));
             isRenering = false;
+            drawImage = true;
             result.renderInfo = ("RenderTime: " + now.ElapsedMilliseconds + "\nFPS: " + 1000 / (now.ElapsedMilliseconds + 0.1f) + "\nTasks: " + (int)cores);
         }
 
         private void addAngle(int value)
         {
+            viewChange = true;
             angle += value;
             if (angle <= 0) angle += 360;
             else if (angle >= 360) angle -= 360;
@@ -258,6 +284,10 @@ namespace program
             if (tilt < 0.2) tilt = 0.2f;
             else if (tilt > 0.8) tilt = 0.8f;
             tilt = (int)(tilt * 100)/100f;
+        }
+        private void Refresh()
+        {
+            viewChange = true;
         }
     }
 }
