@@ -36,7 +36,7 @@
             this.bRotL = new System.Windows.Forms.Button();
             this.bRotR = new System.Windows.Forms.Button();
             this.bNew = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.renderTimer = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.bRot = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -160,10 +160,10 @@
             this.bNew.UseVisualStyleBackColor = false;
             this.bNew.Click += new System.EventHandler(this.bNew_Click);
             // 
-            // timer1
+            // renderTimer
             // 
-            this.timer1.Interval = 17;
-            this.timer1.Tick += new System.EventHandler(this.renderTimer_Tick);
+            this.renderTimer.Interval = 17;
+            this.renderTimer.Tick += new System.EventHandler(this.renderTimer_Tick);
             // 
             // panel1
             // 
@@ -403,7 +403,7 @@
         private System.Windows.Forms.Button bRotL;
         private System.Windows.Forms.Button bRotR;
         private System.Windows.Forms.Button bNew;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer renderTimer;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RadioButton radioButtonPreR;
         private System.Windows.Forms.RadioButton radioButtonPreM;

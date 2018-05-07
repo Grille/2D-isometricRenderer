@@ -32,8 +32,10 @@
             this.listBoxExplorer = new System.Windows.Forms.ListBox();
             this.bClose = new System.Windows.Forms.Button();
             this.bLoad = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.buttonEnd = new System.Windows.Forms.Button();
+            this.buttonOk = new System.Windows.Forms.Button();
+            this.buttonUp = new System.Windows.Forms.Button();
+            this.listBox = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // textBoxDst
@@ -41,15 +43,16 @@
             this.textBoxDst.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxDst.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(44)))));
-            this.textBoxDst.Enabled = false;
+            this.textBoxDst.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxDst.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.textBoxDst.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.textBoxDst.Location = new System.Drawing.Point(12, 9);
+            this.textBoxDst.Location = new System.Drawing.Point(47, 9);
             this.textBoxDst.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxDst.Name = "textBoxDst";
-            this.textBoxDst.Size = new System.Drawing.Size(657, 23);
+            this.textBoxDst.Size = new System.Drawing.Size(622, 23);
             this.textBoxDst.TabIndex = 26;
             this.textBoxDst.Text = "1";
+            this.textBoxDst.TextChanged += new System.EventHandler(this.textBoxDst_TextChanged);
             // 
             // listBoxExplorer
             // 
@@ -57,15 +60,16 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listBoxExplorer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(44)))));
+            this.listBoxExplorer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listBoxExplorer.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.listBoxExplorer.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
             this.listBoxExplorer.FormattingEnabled = true;
             this.listBoxExplorer.IntegralHeight = false;
             this.listBoxExplorer.ItemHeight = 15;
-            this.listBoxExplorer.Location = new System.Drawing.Point(12, 42);
+            this.listBoxExplorer.Location = new System.Drawing.Point(147, 42);
             this.listBoxExplorer.Margin = new System.Windows.Forms.Padding(0);
             this.listBoxExplorer.Name = "listBoxExplorer";
-            this.listBoxExplorer.Size = new System.Drawing.Size(657, 319);
+            this.listBoxExplorer.Size = new System.Drawing.Size(522, 319);
             this.listBoxExplorer.TabIndex = 28;
             // 
             // bClose
@@ -95,35 +99,68 @@
             this.bLoad.Text = "Load";
             this.bLoad.UseVisualStyleBackColor = false;
             // 
-            // button1
+            // buttonEnd
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.button1.Location = new System.Drawing.Point(569, 370);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(100, 30);
-            this.button1.TabIndex = 31;
-            this.button1.Text = "Cancel";
-            this.button1.UseVisualStyleBackColor = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.buttonEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEnd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
+            this.buttonEnd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonEnd.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonEnd.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.buttonEnd.Location = new System.Drawing.Point(569, 370);
+            this.buttonEnd.Name = "buttonEnd";
+            this.buttonEnd.Size = new System.Drawing.Size(100, 30);
+            this.buttonEnd.TabIndex = 31;
+            this.buttonEnd.Text = "Cancel";
+            this.buttonEnd.UseVisualStyleBackColor = false;
+            this.buttonEnd.Click += new System.EventHandler(this.button1_Click);
             // 
-            // button2
+            // buttonOk
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.button2.Location = new System.Drawing.Point(463, 370);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(100, 30);
-            this.button2.TabIndex = 32;
-            this.button2.Text = "Load";
-            this.button2.UseVisualStyleBackColor = false;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
+            this.buttonOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonOk.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonOk.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.buttonOk.Location = new System.Drawing.Point(463, 370);
+            this.buttonOk.Name = "buttonOk";
+            this.buttonOk.Size = new System.Drawing.Size(100, 30);
+            this.buttonOk.TabIndex = 32;
+            this.buttonOk.Text = "Load";
+            this.buttonOk.UseVisualStyleBackColor = false;
+            this.buttonOk.Click += new System.EventHandler(this.buttonOk_Click);
+            // 
+            // buttonUp
+            // 
+            this.buttonUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonUp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
+            this.buttonUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonUp.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonUp.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.buttonUp.Location = new System.Drawing.Point(12, 9);
+            this.buttonUp.Name = "buttonUp";
+            this.buttonUp.Size = new System.Drawing.Size(32, 23);
+            this.buttonUp.TabIndex = 33;
+            this.buttonUp.Text = "^";
+            this.buttonUp.UseVisualStyleBackColor = false;
+            this.buttonUp.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // listBox
+            // 
+            this.listBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(44)))));
+            this.listBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.listBox.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.listBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.listBox.FormattingEnabled = true;
+            this.listBox.IntegralHeight = false;
+            this.listBox.ItemHeight = 15;
+            this.listBox.Location = new System.Drawing.Point(12, 42);
+            this.listBox.Margin = new System.Windows.Forms.Padding(0);
+            this.listBox.Name = "listBox";
+            this.listBox.Size = new System.Drawing.Size(125, 319);
+            this.listBox.TabIndex = 34;
             // 
             // FormFileExplorer
             // 
@@ -131,8 +168,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(678, 412);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.listBox);
+            this.Controls.Add(this.buttonUp);
+            this.Controls.Add(this.buttonOk);
+            this.Controls.Add(this.buttonEnd);
             this.Controls.Add(this.bClose);
             this.Controls.Add(this.bLoad);
             this.Controls.Add(this.listBoxExplorer);
@@ -151,7 +190,9 @@
         private System.Windows.Forms.ListBox listBoxExplorer;
         private System.Windows.Forms.Button bClose;
         private System.Windows.Forms.Button bLoad;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button buttonEnd;
+        private System.Windows.Forms.Button buttonOk;
+        private System.Windows.Forms.Button buttonUp;
+        private System.Windows.Forms.ListBox listBox;
     }
 }

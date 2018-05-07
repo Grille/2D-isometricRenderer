@@ -37,13 +37,26 @@ namespace program
             this.Close();        
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonOk_Click(object sender, EventArgs e)
         {
             if (mode==0)
-            Program.MainForm.LoadMap(fullPath + (string)listBoxExplorer.SelectedItem);
+            Program.MainForm.renderer.LoadMap(fullPath + (string)listBoxExplorer.SelectedItem);
             else
-            Program.MainForm.LoadTexture(fullPath + (string)listBoxExplorer.SelectedItem);
+            Program.MainForm.renderer.LoadTexture(fullPath + (string)listBoxExplorer.SelectedItem);
+            Program.MainForm.Repainting = true;
+
             this.Close();
+        }
+
+        private void textBoxDst_TextChanged(object sender, EventArgs e)
+        {
+            if (Directory.Exists(textBoxDst.Text))
+            move(textBoxDst.Text);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            move(Path.GetPathRoot(fullPath));
         }
     }
 }

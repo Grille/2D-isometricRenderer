@@ -10,24 +10,7 @@ using System.IO;
 /// <summary>-</summary>
 namespace program
 {
-
-    struct RenderInfo
-    {
-        public Bitmap Map;
-        public float MapPosX;
-        public float MapPosY;
-        public float MapSize;
-        public string renderInfo;
-        public void init()
-        {
-            Map = new Bitmap(64, 64);
-            MapPosX = 300 / 2 - 32;
-            MapPosY = 300 / 2 - 32;
-
-            MapSize = 1;
-        }
-    }
-    class Texture
+    public class Texture
     {
         public string Name;
         public byte[] Data;//[r,g,b,a,l]
