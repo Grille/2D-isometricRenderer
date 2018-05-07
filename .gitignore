@@ -1,0 +1,5 @@
+.vs
+2D-isoedit/bin
+2D-isoedit/output
+2D-isoedit/obj
+*.csproj.user
