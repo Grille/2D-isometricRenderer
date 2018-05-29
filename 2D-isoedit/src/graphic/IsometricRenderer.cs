@@ -30,7 +30,7 @@ namespace program
         //settings
         int shadowQuali = 1;
 
-        int angle = 45;
+        float angle = 45;
 
         byte heightExcess = 255;
 
@@ -253,9 +253,13 @@ namespace program
             //result.renderInfo = ("RenderTime: " + now.ElapsedMilliseconds + "\nFPS: " + 1000 / (now.ElapsedMilliseconds + 0.1f) + "\nTasks: " + (int)cores);
         }
 
-        public void addAngle(int value)
+        public void AddAngle(float value)
         {
-            angle += value;
+            SetAngle(angle + value);
+        }
+        public void SetAngle(float value)
+        {
+            angle = value;
             if (angle <= 0) angle += 360;
             else if (angle >= 360) angle -= 360;
         }

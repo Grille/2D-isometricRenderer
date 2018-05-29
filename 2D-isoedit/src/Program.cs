@@ -15,6 +15,7 @@ namespace program
         static void Main()
         {
             //Application.EnableVisualStyles();
+            
             Application.Run(MainForm);
         }
     }

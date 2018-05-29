@@ -66,9 +66,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pBResult.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(25)))), ((int)(((byte)(45)))));
             this.pBResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pBResult.Location = new System.Drawing.Point(3, 38);
+            this.pBResult.Location = new System.Drawing.Point(3, 41);
             this.pBResult.Name = "pBResult";
-            this.pBResult.Size = new System.Drawing.Size(1192, 417);
+            this.pBResult.Size = new System.Drawing.Size(1192, 414);
             this.pBResult.TabIndex = 3;
             this.pBResult.TabStop = false;
             this.pBResult.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
@@ -383,6 +383,7 @@
             this.MinimumSize = new System.Drawing.Size(1210, 530);
             this.Name = "FormEditor";
             this.Text = "2D isoedit";
+            this.Resize += new System.EventHandler(this.FormEditor_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pBResult)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);

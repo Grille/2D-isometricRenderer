@@ -22,7 +22,6 @@ namespace program
         //Graphic
         public IsometricRenderer renderer;
         private Bitmap result;
-
         //Rendering Values
         public bool Repainting = false;
         private bool resultRedy = false;
@@ -40,6 +39,8 @@ namespace program
         //Editor Values
         bool curTextureEdit;
 
+        float camPosX, camPosY, camScale = 1;
+
         public FormEditor()
         {
             Console.WriteLine("build");
@@ -53,14 +54,16 @@ namespace program
         //Draw rendered image
         private void pBRender_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
+
+    Graphics g = e.Graphics;
             if (result == null) return;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
             Rectangle windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
             g.FillRectangle(new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical), windowRect);
-            int drawPosX = -result.Width / 2 + Width / 2, drawPosY = -255 - (result.Height - 255) / 2 + Height / 2;
+            float drawPosX = ((-camPosX) * camScale) + Width / 2 - (result.Width/2)*camScale;
+            float drawPosY = ((-camPosY) * camScale) + Height / 2-255*camScale - ((result.Height-255) / 2) * camScale;
             g.DrawImage(result,
-                new RectangleF(drawPosX, drawPosY, result.Width, result.Height),
+                new RectangleF(drawPosX, drawPosY, result.Width * camScale, result.Height * camScale),
                 new RectangleF(0, 0, result.Width, result.Height), GraphicsUnit.Pixel);
             g.DrawString("" + renderer.RenderTime + "ms", new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
         }
@@ -76,7 +79,7 @@ namespace program
         {
             if (checkBoxPreAR.Checked)
             {
-                renderer.addAngle(1);
+                renderer.AddAngle(1);
                 Repainting = true;
             }
             if (!renderer.IsRenering && Repainting)
@@ -108,16 +111,16 @@ namespace program
             {
                 if (radioButtonPreM.Checked)
                 {
-                    //result.MapPosX -= (lastMousePos.X - e.X);
-                    //result.MapPosY -= (lastMousePos.Y - e.Y);
+                    camPosX += (lastMousePos.X - e.X)/camScale;
+                    camPosY += (lastMousePos.Y - e.Y)/camScale;
+
+                    //Render();
                 }
                 else if (radioButtonPreR.Checked)
                 {
-                    renderer.addAngle(lastMousePos.X - e.X);
-                    //addTilt(-(lastMousePos.Y - e.Y));
+                    renderer.AddAngle(lastMousePos.X - e.X);
                     lastMousePos = e.Location;
-
-                    Render();
+                    Repainting = true;
                 }
                 pBResult.Refresh();
             }
@@ -126,24 +129,38 @@ namespace program
         }
         private void pBRender_MouseWheel(object sender, MouseEventArgs e)
         {
-            //result.MapSize += (float)(result.MapSize * e.Delta) / 1000f;
+            
+            float posX = -camPosX + (e.X - Width / 2) / camScale;
+            float posY = -camPosY + (e.Y - Height / 2) / camScale;
+
+            
+            camScale += (e.Delta / 500f) * camScale;
+
+            if (camScale < 0.1) camScale = 0.1f;
+            else if (camScale > 4f) camScale = 4f;
+
+            
+            camPosX += (camPosX - (-posX + (Width / 2 * (e.X / (float)Width * 2 - 1)) / camScale));
+            camPosY += (camPosY - (-posY + (Height / 2 * (e.Y / (float)Height * 2 - 1)) / camScale));
+            
             pBResult.Refresh();
         }
 
         //Buttons
         private void bRotL_Click(object sender, EventArgs e)
         {
-            renderer.addAngle(-45);
+            renderer.AddAngle(-45);
             Repainting = true;
         }
         private void bRotR_Click(object sender, EventArgs e)
         {
-            renderer.addAngle(45);
+            renderer.AddAngle(45);
             Repainting = true;
         }
         private void bRot_Click(object sender, EventArgs e)
         {
             //angle = 0;
+            renderer.SetAngle(0);
             Repainting = true;
         }
 
@@ -188,6 +205,12 @@ namespace program
         {
             Repainting = true;
         }
+
+        private void FormEditor_Resize(object sender, EventArgs e)
+        {
+            pBResult.Refresh();
+        }
+
         private void radioButtonShadowLow_CheckedChanged(object sender, EventArgs e)
         {
             Repainting = true;
