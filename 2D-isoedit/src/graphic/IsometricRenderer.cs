@@ -28,7 +28,7 @@ namespace program
 
         public int RenderTime;
         //settings
-        int shadowQuali = 1;
+        public int ShadowQuality = 1;
 
         float angle = 45;
 
@@ -36,7 +36,7 @@ namespace program
 
         private bool isRenering = false;
 
-        public bool IsRenering
+        public bool IsRendering
         {
             get
             {
@@ -71,7 +71,7 @@ namespace program
                 for (int i = 0; i < cores; i++) thread[i].Wait();
             }
 
-            shadows(resultLB, shadowQuali);
+            shadows(resultLB, ShadowQuality);
 
             return resultLB;
         }
@@ -112,6 +112,7 @@ namespace program
         //add shadows
         private void shadows(LockBitmap resultLB, int resulution)
         {
+            if (resulution == 0) return;
             byte[] resultRGB = resultLB.getData();
             int width = resultLB.Width, height = resultLB.Height;
             for (int iy = 0; iy < (int)(height); iy++)//y 0 to 1

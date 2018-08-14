@@ -82,7 +82,7 @@ namespace program
                 renderer.AddAngle(1);
                 Repainting = true;
             }
-            if (!renderer.IsRenering && Repainting)
+            if (!renderer.IsRendering && Repainting)
             {
                 renderTask = new Task(() => Render());
                 renderTask.Start();
@@ -103,8 +103,8 @@ namespace program
             //{
             if (e.Button == MouseButtons.Middle)
             {
-                //result.MapPosX -= (lastMousePos.X - e.X);
-                //result.MapPosY -= (lastMousePos.Y - e.Y);
+                camPosX += (lastMousePos.X - e.X) / camScale;
+                camPosY += (lastMousePos.Y - e.Y) / camScale;
                 pBResult.Refresh();
             }
             else if (e.Button == MouseButtons.Left)
@@ -113,16 +113,21 @@ namespace program
                 {
                     camPosX += (lastMousePos.X - e.X)/camScale;
                     camPosY += (lastMousePos.Y - e.Y)/camScale;
-
+                    pBResult.Refresh();
                     //Render();
                 }
                 else if (radioButtonPreR.Checked)
                 {
-                    renderer.AddAngle(lastMousePos.X - e.X);
-                    lastMousePos = e.Location;
+                    float curPosX = e.X - Width / 2 + camPosX * camScale, curPosY = (e.Y - Height / 2 + camPosY * camScale);
+                    float lastPosX = lastMousePos.X - Width / 2 + camPosX * camScale, lastPosY = (lastMousePos.Y - Height / 2 + camPosY * camScale);
+
+                    float curAngle = (float)(Math.Atan2(curPosY*2, curPosX) * (180 / Math.PI));
+                    float lastAngle = (float)(Math.Atan2(lastPosY*2, lastPosX) * (180 / Math.PI));
+
+                    renderer.AddAngle(curAngle- lastAngle);
                     Repainting = true;
                 }
-                pBResult.Refresh();
+                //pBResult.Refresh();
             }
             //}
             lastMousePos = e.Location;
@@ -203,6 +208,7 @@ namespace program
         }
         private void radioButtonShadowHigh_CheckedChanged(object sender, EventArgs e)
         {
+            renderer.ShadowQuality = 1;
             Repainting = true;
         }
 
@@ -213,10 +219,12 @@ namespace program
 
         private void radioButtonShadowLow_CheckedChanged(object sender, EventArgs e)
         {
+            renderer.ShadowQuality = 3;
             Repainting = true;
         }
         private void radioButtonShadowOf_CheckedChanged(object sender, EventArgs e)
         {
+            renderer.ShadowQuality = 0;
             Repainting = true;
         }
         #endregion
