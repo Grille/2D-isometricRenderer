@@ -12,25 +12,40 @@ namespace program
 {
     public partial class FormFileExplorer : Form
     {
+        public event FileSystemEventHandler FileSelectet;
         private string fullPath;
-        private byte mode;
-        public FormFileExplorer(string path,byte mode)
+        public FormFileExplorer(string path)
         {
             InitializeComponent();
-            this.mode = mode;
             move(path);
         }
         private void move(string path)
         {
             int[] a = new int[]{3,4};
-            textBoxDst.Text = fullPath = System.IO.Path.GetFullPath(path);
+            if (path==null||!Directory.Exists(Path.GetFullPath(path))) return;
+            textBoxDst.Text = fullPath = Path.GetFullPath(path);
+
             listBoxExplorer.Items.Clear();
-            foreach (string dateien in Directory.GetFiles(path))
+            listBoxExplorer.Items.Add("...");
+            try
             {
-                string item = (System.IO.Path.GetFileName(dateien));
-                //if (item.Split(new char[1]{'.'},1)[0]=="png")
+                foreach (string dateien in Directory.GetDirectories(path))
+                {
+
+                    string item = '<' + (Path.GetFileName(dateien)) + '>';
+                    //if (item.Split(new char[1]{'.'},1)[0]=="png")
                     listBoxExplorer.Items.Add(item);
+
+                }
+                foreach (string dateien in Directory.GetFiles(path))
+                {
+
+                    string item = (Path.GetFileName(dateien));
+                    //if (item.Split(new char[1]{'.'},1)[0]=="png")
+                    listBoxExplorer.Items.Add(item);
+                }
             }
+            catch { }
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -39,13 +54,7 @@ namespace program
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
-            if (mode==0)
-            Program.MainForm.renderer.LoadMap(fullPath + (string)listBoxExplorer.SelectedItem);
-            else
-            Program.MainForm.renderer.LoadTexture(fullPath + (string)listBoxExplorer.SelectedItem);
-            Program.MainForm.Repainting = true;
-
-            this.Close();
+            itemSelectet();
         }
 
         private void textBoxDst_TextChanged(object sender, EventArgs e)
@@ -57,6 +66,35 @@ namespace program
         private void button3_Click(object sender, EventArgs e)
         {
             move(Path.GetPathRoot(fullPath));
+        }
+
+        private void listBoxExplorer_DoubleClick(object sender, EventArgs e)
+        {
+            itemSelectet();
+        }
+        private void itemSelectet()
+        {
+            string item = (string)listBoxExplorer.SelectedItem;
+            if (item == "...")
+            {
+                move(Path.GetDirectoryName(fullPath.TrimEnd('\\')));
+            }
+            else if (item[0] == '<')
+            {
+                move(fullPath.TrimEnd('\\') + '\\'+ item.Trim(new char[] { '<', '>' }));
+            }
+            else
+            {
+                string path = Path.GetDirectoryName(fullPath.TrimEnd('\\'));
+                FileSelectet?.Invoke(this, new FileSystemEventArgs(WatcherChangeTypes.All, fullPath, item));
+                this.Close();
+            }
+        }
+
+        private void listBoxExplorer_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) itemSelectet();
+            else if (e.KeyCode == Keys.Back) move(Path.GetDirectoryName(fullPath.TrimEnd('\\')));
         }
     }
 }

@@ -198,12 +198,26 @@ namespace program
         }
         private void bLoad_Click(object sender, EventArgs e)
         {
-            Form fileExplorer = new FormFileExplorer("../maps/", 0);
+            var fileExplorer = new FormFileExplorer("../maps/");
+            fileExplorer.FileSelectet += new FileSystemEventHandler(
+                (object fssender, FileSystemEventArgs fse) =>
+                {
+                    Program.MainForm.renderer.LoadMap(fse.FullPath);
+                    Program.MainForm.Repainting = true;
+                }
+                );
             fileExplorer.Show();
         }
         private void bLoadTexture_Click(object sender, EventArgs e)
         {
-            Form fileExplorer = new FormFileExplorer("../textures/", 1);
+            var fileExplorer = new FormFileExplorer("../textures/");
+            fileExplorer.FileSelectet += new FileSystemEventHandler(
+                (object fssender, FileSystemEventArgs fse) =>
+                {
+                    Program.MainForm.renderer.LoadTexture(fse.FullPath);
+                    Program.MainForm.Repainting = true;
+                }
+                );
             fileExplorer.Show();
         }
         private void radioButtonShadowHigh_CheckedChanged(object sender, EventArgs e)

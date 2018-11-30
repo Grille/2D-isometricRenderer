@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEditor));
             this.pBResult = new System.Windows.Forms.PictureBox();
             this.bExport = new System.Windows.Forms.Button();
             this.bClose = new System.Windows.Forms.Button();
@@ -68,7 +69,7 @@
             this.pBResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pBResult.Location = new System.Drawing.Point(3, 41);
             this.pBResult.Name = "pBResult";
-            this.pBResult.Size = new System.Drawing.Size(1192, 414);
+            this.pBResult.Size = new System.Drawing.Size(632, 448);
             this.pBResult.TabIndex = 3;
             this.pBResult.TabStop = false;
             this.pBResult.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
@@ -96,7 +97,7 @@
             this.bClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bClose.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bClose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bClose.Location = new System.Drawing.Point(1093, 5);
+            this.bClose.Location = new System.Drawing.Point(533, 5);
             this.bClose.Name = "bClose";
             this.bClose.Size = new System.Drawing.Size(100, 26);
             this.bClose.TabIndex = 5;
@@ -124,11 +125,11 @@
             this.bRotL.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bRotL.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bRotL.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRotL.Location = new System.Drawing.Point(485, 6);
+            this.bRotL.Location = new System.Drawing.Point(366, 6);
             this.bRotL.Name = "bRotL";
-            this.bRotL.Size = new System.Drawing.Size(100, 26);
+            this.bRotL.Size = new System.Drawing.Size(40, 26);
             this.bRotL.TabIndex = 7;
-            this.bRotL.Text = "Rotate - 45°";
+            this.bRotL.Text = "-45°";
             this.bRotL.UseVisualStyleBackColor = false;
             this.bRotL.Click += new System.EventHandler(this.bRotL_Click);
             // 
@@ -138,11 +139,11 @@
             this.bRotR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.bRotR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bRotR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRotR.Location = new System.Drawing.Point(380, 6);
+            this.bRotR.Location = new System.Drawing.Point(320, 6);
             this.bRotR.Name = "bRotR";
-            this.bRotR.Size = new System.Drawing.Size(100, 26);
+            this.bRotR.Size = new System.Drawing.Size(40, 26);
             this.bRotR.TabIndex = 8;
-            this.bRotR.Text = "Rotate + 45°";
+            this.bRotR.Text = "+45°";
             this.bRotR.UseVisualStyleBackColor = false;
             this.bRotR.Click += new System.EventHandler(this.bRotR_Click);
             // 
@@ -179,7 +180,7 @@
             this.panel1.Controls.Add(this.bRotL);
             this.panel1.Location = new System.Drawing.Point(3, 44);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1198, 460);
+            this.panel1.Size = new System.Drawing.Size(638, 494);
             this.panel1.TabIndex = 15;
             // 
             // bRot
@@ -190,9 +191,9 @@
             this.bRot.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
             this.bRot.Location = new System.Drawing.Point(274, 6);
             this.bRot.Name = "bRot";
-            this.bRot.Size = new System.Drawing.Size(100, 26);
+            this.bRot.Size = new System.Drawing.Size(40, 26);
             this.bRot.TabIndex = 22;
-            this.bRot.Text = "Rotate = 0°";
+            this.bRot.Text = "=0°";
             this.bRot.UseVisualStyleBackColor = false;
             this.bRot.Click += new System.EventHandler(this.bRot_Click);
             // 
@@ -202,7 +203,7 @@
             this.panel2.Controls.Add(this.radioButtonShadowLow);
             this.panel2.Controls.Add(this.radioButtonShadowOf);
             this.panel2.Controls.Add(this.radioButtonShadowHigh);
-            this.panel2.Location = new System.Drawing.Point(597, 0);
+            this.panel2.Location = new System.Drawing.Point(409, 0);
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(227, 38);
@@ -340,7 +341,7 @@
             this.panel3.Controls.Add(this.bLoadMap);
             this.panel3.Location = new System.Drawing.Point(3, 4);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(1198, 37);
+            this.panel3.Size = new System.Drawing.Size(638, 37);
             this.panel3.TabIndex = 16;
             // 
             // bLoadTexture
@@ -365,7 +366,7 @@
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.button3.Location = new System.Drawing.Point(987, 5);
+            this.button3.Location = new System.Drawing.Point(427, 5);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(100, 26);
             this.button3.TabIndex = 12;
@@ -377,11 +378,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(30)))));
-            this.ClientSize = new System.Drawing.Size(1203, 512);
+            this.ClientSize = new System.Drawing.Size(643, 546);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel1);
-            this.MinimumSize = new System.Drawing.Size(1210, 530);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(650, 300);
             this.Name = "FormEditor";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "2D isoedit";
             this.Resize += new System.EventHandler(this.FormEditor_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pBResult)).EndInit();

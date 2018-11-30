@@ -277,16 +277,22 @@ namespace program
         public void LoadMap(string path)
         {
             Console.WriteLine("LoadMap: " + path);
-            using (var bmpTemp = new Bitmap(path))
+            try
             {
-                inputLB = new LockBitmap(new Bitmap(bmpTemp), false);
+                using (var bmpTemp = new Bitmap(path))
+                {
+                    inputLB = new LockBitmap(new Bitmap(bmpTemp), false);
+                }
             }
+            catch { }
         }
         public void LoadTexture(string path)
         {
             Console.WriteLine("LoadTexture: " + path);
-            //"../textures/default.tex"
-            ByteStream bs = new ByteStream(path);
+            try
+            {
+                //"../textures/default.tex"
+                ByteStream bs = new ByteStream(path);
             bs.ResetIndex();
             int length = bs.ReadInt();
             textures = new Texture[255];
@@ -298,6 +304,8 @@ namespace program
                     textures[i] = new Texture("-", new byte[] { 6, 0, 4, 255, 0, 0, 255, 4, 255, 255, 0, 255, 4, 0, 255, 0, 255, 4, 0, 255, 255, 255, 4, 0, 0, 255, 255, 4, 255, 0, 255, 255 });
                 //textures[i].Data = new byte[] { 1, 0, 8,70,100, 40, 255, 8, 70, 100, 40, 255 };//[bs.ReadByteArray();
             }
+        }
+            catch { }
         }
         public void SaveTexture(string path)
         {

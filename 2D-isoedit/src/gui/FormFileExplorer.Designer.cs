@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormFileExplorer));
             this.textBoxDst = new System.Windows.Forms.TextBox();
             this.listBoxExplorer = new System.Windows.Forms.ListBox();
             this.bClose = new System.Windows.Forms.Button();
@@ -36,6 +37,7 @@
             this.buttonOk = new System.Windows.Forms.Button();
             this.buttonUp = new System.Windows.Forms.Button();
             this.listBox = new System.Windows.Forms.ListBox();
+            this.textBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBoxDst
@@ -71,6 +73,8 @@
             this.listBoxExplorer.Name = "listBoxExplorer";
             this.listBoxExplorer.Size = new System.Drawing.Size(522, 319);
             this.listBoxExplorer.TabIndex = 28;
+            this.listBoxExplorer.DoubleClick += new System.EventHandler(this.listBoxExplorer_DoubleClick);
+            this.listBoxExplorer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBoxExplorer_KeyDown);
             // 
             // bClose
             // 
@@ -131,7 +135,6 @@
             // 
             // buttonUp
             // 
-            this.buttonUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonUp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
             this.buttonUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonUp.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -146,9 +149,8 @@
             // 
             // listBox
             // 
-            this.listBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.listBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(44)))));
             this.listBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listBox.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -162,12 +164,29 @@
             this.listBox.Size = new System.Drawing.Size(125, 319);
             this.listBox.TabIndex = 34;
             // 
+            // textBox
+            // 
+            this.textBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(44)))));
+            this.textBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.textBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
+            this.textBox.Location = new System.Drawing.Point(12, 376);
+            this.textBox.Margin = new System.Windows.Forms.Padding(0);
+            this.textBox.Name = "textBox";
+            this.textBox.Size = new System.Drawing.Size(438, 23);
+            this.textBox.TabIndex = 35;
+            this.textBox.Text = "1";
+            this.textBox.Visible = false;
+            // 
             // FormFileExplorer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(678, 412);
+            this.Controls.Add(this.textBox);
             this.Controls.Add(this.listBox);
             this.Controls.Add(this.buttonUp);
             this.Controls.Add(this.buttonOk);
@@ -176,6 +195,7 @@
             this.Controls.Add(this.bLoad);
             this.Controls.Add(this.listBoxExplorer);
             this.Controls.Add(this.textBoxDst);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormFileExplorer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "FileExplorer";
@@ -194,5 +214,6 @@
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.Button buttonUp;
         private System.Windows.Forms.ListBox listBox;
+        private System.Windows.Forms.TextBox textBox;
     }
 }
