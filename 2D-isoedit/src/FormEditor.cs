@@ -198,7 +198,7 @@ namespace program
         }
         private void bLoad_Click(object sender, EventArgs e)
         {
-            var fileExplorer = new FormFileExplorer("../maps/");
+            var fileExplorer = new FormFileExplorer("../maps/","bmp,gif,exif,jpg,png,tiff");
             fileExplorer.FileSelectet += new FileSystemEventHandler(
                 (object fssender, FileSystemEventArgs fse) =>
                 {

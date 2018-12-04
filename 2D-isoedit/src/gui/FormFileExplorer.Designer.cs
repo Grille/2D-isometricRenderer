@@ -163,6 +163,8 @@
             this.listBox.Name = "listBox";
             this.listBox.Size = new System.Drawing.Size(125, 319);
             this.listBox.TabIndex = 34;
+            this.listBox.DoubleClick += new System.EventHandler(this.listBox_DoubleClick);
+            this.listBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox_KeyDown);
             // 
             // textBox
             // 

@@ -14,15 +14,22 @@ namespace program
     {
         public event FileSystemEventHandler FileSelectet;
         private string fullPath;
-        public FormFileExplorer(string path)
+        private string[] types;
+        public FormFileExplorer(string path) : this(path,""){}
+        public FormFileExplorer(string path,string types)
         {
             InitializeComponent();
+            this.types = types.Split(',');
             move(path);
+            listBox.Items.Add("<Favorites>");
+            //listBox.Items.Add("<My Computer>");
+            listBox.Items.Add("<Desktop>");
+            listBox.Items.Add("<Documents>");
         }
         private void move(string path)
         {
             int[] a = new int[]{3,4};
-            if (path==null||!Directory.Exists(Path.GetFullPath(path))) return;
+            if (path==null||path==""||!Directory.Exists(Path.GetFullPath(path))) return;
             textBoxDst.Text = fullPath = Path.GetFullPath(path);
 
             listBoxExplorer.Items.Clear();
@@ -39,10 +46,16 @@ namespace program
                 }
                 foreach (string dateien in Directory.GetFiles(path))
                 {
-
                     string item = (Path.GetFileName(dateien));
-                    //if (item.Split(new char[1]{'.'},1)[0]=="png")
-                    listBoxExplorer.Items.Add(item);
+                    string extension = Path.GetExtension(item);
+                    bool visible = false;
+                    if (types[0] != "")
+                    {
+                        for (int i = 0; i < types.Length; i++)
+                            if (extension == '.' + types[i]) visible = true;
+                    }
+                    else visible = true;
+                    if (visible) listBoxExplorer.Items.Add(item);      
                 }
             }
             catch { }
@@ -65,7 +78,7 @@ namespace program
 
         private void button3_Click(object sender, EventArgs e)
         {
-            move(Path.GetPathRoot(fullPath));
+            move(Path.GetDirectoryName(fullPath.TrimEnd('\\')));
         }
 
         private void listBoxExplorer_DoubleClick(object sender, EventArgs e)
@@ -90,11 +103,31 @@ namespace program
                 this.Close();
             }
         }
+        private void shortcutSelectet()
+        {
+            switch ((string)listBox.SelectedItem)
+            {
+                case "<Favorites>": move(Environment.GetFolderPath(Environment.SpecialFolder.Favorites)); break;
+                case "<My Computer>": move(Environment.GetFolderPath(Environment.SpecialFolder.MyComputer)); break;
+                case "<Desktop>":move(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));break;
+                case "<Documents>": move(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)); break;
+            }
+        }
 
         private void listBoxExplorer_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter) itemSelectet();
             else if (e.KeyCode == Keys.Back) move(Path.GetDirectoryName(fullPath.TrimEnd('\\')));
+        }
+
+        private void listBox_DoubleClick(object sender, EventArgs e)
+        {
+            shortcutSelectet();
+        }
+
+        private void listBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) shortcutSelectet();
         }
     }
 }
