@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace GGL
 {
-    class LockBitmap
+    public class LockBitmap
     {
         public int Width;
         public int Height;
@@ -16,7 +16,7 @@ namespace GGL
         private System.Drawing.Imaging.BitmapData bmpData;
         private IntPtr ptr;
         private int bytes;
-        private byte[] rgbValues;
+        public byte[] Data;
 
 
         public LockBitmap(Bitmap input, bool byValue)
@@ -30,8 +30,8 @@ namespace GGL
             bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
             ptr = bmpData.Scan0;
             bytes = Math.Abs(bmpData.Stride) * bmp.Height;
-            rgbValues = new byte[bytes];
-            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+            Data = new byte[bytes];
+            System.Runtime.InteropServices.Marshal.Copy(ptr, Data, 0, bytes);
         }
         public LockBitmap(int width, int height)
         {
@@ -42,18 +42,14 @@ namespace GGL
             bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
             ptr = bmpData.Scan0;
             bytes = Math.Abs(bmpData.Stride) * bmp.Height;
-            rgbValues = new byte[bytes];
-            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+            Data = new byte[bytes];
+            System.Runtime.InteropServices.Marshal.Copy(ptr, Data, 0, bytes);
         }
         public Bitmap returnBitmap()
         {
-            System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
+            System.Runtime.InteropServices.Marshal.Copy(Data, 0, ptr, bytes);
             bmp.UnlockBits(bmpData);
             return bmp;
-        }
-        public byte[] getData()
-        {
-            return rgbValues;
         }
     }
     class ByteArray

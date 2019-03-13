@@ -1,16 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 
 namespace GGL.IO
 {
+    public enum CompressMode
+    {
+        Auto = -1,
+        None = 0,
+        RLE = 1
+    }
     public class ByteStream
     {
         private byte[] data;
         private int index;
+        private int endIndex;
+        public int Index
+        {
+            get { return index; }
+            set
+            {
+                if (index > endIndex) endIndex = index;
+                if (value > endIndex) endIndex = value;
+                index = value;
+            }
+        }
+        public int EndIndex
+        {
+            get
+            {
+                if (index > endIndex) endIndex = index;
+                return endIndex;
+            }
+        }
 
         public ByteStream()
         {
+            //datal[7] = 8;
+
             data = new byte[10000000];
             index = 0;
         }
@@ -18,23 +46,37 @@ namespace GGL.IO
         {
             data = File.ReadAllBytes(path);
             index = 0;// data.Length - 1;
+            endIndex = data.Length;
+        }
+        public ByteStream(byte[] bytes)
+        {
+            data = bytes;
+            index = 0;// data.Length - 1;
+            endIndex = data.Length;
         }
 
         #region write
+        public void WriteByte(byte input)
+        {
+            data[index++] = input;
+        }
         public void WriteInt(int input)
         {
-            testSize(4);
             byte[] value = BitConverter.GetBytes(input);
             data[index++] = value[0];
             data[index++] = value[1];
             data[index++] = value[2];
             data[index++] = value[3];
         }
-        public void WriteByte(byte input)
+        public void WriteFloat(float input)
         {
-            testSize(1);
-            data[index++] = input;
+            byte[] value = BitConverter.GetBytes(input);
+            data[index++] = value[0];
+            data[index++] = value[1];
+            data[index++] = value[2];
+            data[index++] = value[3];
         }
+
         public void WriteByteArray(int[] input)
         {
             byte[] data = new byte[input.Length];
@@ -45,9 +87,25 @@ namespace GGL.IO
         {
             WriteByteArray(input, 0);
         }
-        public void WriteByteArray(byte[] input, int compressionMode)
+        public void WriteByteArray(byte[] input, CompressMode compressionMode)
         {
-            testSize(input.Length);
+            if (compressionMode == CompressMode.Auto)
+            {
+                byte curValue = input[0];
+                int changes = 1;
+                for (int i = 1; i < input.Length; i++)
+                {
+                    if (input[i] != curValue)
+                    {
+                        changes++;
+                        curValue = input[i];
+                    }
+                }
+                float clutter = changes / (float)input.Length;
+                if (clutter >= 0.5) compressionMode = CompressMode.None;
+                else compressionMode = CompressMode.RLE;
+
+            }
             if (input.Length < 256)
             {
                 WriteByte((byte)(compressionMode + 4));
@@ -58,53 +116,55 @@ namespace GGL.IO
                 WriteByte((byte)compressionMode);
                 WriteInt((int)input.Length);
             }
-            if (compressionMode == 0)//direct 8bit
+
+            switch (compressionMode)
             {
-                for (int i = 0; i < input.Length; i++)
-                {
-                    data[index++] = input[i];
-                }
-            }
-            if (compressionMode == 1)//compres 8bit
-            {
-                WriteString("begin [");
-                int lastValue = input[0];
-                int length = 0;
-                for (int i = 0; i < input.Length; i++)
-                {
-                    if (lastValue == input[i] && i < input.Length)
+                case CompressMode.None:
+                    for (int i = 0; i < input.Length; i++)
                     {
-                        WriteString("-");
-                        length++;
+                        data[index++] = input[i];
                     }
-                    else
+                    break;
+                case CompressMode.RLE:
+                    byte curValue = input[0], curLength = 0;
+                    for (int i = 1; i < input.Length; i++)
                     {
-                        WriteString(" |" + length + "x" + lastValue);
-                        //data[index++] = length;
-                        //data[index++] = lastValue;
-                        lastValue = input[i];
-                        length = 0;
+                        if (input[i] != curValue || curLength >= 255)
+                        {
+                            data[index++] = curLength;
+                            data[index++] = curValue;
+                            curValue = input[i]; curLength = 0;
+                        }
+                        else curLength++;
                     }
-                }
-                WriteString("] end");
-            }
-            else if (compressionMode == 2)//direct 4bit
-            {
-                for (int i = 0; i < input.Length; i += 2)
-                {
-                    data[index++] = (byte)(input[i] << 4 | input[i + 1]);
-                }
-            }
-            else if (compressionMode == 3)//compres 4bit
-            {
+                    data[index++] = curLength;
+                    data[index++] = curValue;
+                    break;
             }
         }
-
-        public void WriteIntArray(byte[] input)
+        public void WriteIntArray(int[] input)
         {
             WriteInt((int)input.Length);
             for (int i = 0; i < input.Length; i++) WriteInt(input[i]);
-
+        }
+        public void WriteIntArray2D(int[,] input)
+        {
+            int width = input.GetLength(0);
+            int height = input.GetLength(1);
+            WriteInt(width);
+            WriteInt(height);
+            for (int ix = 0; ix < width; ix++)
+            {
+                for (int iy = 0; iy < height; iy++)
+                {
+                    WriteInt(input[ix, iy]);
+                }
+            }
+        }
+        public void WriteFloatArray(float[] input)
+        {
+            WriteInt((int)input.Length);
+            for (int i = 0; i < input.Length; i++) WriteFloat(input[i]);
         }
         public void WriteString(string input)
         {
@@ -133,14 +193,20 @@ namespace GGL.IO
         #endregion
 
         #region read
-        public int ReadInt()
-        {
-            return (data[index++] << 0 | data[index++] << 8 | data[index++] << 16 | data[index++] << 24);
-        }
         public byte ReadByte()
         {
             return data[index++];
         }
+        public int ReadInt()
+        {
+            return (data[index++] << 0 | data[index++] << 8 | data[index++] << 16 | data[index++] << 24);
+        }
+        public float ReadFloat()
+        {
+            index += 4;
+            return BitConverter.ToSingle(data, index - 4);
+        }
+
         public byte[] ReadByteArray()
         {
             byte mode = ReadByte();
@@ -161,6 +227,18 @@ namespace GGL.IO
                     retData[i] = data[index++];
                 }
             }
+            else if (mode == 1)
+            {
+                int curLength = 0;
+                while (curLength < length)
+                {
+                    byte len = data[index++];
+                    byte value = data[index++];
+                    for (int i = 0; i < len + 1; i++)
+                        retData[curLength + i] = value;
+                    curLength += len + 1;
+                }
+            }
             else if (mode == 2)
             {
                 for (int i = 0; i < retData.Length; i += 2)
@@ -172,6 +250,36 @@ namespace GGL.IO
 
             return retData;
         }
+        public int[] ReadIntArray()
+        {
+            int length = ReadInt();
+            int[] retData = new int[length];
+            for (int i = 0; i < retData.Length; i++) retData[i] = ReadInt();
+            return retData;
+        }
+        public int[,] ReadIntArray2D()
+        {
+            int width = ReadInt();
+            int height = ReadInt();
+            int[,] retData = new int[width, height];
+
+            for (int ix = 0; ix < width; ix++)
+            {
+                for (int iy = 0; iy < height; iy++)
+                {
+                    retData[ix, iy] = ReadInt();
+                }
+            }
+            return retData;
+        }
+        public float[] ReadFloatArray()
+        {
+            int length = ReadInt();
+            float[] retData = new float[length];
+            for (int i = 0; i < retData.Length; i++) retData[i] = ReadFloat();
+            return retData;
+        }
+
         public string ReadString()
         {
             byte mode = ReadByte();
@@ -187,13 +295,6 @@ namespace GGL.IO
             }
 
             return new string(retData);
-        }
-        public int[] ReadIntArray()
-        {
-            int length = ReadInt();
-            int[] retData = new int[length];
-            for (int i = 0; i < retData.Length; i++) retData[i] = ReadInt();
-            return retData;
         }
         public string[] ReadStringArray()
         {
@@ -226,9 +327,11 @@ namespace GGL.IO
         {
             index = 0;
         }
-        public byte[] GetData()
+        public byte[] GetBytes()
         {
-            return data;
+            byte[] result = new byte[EndIndex];
+            Array.Copy(data, result, EndIndex);
+            return result;
         }
         public string GetString()
         {

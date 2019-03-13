@@ -30,35 +30,216 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEditor));
-            this.pBResult = new System.Windows.Forms.PictureBox();
-            this.bExport = new System.Windows.Forms.Button();
-            this.bClose = new System.Windows.Forms.Button();
-            this.bLoadMap = new System.Windows.Forms.Button();
-            this.bRotL = new System.Windows.Forms.Button();
-            this.bRotR = new System.Windows.Forms.Button();
-            this.bNew = new System.Windows.Forms.Button();
             this.renderTimer = new System.Windows.Forms.Timer(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.bRot = new System.Windows.Forms.Button();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.radioButtonShadowLow = new System.Windows.Forms.RadioButton();
-            this.radioButtonShadowOf = new System.Windows.Forms.RadioButton();
-            this.radioButtonShadowHigh = new System.Windows.Forms.RadioButton();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.checkBoxPreAR = new System.Windows.Forms.CheckBox();
-            this.radioButtonPreM = new System.Windows.Forms.RadioButton();
-            this.radioButtonPreR = new System.Windows.Forms.RadioButton();
-            this.label3 = new System.Windows.Forms.Label();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.bLoadTexture = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fgdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.dgfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolboxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fullscrenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoRotateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pBResult = new System.Windows.Forms.PictureBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButtonDrag = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonRotate = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabelRenderTime = new System.Windows.Forms.ToolStripStatusLabel();
+            this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pBResult)).BeginInit();
-            this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
-            this.panel4.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // renderTimer
+            // 
+            this.renderTimer.Interval = 17;
+            this.renderTimer.Tick += new System.EventHandler(this.renderTimer_Tick);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fgdToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.displayToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(624, 24);
+            this.menuStrip1.TabIndex = 17;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fgdToolStripMenuItem
+            // 
+            this.fgdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newToolStripMenuItem,
+            this.openToolStripMenuItem,
+            this.saveToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.importToolStripMenuItem,
+            this.exportToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.dgfToolStripMenuItem});
+            this.fgdToolStripMenuItem.Name = "fgdToolStripMenuItem";
+            this.fgdToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fgdToolStripMenuItem.Text = "File";
+            this.fgdToolStripMenuItem.Click += new System.EventHandler(this.fgdToolStripMenuItem_Click);
+            // 
+            // newToolStripMenuItem
+            // 
+            this.newToolStripMenuItem.Enabled = false;
+            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+            this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.newToolStripMenuItem.Text = "New";
+            // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Text = "Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openHighMapToolStripMenuItem_Click);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveRenderToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            // 
+            // importToolStripMenuItem
+            // 
+            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
+            this.importToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.importToolStripMenuItem.Text = "Import";
+            this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportToolStripMenuItem.Text = "Export";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // dgfToolStripMenuItem
+            // 
+            this.dgfToolStripMenuItem.Name = "dgfToolStripMenuItem";
+            this.dgfToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
+            this.dgfToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dgfToolStripMenuItem.Text = "Quit";
+            this.dgfToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolboxToolStripMenuItem,
+            this.textureToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
+            this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // toolboxToolStripMenuItem
+            // 
+            this.toolboxToolStripMenuItem.Enabled = false;
+            this.toolboxToolStripMenuItem.Name = "toolboxToolStripMenuItem";
+            this.toolboxToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.toolboxToolStripMenuItem.Text = "Toolbox";
+            this.toolboxToolStripMenuItem.Click += new System.EventHandler(this.toolboxToolStripMenuItem_Click);
+            // 
+            // textureToolStripMenuItem
+            // 
+            this.textureToolStripMenuItem.Enabled = false;
+            this.textureToolStripMenuItem.Name = "textureToolStripMenuItem";
+            this.textureToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.textureToolStripMenuItem.Text = "Texture";
+            this.textureToolStripMenuItem.Click += new System.EventHandler(this.rotateToolStripMenuItem_Click);
+            // 
+            // displayToolStripMenuItem
+            // 
+            this.displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fullscrenToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.settingsToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.toolStripMenuItem1,
+            this.autoRotateToolStripMenuItem});
+            this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
+            this.displayToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
+            this.displayToolStripMenuItem.Text = "Display";
+            // 
+            // fullscrenToolStripMenuItem
+            // 
+            this.fullscrenToolStripMenuItem.Name = "fullscrenToolStripMenuItem";
+            this.fullscrenToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
+            this.fullscrenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fullscrenToolStripMenuItem.Text = "Fullscreen";
+            this.fullscrenToolStripMenuItem.Click += new System.EventHandler(this.fullscrenToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.Enabled = false;
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.toolStripMenuItem1.Checked = true;
+            this.toolStripMenuItem1.CheckOnClick = true;
+            this.toolStripMenuItem1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Text = "Shadow";
+            this.toolStripMenuItem1.CheckedChanged += new System.EventHandler(this.toolStripMenuItem1_CheckedChanged);
+            // 
+            // autoRotateToolStripMenuItem
+            // 
+            this.autoRotateToolStripMenuItem.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.autoRotateToolStripMenuItem.CheckOnClick = true;
+            this.autoRotateToolStripMenuItem.Name = "autoRotateToolStripMenuItem";
+            this.autoRotateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoRotateToolStripMenuItem.Text = "AutoRotate";
             // 
             // pBResult
             // 
@@ -67,362 +248,165 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pBResult.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(25)))), ((int)(((byte)(45)))));
             this.pBResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pBResult.Location = new System.Drawing.Point(3, 41);
+            this.pBResult.Location = new System.Drawing.Point(4, 4);
             this.pBResult.Name = "pBResult";
-            this.pBResult.Size = new System.Drawing.Size(632, 448);
+            this.pBResult.Size = new System.Drawing.Size(616, 362);
             this.pBResult.TabIndex = 3;
             this.pBResult.TabStop = false;
             this.pBResult.Paint += new System.Windows.Forms.PaintEventHandler(this.pBRender_Paint);
+            this.pBResult.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pBResult_MouseDown);
             this.pBResult.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseMove);
             this.pBResult.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pBRender_MouseWheel);
             // 
-            // bExport
+            // tableLayoutPanel1
             // 
-            this.bExport.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bExport.Enabled = false;
-            this.bExport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bExport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bExport.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bExport.Location = new System.Drawing.Point(323, 5);
-            this.bExport.Name = "bExport";
-            this.bExport.Size = new System.Drawing.Size(100, 26);
-            this.bExport.TabIndex = 4;
-            this.bExport.Text = "Export";
-            this.bExport.UseVisualStyleBackColor = false;
-            // 
-            // bClose
-            // 
-            this.bClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.bClose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bClose.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bClose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bClose.Location = new System.Drawing.Point(533, 5);
-            this.bClose.Name = "bClose";
-            this.bClose.Size = new System.Drawing.Size(100, 26);
-            this.bClose.TabIndex = 5;
-            this.bClose.Text = "Close";
-            this.bClose.UseVisualStyleBackColor = false;
-            this.bClose.Click += new System.EventHandler(this.bClose_Click);
-            // 
-            // bLoadMap
-            // 
-            this.bLoadMap.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bLoadMap.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bLoadMap.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bLoadMap.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bLoadMap.Location = new System.Drawing.Point(111, 5);
-            this.bLoadMap.Name = "bLoadMap";
-            this.bLoadMap.Size = new System.Drawing.Size(100, 26);
-            this.bLoadMap.TabIndex = 6;
-            this.bLoadMap.Text = "Load Map";
-            this.bLoadMap.UseVisualStyleBackColor = false;
-            this.bLoadMap.Click += new System.EventHandler(this.bLoad_Click);
-            // 
-            // bRotL
-            // 
-            this.bRotL.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bRotL.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bRotL.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bRotL.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRotL.Location = new System.Drawing.Point(366, 6);
-            this.bRotL.Name = "bRotL";
-            this.bRotL.Size = new System.Drawing.Size(40, 26);
-            this.bRotL.TabIndex = 7;
-            this.bRotL.Text = "-45°";
-            this.bRotL.UseVisualStyleBackColor = false;
-            this.bRotL.Click += new System.EventHandler(this.bRotL_Click);
-            // 
-            // bRotR
-            // 
-            this.bRotR.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bRotR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bRotR.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bRotR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRotR.Location = new System.Drawing.Point(320, 6);
-            this.bRotR.Name = "bRotR";
-            this.bRotR.Size = new System.Drawing.Size(40, 26);
-            this.bRotR.TabIndex = 8;
-            this.bRotR.Text = "+45°";
-            this.bRotR.UseVisualStyleBackColor = false;
-            this.bRotR.Click += new System.EventHandler(this.bRotR_Click);
-            // 
-            // bNew
-            // 
-            this.bNew.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bNew.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bNew.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bNew.Location = new System.Drawing.Point(5, 5);
-            this.bNew.Name = "bNew";
-            this.bNew.Size = new System.Drawing.Size(100, 26);
-            this.bNew.TabIndex = 11;
-            this.bNew.Text = "New";
-            this.bNew.UseVisualStyleBackColor = false;
-            this.bNew.Click += new System.EventHandler(this.bNew_Click);
-            // 
-            // renderTimer
-            // 
-            this.renderTimer.Interval = 17;
-            this.renderTimer.Tick += new System.EventHandler(this.renderTimer_Tick);
-            // 
-            // panel1
-            // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.panel1.Controls.Add(this.bRot);
-            this.panel1.Controls.Add(this.pBResult);
-            this.panel1.Controls.Add(this.panel2);
-            this.panel1.Controls.Add(this.panel4);
-            this.panel1.Controls.Add(this.bRotR);
-            this.panel1.Controls.Add(this.bRotL);
-            this.panel1.Location = new System.Drawing.Point(3, 44);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(638, 494);
-            this.panel1.TabIndex = 15;
+            this.tableLayoutPanel1.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.pBResult, 0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 49);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(624, 370);
+            this.tableLayoutPanel1.TabIndex = 20;
             // 
-            // bRot
+            // toolStrip1
             // 
-            this.bRot.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bRot.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bRot.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bRot.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bRot.Location = new System.Drawing.Point(274, 6);
-            this.bRot.Name = "bRot";
-            this.bRot.Size = new System.Drawing.Size(40, 26);
-            this.bRot.TabIndex = 22;
-            this.bRot.Text = "=0°";
-            this.bRot.UseVisualStyleBackColor = false;
-            this.bRot.Click += new System.EventHandler(this.bRot_Click);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel1,
+            this.toolStripButtonDrag,
+            this.toolStripButtonRotate,
+            this.toolStripSeparator5});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(624, 25);
+            this.toolStrip1.TabIndex = 22;
+            this.toolStrip1.Text = "toolStrip1";
             // 
-            // panel2
+            // toolStripButtonDrag
             // 
-            this.panel2.Controls.Add(this.label1);
-            this.panel2.Controls.Add(this.radioButtonShadowLow);
-            this.panel2.Controls.Add(this.radioButtonShadowOf);
-            this.panel2.Controls.Add(this.radioButtonShadowHigh);
-            this.panel2.Location = new System.Drawing.Point(409, 0);
-            this.panel2.Margin = new System.Windows.Forms.Padding(0);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(227, 38);
-            this.panel2.TabIndex = 31;
+            this.toolStripButtonDrag.Checked = true;
+            this.toolStripButtonDrag.CheckOnClick = true;
+            this.toolStripButtonDrag.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripButtonDrag.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonDrag.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonDrag.Image")));
+            this.toolStripButtonDrag.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonDrag.Name = "toolStripButtonDrag";
+            this.toolStripButtonDrag.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonDrag.Text = "toolStripButton1";
+            this.toolStripButtonDrag.Click += new System.EventHandler(this.toolStripButtonDrag_Click);
             // 
-            // label1
+            // toolStripButtonRotate
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.label1.Location = new System.Drawing.Point(17, 8);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(56, 15);
-            this.label1.TabIndex = 25;
-            this.label1.Text = "shadows:";
+            this.toolStripButtonRotate.CheckOnClick = true;
+            this.toolStripButtonRotate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonRotate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRotate.Image")));
+            this.toolStripButtonRotate.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRotate.Name = "toolStripButtonRotate";
+            this.toolStripButtonRotate.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonRotate.Text = "toolStripButton2";
+            this.toolStripButtonRotate.Click += new System.EventHandler(this.toolStripButtonRotate_Click);
             // 
-            // radioButtonShadowLow
+            // toolStripSeparator5
             // 
-            this.radioButtonShadowLow.AutoSize = true;
-            this.radioButtonShadowLow.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.radioButtonShadowLow.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.radioButtonShadowLow.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.radioButtonShadowLow.Location = new System.Drawing.Point(133, 5);
-            this.radioButtonShadowLow.Name = "radioButtonShadowLow";
-            this.radioButtonShadowLow.Size = new System.Drawing.Size(43, 19);
-            this.radioButtonShadowLow.TabIndex = 27;
-            this.radioButtonShadowLow.Text = "low";
-            this.radioButtonShadowLow.UseVisualStyleBackColor = true;
-            this.radioButtonShadowLow.CheckedChanged += new System.EventHandler(this.radioButtonShadowLow_CheckedChanged);
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
             // 
-            // radioButtonShadowOf
+            // toolStripLabel1
             // 
-            this.radioButtonShadowOf.AutoSize = true;
-            this.radioButtonShadowOf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.radioButtonShadowOf.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.radioButtonShadowOf.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.radioButtonShadowOf.Location = new System.Drawing.Point(183, 6);
-            this.radioButtonShadowOf.Name = "radioButtonShadowOf";
-            this.radioButtonShadowOf.Size = new System.Drawing.Size(35, 19);
-            this.radioButtonShadowOf.TabIndex = 28;
-            this.radioButtonShadowOf.Text = "of";
-            this.radioButtonShadowOf.UseVisualStyleBackColor = true;
-            this.radioButtonShadowOf.CheckedChanged += new System.EventHandler(this.radioButtonShadowOf_CheckedChanged);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(33, 22);
+            this.toolStripLabel1.Text = "tools";
             // 
-            // radioButtonShadowHigh
+            // statusStrip1
             // 
-            this.radioButtonShadowHigh.AutoSize = true;
-            this.radioButtonShadowHigh.Checked = true;
-            this.radioButtonShadowHigh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.radioButtonShadowHigh.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.radioButtonShadowHigh.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.radioButtonShadowHigh.Location = new System.Drawing.Point(79, 5);
-            this.radioButtonShadowHigh.Name = "radioButtonShadowHigh";
-            this.radioButtonShadowHigh.Size = new System.Drawing.Size(48, 19);
-            this.radioButtonShadowHigh.TabIndex = 26;
-            this.radioButtonShadowHigh.TabStop = true;
-            this.radioButtonShadowHigh.Text = "high";
-            this.radioButtonShadowHigh.UseVisualStyleBackColor = true;
-            this.radioButtonShadowHigh.CheckedChanged += new System.EventHandler(this.radioButtonShadowHigh_CheckedChanged);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelRenderTime});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 419);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(624, 22);
+            this.statusStrip1.TabIndex = 23;
+            this.statusStrip1.Text = "statusStrip1";
             // 
-            // panel4
+            // toolStripStatusLabelRenderTime
             // 
-            this.panel4.Controls.Add(this.checkBoxPreAR);
-            this.panel4.Controls.Add(this.radioButtonPreM);
-            this.panel4.Controls.Add(this.radioButtonPreR);
-            this.panel4.Controls.Add(this.label3);
-            this.panel4.Location = new System.Drawing.Point(3, 0);
-            this.panel4.Margin = new System.Windows.Forms.Padding(0);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(259, 38);
-            this.panel4.TabIndex = 30;
-            // 
-            // checkBoxPreAR
-            // 
-            this.checkBoxPreAR.AutoSize = true;
-            this.checkBoxPreAR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBoxPreAR.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.checkBoxPreAR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.checkBoxPreAR.Location = new System.Drawing.Point(173, 6);
-            this.checkBoxPreAR.Name = "checkBoxPreAR";
-            this.checkBoxPreAR.Size = new System.Drawing.Size(81, 19);
-            this.checkBoxPreAR.TabIndex = 21;
-            this.checkBoxPreAR.Text = "auto rotate";
-            this.checkBoxPreAR.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonPreM
-            // 
-            this.radioButtonPreM.AutoSize = true;
-            this.radioButtonPreM.Checked = true;
-            this.radioButtonPreM.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.radioButtonPreM.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.radioButtonPreM.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.radioButtonPreM.Location = new System.Drawing.Point(55, 6);
-            this.radioButtonPreM.Name = "radioButtonPreM";
-            this.radioButtonPreM.Size = new System.Drawing.Size(54, 19);
-            this.radioButtonPreM.TabIndex = 18;
-            this.radioButtonPreM.TabStop = true;
-            this.radioButtonPreM.Text = "move";
-            this.radioButtonPreM.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonPreR
-            // 
-            this.radioButtonPreR.AutoSize = true;
-            this.radioButtonPreR.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.radioButtonPreR.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.radioButtonPreR.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.radioButtonPreR.Location = new System.Drawing.Point(112, 6);
-            this.radioButtonPreR.Name = "radioButtonPreR";
-            this.radioButtonPreR.Size = new System.Drawing.Size(55, 19);
-            this.radioButtonPreR.TabIndex = 19;
-            this.radioButtonPreR.Text = "rotate";
-            this.radioButtonPreR.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.label3.Location = new System.Drawing.Point(13, 8);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(36, 15);
-            this.label3.TabIndex = 25;
-            this.label3.Text = "tools:";
-            // 
-            // panel3
-            // 
-            this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.panel3.Controls.Add(this.bLoadTexture);
-            this.panel3.Controls.Add(this.button3);
-            this.panel3.Controls.Add(this.bNew);
-            this.panel3.Controls.Add(this.bClose);
-            this.panel3.Controls.Add(this.bExport);
-            this.panel3.Controls.Add(this.bLoadMap);
-            this.panel3.Location = new System.Drawing.Point(3, 4);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(638, 37);
-            this.panel3.TabIndex = 16;
-            // 
-            // bLoadTexture
-            // 
-            this.bLoadTexture.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.bLoadTexture.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.bLoadTexture.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bLoadTexture.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.bLoadTexture.Location = new System.Drawing.Point(217, 5);
-            this.bLoadTexture.Name = "bLoadTexture";
-            this.bLoadTexture.Size = new System.Drawing.Size(100, 26);
-            this.bLoadTexture.TabIndex = 13;
-            this.bLoadTexture.Text = "Load Texture";
-            this.bLoadTexture.UseVisualStyleBackColor = false;
-            this.bLoadTexture.Click += new System.EventHandler(this.bLoadTexture_Click);
-            // 
-            // button3
-            // 
-            this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.button3.Enabled = false;
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(255)))));
-            this.button3.Location = new System.Drawing.Point(427, 5);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(100, 26);
-            this.button3.TabIndex = 12;
-            this.button3.Text = "Options";
-            this.button3.UseVisualStyleBackColor = false;
+            this.toolStripStatusLabelRenderTime.BackColor = System.Drawing.SystemColors.Control;
+            this.toolStripStatusLabelRenderTime.Name = "toolStripStatusLabelRenderTime";
+            this.toolStripStatusLabelRenderTime.Size = new System.Drawing.Size(96, 17);
+            this.toolStripStatusLabelRenderTime.Text = "RenderTime 0ms";
             // 
             // FormEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(30)))));
-            this.ClientSize = new System.Drawing.Size(643, 546);
-            this.Controls.Add(this.panel3);
-            this.Controls.Add(this.panel1);
+            this.ClientSize = new System.Drawing.Size(624, 441);
+            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(650, 300);
+            this.IsMdiContainer = true;
+            this.KeyPreview = true;
+            this.MainMenuStrip = this.menuStrip1;
+            this.MinimumSize = new System.Drawing.Size(640, 480);
             this.Name = "FormEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "2D isoedit";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormEditor_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.FormEditor_KeyUp);
             this.Resize += new System.EventHandler(this.FormEditor_Resize);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pBResult)).EndInit();
-            this.panel1.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
-            this.panel4.ResumeLayout(false);
-            this.panel4.PerformLayout();
-            this.panel3.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.PictureBox pBResult;
-        private System.Windows.Forms.Button bExport;
-        private System.Windows.Forms.Button bClose;
-        private System.Windows.Forms.Button bLoadMap;
-        private System.Windows.Forms.Button bRotL;
-        private System.Windows.Forms.Button bRotR;
-        private System.Windows.Forms.Button bNew;
         private System.Windows.Forms.Timer renderTimer;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.RadioButton radioButtonPreR;
-        private System.Windows.Forms.RadioButton radioButtonPreM;
-        private System.Windows.Forms.CheckBox checkBoxPreAR;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Button bRot;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button bLoadTexture;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.RadioButton radioButtonShadowOf;
-        private System.Windows.Forms.RadioButton radioButtonShadowHigh;
-        private System.Windows.Forms.RadioButton radioButtonShadowLow;
-        private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fgdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dgfToolStripMenuItem;
+        private System.Windows.Forms.PictureBox pBResult;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolboxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem textureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fullscrenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem autoRotateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripButton toolStripButtonDrag;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRotate;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelRenderTime;
     }
 }
 

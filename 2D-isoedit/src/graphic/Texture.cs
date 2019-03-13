@@ -12,8 +12,15 @@ namespace program
 {
     public class Texture
     {
+        public int typ;
         public string Name;
         public byte[] Data;//[r,g,b,a,l]
+        public Texture(string name, Color color)
+        {
+            typ = 0;
+            this.Name = name;
+            //Data = input;
+        }
         public Texture(string name,byte[] input)
         {
             this.Name = name;

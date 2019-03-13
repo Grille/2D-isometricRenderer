@@ -1,6 +1,6 @@
 ﻿namespace program
 {
-    partial class TextureEditor
+    partial class FormRenderSettings
     {
         /// <summary>
         /// Required designer variable.
@@ -28,18 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            // 
-            // TextureEditor
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(284, 262);
-            this.Name = "TextureEditor";
-            this.Text = "TextureEditor";
-            this.ResumeLayout(false);
-
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Text = "FormRenderSettings";
         }
 
         #endregion

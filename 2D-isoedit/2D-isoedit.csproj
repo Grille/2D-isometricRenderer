@@ -55,7 +55,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\graphic\RenderData.cs" />
     <Compile Include="src\graphic\Texture.cs" />
+    <Compile Include="src\graphic\TexturePack.cs" />
+    <Compile Include="src\gui\FormImport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\gui\FormImport.Designer.cs">
+      <DependentUpon>FormImport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\gui\FormRenderSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\gui\FormRenderSettings.Designer.cs">
+      <DependentUpon>FormRenderSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\gui\FormToolbox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\gui\FormToolbox.Designer.cs">
+      <DependentUpon>FormToolbox.cs</DependentUpon>
+    </Compile>
     <Compile Include="src\util\ByteStream.cs" />
     <Compile Include="src\FormEditor.cs">
       <SubType>Form</SubType>
@@ -63,27 +83,18 @@
     <Compile Include="src\FormEditor.Designer.cs">
       <DependentUpon>FormEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="src\gui\FormFileExplorer.cs">
+    <Compile Include="src\graphic\IsometricRenderer.cs" />
+    <Compile Include="src\gui\FormTextureEditor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="src\gui\FormFileExplorer.Designer.cs">
-      <DependentUpon>FormFileExplorer.cs</DependentUpon>
+    <Compile Include="src\gui\FormTextureEditor.Designer.cs">
+      <DependentUpon>FormTextureEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="src\graphic\IsometricRenderer.cs" />
     <Compile Include="src\util\LockBitmap.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\gui\TextureEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="src\gui\TextureEditor.Designer.cs">
-      <DependentUpon>TextureEditor.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="src\FormEditor.resx">
       <DependentUpon>FormEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="src\gui\FormFileExplorer.resx">
-      <DependentUpon>FormFileExplorer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -95,9 +106,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="src\gui\TextureEditor.resx">
-      <DependentUpon>TextureEditor.cs</DependentUpon>
+    <EmbeddedResource Include="src\gui\FormImport.resx">
+      <DependentUpon>FormImport.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="src\gui\FormTextureEditor.resx">
+      <DependentUpon>FormTextureEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\gui\FormToolbox.resx">
+      <DependentUpon>FormToolbox.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="src\app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
