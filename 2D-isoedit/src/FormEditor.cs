@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -106,6 +107,8 @@ namespace program
             Graphics g = e.Graphics;
             if (result == null) return;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.SmoothingMode = SmoothingMode.None;
+
             Rectangle windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
             g.FillRectangle(new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical), windowRect);
             float drawPosX = ((-camPosX) * camScale) + Width / 2;
@@ -115,11 +118,10 @@ namespace program
                 new RectangleF(0, 0, result.Width, result.Height), GraphicsUnit.Pixel);
             //g.DrawString("" + renderer.RenderTime + "ms", new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
 
-
             float X=0, Y=0, Z=0;
 
             //renderer.AddAngle(curAngle - lastAngle);
-
+            
             //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPosX, drawPosY-100), new PointF(drawPosX, drawPosY + 100));
             //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPosX- (result.Width/2) * camScale, drawPosY), new PointF(drawPosX+ (result.Width / 2) * camScale, drawPosY));
             //g.DrawLine(new Pen(Color.FromArgb(100, Color.Lime), 2), new PointF(drawPosX - 100, drawPosY - 50), new PointF(drawPosX + 100, drawPosY + 50));
@@ -315,7 +317,7 @@ namespace program
         {
             var dialog = new OpenFileDialog();
             dialog.InitialDirectory = Path.GetFullPath(directorySave);
-            dialog.Filter = "IsoHightMap(*.IHM)|*.IHM|All files (*.*)|*.*";
+            dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
                 ByteStream bs = new ByteStream(dialog.FileName);
@@ -325,8 +327,7 @@ namespace program
                 Program.MainForm.renderer.Data.TextureMap = bs.ReadByteArray();
                 Program.MainForm.Repainting = true;
                 directorySave = Path.GetDirectoryName(dialog.FileName);
-            }
-            );
+            });
             dialog.ShowDialog(this);
         }
 
@@ -336,7 +337,7 @@ namespace program
             dialog.InitialDirectory = Path.GetFullPath(directorySave);
             dialog.AddExtension = true;
             dialog.DefaultExt = "ihm";
-            dialog.Filter = "IsoHightMap(*.IHM)|*.IHM|All files (*.*)|*.*";
+            dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
                 ByteStream bs = new ByteStream();
@@ -347,8 +348,7 @@ namespace program
                 bs.WriteByteArray(Program.MainForm.renderer.Data.TextureMap, CompressMode.Auto);
                 bs.Save(dialog.FileName);
                 directorySave = Path.GetDirectoryName(dialog.FileName);
-            }
-            );
+            });
             dialog.ShowDialog(this);
             //ByteStream bs = new ByteStream();
         }
@@ -418,7 +418,7 @@ namespace program
         {
             var dialog = new OpenFileDialog();
             dialog.InitialDirectory = Path.GetFullPath(directoryImport);
-            dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
+            dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
                 //FormImport form = new FormImport();
@@ -432,8 +432,7 @@ namespace program
                 //{
                 //    ce.Cancel = true;
                 //}
-            }
-            );
+            });
             dialog.ShowDialog(this);
         }
 
@@ -442,18 +441,25 @@ namespace program
             var dialog = new SaveFileDialog();
             dialog.InitialDirectory = Path.GetFullPath(directoryExport);
             dialog.AddExtension = true;
-            dialog.DefaultExt = "png";
-            dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
+            dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
+            dialog.DefaultExt = ".png";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
+                
                 if (Program.MainForm.Repainting)
-                    renderer.Render();
-                renderer.Result.Save(dialog.FileName);
+                renderer.Render();
+                switch (Path.GetExtension(dialog.FileName).ToLower())
+                {
+                    case ".bmp": renderer.Result.Save(dialog.FileName, ImageFormat.Bmp);break;
+                    case ".jpg": renderer.Result.Save(dialog.FileName, ImageFormat.Jpeg); break;
+                    case ".gif": renderer.Result.Save(dialog.FileName, ImageFormat.Gif); break;
+                    default: renderer.Result.Save(dialog.FileName, ImageFormat.Png); break;
+                }
+                    
                 directoryExport = Path.GetDirectoryName(dialog.FileName);
                 //Program.MainForm.Repainting = true;
                 //ce.Cancel = false;
-            }
-            );
+            });
             dialog.ShowDialog(this);
         }
         #endregion
