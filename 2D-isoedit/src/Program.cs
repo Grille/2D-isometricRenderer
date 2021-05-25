@@ -4,7 +4,7 @@ using System.Threading;
 using System.Globalization;
 using System.Windows.Forms;
 
-namespace program
+namespace Program
 {
     public static class Program
     {

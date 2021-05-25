@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 /// <summary>-</summary>
-namespace program
+namespace Program
 {
     public class Texture
     {

@@ -15,7 +15,7 @@ using GGL;
 using GGL.IO;
 using System.Drawing.Drawing2D;
 /// <summary>-</summary>
-namespace program
+namespace Program
 {
 
     //[System.ComponentModel.DesignerCategory("code")]

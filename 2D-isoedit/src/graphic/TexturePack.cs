@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using GGL.IO;
 
-namespace program
+namespace Program
 {
     public class TexturePack
     {

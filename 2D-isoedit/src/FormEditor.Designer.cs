@@ -1,4 +1,4 @@
-﻿namespace program
+﻿namespace Program
 {
     partial class FormEditor 
     {

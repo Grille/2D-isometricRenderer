@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using GGL;
 using GGL.IO;
 
-namespace program
+namespace Program
 {
     public class IsometricRenderer
     {

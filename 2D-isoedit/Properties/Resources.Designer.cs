@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace program.Properties {
+namespace Program.Properties {
     using System;
     
     

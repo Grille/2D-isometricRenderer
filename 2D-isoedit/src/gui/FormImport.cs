@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace program
+namespace Program
 {
     public partial class FormImport : Form
     {
