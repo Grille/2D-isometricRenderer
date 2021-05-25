@@ -30,11 +30,9 @@ namespace Program
 
         //mouse
         private Point lastMousePos;
-        private Point startMousePos;
 
-        private string directory,directorySave, directoryImport, directoryExport;
         //setings
-        private float cores = (int)(Environment.ProcessorCount);
+        private Settings settings;
 
         //Tasks
         private Task renderTask;
@@ -48,52 +46,20 @@ namespace Program
         {
             Console.WriteLine("Start");
             InitializeComponent();
-            directory = directorySave = directoryImport = directoryExport = "";
 
-            if (File.Exists("config.ini"))
-            {
-                string[] configLines = File.ReadAllLines("config.ini");
-                var config = new SortedList<string, string>();
-                for (int i = 0; i < configLines.Length; i++)
-                {
-                    string[] pair = configLines[i].Split(' ');
-                    for (int j = 0; j < pair.Length - 2; j++)
-                        pair[1] += " "+pair[j + 2];
-                    if (pair.Length >= 2)
-                    {
-                        config.Add(pair[0].Trim().ToLower(), pair[1].Trim());
-                    }
-                }
-                try
-                {
-                    if (config.TryGetValue("-fullscreen", out string fullscreen))
-                        Fullscreen(Convert.ToBoolean(fullscreen));
-                    if (config.TryGetValue("-width", out string width))
-                        Width = Convert.ToInt32(width);
-                    if (config.TryGetValue("-height", out string height))
-                        Height = Convert.ToInt32(height);
-                    if (config.TryGetValue("-directory", out string path))
-                        directory = directorySave = directoryImport = directoryExport = path.Trim('"');
-                    if (config.TryGetValue("-directorysave", out string paths))
-                        directorySave = paths.Trim('"');
-                    if (config.TryGetValue("-directoryexport", out string pathe))
-                        directoryExport = pathe.Trim('"');
-                    if (config.TryGetValue("-directoryimport", out string pathi))
-                        directoryImport = pathi.Trim('"');
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("config error "+e.Message);
-                }
-            }
-            else
-            {
+            settings = new Settings();
+            if (!settings.Load("config.ini")) { 
                 Console.WriteLine("config not found");
             }
-                
+
+            Width = settings.WindowWidth;
+            Height = settings.WindowHeight;
+            Fullscreen(settings.Fullscreen);
+
             renderer = new IsometricRenderer();
-            renderer.LoadDataFromBitmapFile(directoryImport + "/Mountain_512.png");
-            renderer.TexturePack.Load(directory + "/default.tex");
+            renderer.LoadDataFromBitmapFile(settings.DirectoryImport + "/Mountain_512.png");
+            renderer.TexturePack.Load(settings.Directory + "/default.tex");
+
             Console.WriteLine("Init Renderer");
             result = null;
             renderTimer.Start();
@@ -316,7 +282,7 @@ namespace Program
         private void openHighMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var dialog = new OpenFileDialog();
-            dialog.InitialDirectory = Path.GetFullPath(directorySave);
+            dialog.InitialDirectory = Path.GetFullPath(settings.DirectorySave);
             dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
@@ -326,7 +292,7 @@ namespace Program
                 Program.MainForm.renderer.Data.HeightMap = bs.ReadByteArray();
                 Program.MainForm.renderer.Data.TextureMap = bs.ReadByteArray();
                 Program.MainForm.Repainting = true;
-                directorySave = Path.GetDirectoryName(dialog.FileName);
+                settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
             });
             dialog.ShowDialog(this);
         }
@@ -334,7 +300,7 @@ namespace Program
         private void saveRenderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var dialog = new SaveFileDialog();
-            dialog.InitialDirectory = Path.GetFullPath(directorySave);
+            dialog.InitialDirectory = Path.GetFullPath(settings.DirectorySave);
             dialog.AddExtension = true;
             dialog.DefaultExt = "ihm";
             dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
@@ -347,7 +313,7 @@ namespace Program
                 bs.WriteByteArray(Program.MainForm.renderer.Data.HeightMap,CompressMode.Auto);
                 bs.WriteByteArray(Program.MainForm.renderer.Data.TextureMap, CompressMode.Auto);
                 bs.Save(dialog.FileName);
-                directorySave = Path.GetDirectoryName(dialog.FileName);
+                settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
             });
             dialog.ShowDialog(this);
             //ByteStream bs = new ByteStream();
@@ -417,7 +383,7 @@ namespace Program
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var dialog = new OpenFileDialog();
-            dialog.InitialDirectory = Path.GetFullPath(directoryImport);
+            dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
             dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
@@ -425,7 +391,7 @@ namespace Program
                 //if (form.ShowDialog(this,out ImportOptions options) == DialogResult.OK)
                 //{
                     renderer.LoadDataFromBitmapFile(dialog.FileName);
-                    directoryImport = Path.GetDirectoryName(dialog.FileName);
+                    settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
                     Repainting = true;
                 //}
                 //else
@@ -439,7 +405,7 @@ namespace Program
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var dialog = new SaveFileDialog();
-            dialog.InitialDirectory = Path.GetFullPath(directoryExport);
+            dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryExport);
             dialog.AddExtension = true;
             dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
             dialog.DefaultExt = ".png";
@@ -455,8 +421,8 @@ namespace Program
                     case ".gif": renderer.Result.Save(dialog.FileName, ImageFormat.Gif); break;
                     default: renderer.Result.Save(dialog.FileName, ImageFormat.Png); break;
                 }
-                    
-                directoryExport = Path.GetDirectoryName(dialog.FileName);
+
+                settings.DirectoryExport = Path.GetDirectoryName(dialog.FileName);
                 //Program.MainForm.Repainting = true;
                 //ce.Cancel = false;
             });

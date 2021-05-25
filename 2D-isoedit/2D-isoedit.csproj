@@ -74,6 +74,7 @@
     <Compile Include="src\gui\FormToolbox.Designer.cs">
       <DependentUpon>FormToolbox.cs</DependentUpon>
     </Compile>
+    <Compile Include="src\util\Settings.cs" />
     <Compile Include="src\util\ByteStream.cs" />
     <Compile Include="src\FormEditor.cs">
       <SubType>Form</SubType>
