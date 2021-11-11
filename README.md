@@ -5,25 +5,11 @@ An example of what is possible with it...<br>
 ## Features
 Isometric graphics from elevation data<br>
 Freely rotatable on Z axis<br>
-Generated realistic shadow<br>
-## Planned
-Real time editor for height map<br>
-Advanced export options<br>
-## How Use
-Download v0.2.1 https://github.com/Grille98/2D-isometricEditor/releases<br>
-Run 2D-isoedit.exe in the bin folder<br>
-Load any heightmap<br>
-## Heightmap format
-The green rgb channel is used for the height<br>
-G = 100 => height = 100px<br>
+Generated shadow<br>
 
-The blue rgb channel defines the used texture<br>
-List of Textures:<br>
-  - 0 = grass<br>
-  - 1 = dirt<br>
-  - 2 = sand<br>
-  - 3 = stone<br>
-  - 4 = dark grass<br>
-  - 5 = water<br>
-  
-The red and alpha rgb channels are ignored<br>
+## How Use
+Download v0.4 https://github.com/Grille/2D-isometricRenderer/releases/download/0.4.0/2D-isoedit_Win64.zip<br>
+Run 2D-isoedit.exe in the bin folder<br>
+import an heightmap image, for example: 'map.png', 'map_text.png' will then be automatically loaded<br>
+'textures.txt' contains information on how colors from 'map_text' will be replaced.<br>
+
