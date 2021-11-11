@@ -13,6 +13,9 @@ namespace Program
         public string DirectoryImport = "./";
         public string DirectoryExport = "./";
 
+        public string DefaultTexture = "./";
+        public string DefaultMap = "./";
+
         public int WindowWidth = 0;
         public int WindowHeight = 0;
 
@@ -57,6 +60,12 @@ namespace Program
 
             if (settings.TryGetValue("directory_import", out value))
                 DirectoryImport = value;
+
+            if (settings.TryGetValue("default_texture", out value))
+                DefaultTexture = value;
+
+            if (settings.TryGetValue("default_map", out value))
+                DefaultMap = value;
 
             return true;
         }

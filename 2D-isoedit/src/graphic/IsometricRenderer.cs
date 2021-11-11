@@ -41,6 +41,7 @@ namespace Program
         public IsometricRenderer()
         {
             //LoadDataFromFile("../examples/maps/autosave.png");
+            Data = new RenderData();
             TexturePack = new TexturePack();
             //TexturePack.Load("../examples/textures/default.tex");
         }
@@ -168,75 +169,68 @@ namespace Program
         private void elevate(RenderData input, LockBitmap resultLB, float start, float end)
         {
             byte[] resultRGB = resultLB.Data;
-            int widthSrc = input.Width, heightSrc = input.Height, widthDst = resultLB.Width, heightDst = resultLB.Height;
 
-            for (int ix = (int)(widthSrc * start); ix < (int)(widthSrc * end); ix++)//Upwards
+            int widthSrc = input.Width, 
+                heightSrc = input.Height, 
+                widthDst = resultLB.Width, 
+                heightDst = resultLB.Height;
+
+            int beginX = (int)(widthSrc * start),
+                endX = (int)(heightSrc * end);
+                
+            for (int ix = beginX; ix < endX; ix++) //L->R
             {
-                for (int iy = (heightSrc - 1); iy >= 0; iy -= 1)//Downwards
+                for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) //Downwards
+                //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
                 {
                     //get positions
                     int offSrc = (ix + iy * widthSrc);
                     int offDst = (ix + iy / 2 * widthDst) * 4;
 
-
-                    //height > 0
-                    if (input.HeightMap[offSrc] > 0)
+                    int iz = input.HeightMap[offSrc];
+                    while (iz > 0) //Downwards
                     {
-                        //get colorList & find color pos
-                        byte[] refColor = TexturePack.Textures[input.TextureMap[offSrc]].Data;
-                        int colorSize = refColor[0] - refColor[1];
-                        int colorStart = 0;
-                        int colorListPos = -1;
-                        int colorPos = 0;
-                        while (colorStart < input.HeightMap[offSrc])
+                        //save
+                        if (iy + heightExcess - iz >= 0)
                         {
-                            colorListPos++;
-                            if (colorListPos >= colorSize) colorListPos = 0;
-                            colorStart += refColor[2 + colorListPos * 5];
-                        }
-                        colorPos = refColor[2 + colorListPos * 5] - (colorStart - input.HeightMap[offSrc]);
+                            //get position on z axe
+                            int offDstZ = offDst - (widthDst * iz * 4) + widthDst * heightExcess * 4;//pos + curent height
 
-                        int iz = input.HeightMap[offSrc];
-                        while (iz > 0) //Downwards
-                        {
-                            //Repeat until color is changed | ground reached
-                            while (iz > 0 && colorPos > 0)
+                            //pixel not yet drawn
+                            if (resultRGB[offDstZ + 3] == 0)
                             {
-                                //save
-                                if ((iy + heightExcess) - iz >= 0)
-                                {
-                                    //get position on z axe
-                                    int offDstZ = offDst - (widthDst * iz * 4) + widthDst * heightExcess * 4;//pos + curent height
-                                                                                                             //pixel not yet drawn
-                                    if (resultRGB[offDstZ + 3] == 0)
-                                    {
-                                        //draw pixel
-                                        float shadow = 1f;
-                                        if (iz < input.ShadowMap[offSrc] + 1) shadow = 0.75f;
-                                        //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
-                                        //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
-                                        //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
-                                        //resultRGB[offDstZ + 3] = (byte)(255);//a
-                                        resultRGB[offDstZ + 0] = (byte)(refColor[5 + colorListPos * 5] * shadow);//b
-                                        resultRGB[offDstZ + 1] = (byte)(refColor[4 + colorListPos * 5] * shadow);//g
-                                        resultRGB[offDstZ + 2] = (byte)(refColor[3 + colorListPos * 5] * shadow);//r
-                                        resultRGB[offDstZ + 3] = (byte)(refColor[6 + colorListPos * 5]);//a
-                                    }
-                                    else
-                                    {
-                                        iz = 0;
-                                        break;
-                                    }
-                                }
-                                //get next z & color pos
-                                iz--;
-                                colorPos--;
+                                //draw pixel
+                                float shadow = 1f;
+                                if (iz < input.ShadowMap[offSrc] + 1)
+                                    shadow = 0.75f;
+
+                                var color = TexturePack[input.TextureMap[offSrc]].GetColorAt(iz);
+                                float ff = 0.01f;// color.A / 255f;
+                                float ff2 = 1 - ff;
+                                //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
+                                //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
+                                //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
+                                //resultRGB[offDstZ + 3] = (byte)(255);//a
+                                /*
+                                resultRGB[offDstZ + 0] = (byte)(resultRGB[offDstZ + 0] * ff2 + color.B * shadow * ff);//b
+                                resultRGB[offDstZ + 1] = (byte)(resultRGB[offDstZ + 1] * ff2 + color.G * shadow * ff);//g
+                                resultRGB[offDstZ + 2] = (byte)(resultRGB[offDstZ + 2] * ff2 + color.R * shadow * ff);//r
+                                resultRGB[offDstZ + 3] = 255;// (byte)(resultRGB[offDstZ + 3] * ff2 + color.A * shadow * ff); ;// (byte)(color.A);//a
+                                */
+                                
+                                resultRGB[offDstZ + 0] += (byte)(color.B * shadow);//b
+                                resultRGB[offDstZ + 1] += (byte)(color.G * shadow);//g
+                                resultRGB[offDstZ + 2] += (byte)(color.R * shadow);//r
+                                resultRGB[offDstZ + 3] += 255;// (byte)(color.A);//a
+                                
                             }
-                            //get next color
-                            colorListPos--;
-                            if (colorListPos < 0) colorListPos = colorSize - 1;
-                            colorPos = refColor[2 + colorListPos * 5];
+                            else
+                            {
+                                iz = 0;
+                                break;
+                            }
                         }
+                        iz--;
                     }
                 }
 
@@ -257,30 +251,6 @@ namespace Program
             return Result;
             //drawImage = true;
             //result.renderInfo = ("RenderTime: " + now.ElapsedMilliseconds + "\nFPS: " + 1000 / (now.ElapsedMilliseconds + 0.1f) + "\nTasks: " + (int)cores);
-        }
-
-        public void LoadDataFromBitmapFile(string path)
-        {
-            try
-            {
-                using (var bmpTemp = new Bitmap(path))
-                {
-                    LockBitmap lockBitmap = new LockBitmap(new Bitmap(bmpTemp), false);
-                    int width = lockBitmap.Width, height = lockBitmap.Height;
-                    Data = new RenderData(width, height);
-                    for (int i = 0; i < width * height; i++)
-                    {
-                        Data.TextureMap[i] = lockBitmap.Data[i * 4 + 0];
-                        Data.HeightMap[i] = lockBitmap.Data[i * 4 + 1];
-                    }
-                }
-                Console.WriteLine("LoadData: " + path);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("LoadData: " + path + " Failed "+e.Message);
-            }
-
         }
     }
 }

@@ -2,49 +2,102 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using GGL.IO;
+using System.Drawing;
 
 namespace Program
 {
-    public class TexturePack
+    public class TexturePack : List<Texture>
     {
-        public Texture[] Textures;
         public TexturePack()
         {
-            Textures = new Texture[255];
-            for (int i = 0; i < 255; i++)
-                Textures[i] = new Texture("default",new byte[] { 2, 0, 1, 70, 100, 40, 255, 1, 100, 70, 40, 255 });
+            
         }
+
+        public int GetId(Color color)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (this[i].GetColorAt(0) == color)
+                    return i;
+            }
+            return 0;
+        }
+
         public void Load(string path)
         {
-            try
+            parse(File.ReadAllText(path));
+        }
+
+        private void parse(string code)
+        {
+            var lines = code.Split(new[] { '\n' });
+
+            Texture texture = null;
+            foreach (var line in lines)
             {
-                //"../textures/default.tex"
-                ByteStream bs = new ByteStream(path);
-                bs.ResetIndex();
-                int length = bs.ReadInt();
-                Textures = new Texture[255];
-                for (int i = 0; i < 255; i++)
+                var tline = line.Trim();
+                if (tline.Length > 0)
                 {
-                    if (i < length)
-                        Textures[i] = new Texture(bs.ReadString(), bs.ReadByteArray());
+                    if (tline[0] == '<')
+                    {
+                        string name = tline.Trim(new[] { '<', '>' });
+                        texture = new Texture();
+                        texture.Name = name;
+                        Add(texture);
+                    }
+                    else {
+                        var split = tline.Split(new[] { ' ' }, 2);
+                        string op = split[0].Trim();
+                        string value = split[1]?.Trim();
+
+                        if (op == "C")
+                        {
+                            var seg = parseSegment(value);
+                            texture.AddSegment(seg);
+                        }
+                    }
                 }
+
             }
-            catch (Exception e){
-                Console.WriteLine(path + " " + e.Message);
+            foreach (var tex in this)
+            {
+                tex.FillData();
             }
         }
-        public void Save(string path)
+        private TextureSegment parseSegment(string line)
         {
-            ByteStream bs = new ByteStream();
-            bs.ResetIndex();
-            bs.WriteInt(Textures.Length);
-            for (int i = 0; i < Textures.Length; i++)
+            var seg = new TextureSegment()
             {
-                bs.WriteString(Textures[i].Name);
-                bs.WriteByteArray(Textures[i].Data);
+                A = 255,
+                R = 0,
+                G = 0,
+                B = 0,
+                Repeat = 1,
+            };
+
+            var split = line.Split('*');
+            if (split.Length == 2)
+            {
+                int repeat = int.Parse(split[1]);
+                seg.Repeat = repeat;
             }
-            bs.Save(path);
+            var csplit = split[0].Trim(new[] { '(', ')' }).Split(',');
+
+            if (csplit.Length >= 3)
+            {
+                seg.R = int.Parse(csplit[0]);
+                seg.G = int.Parse(csplit[1]);
+                seg.B = int.Parse(csplit[2]);
+            }
+
+            if (csplit.Length >= 4)
+            {
+                seg.A = int.Parse(csplit[3]);
+            }
+
+            return seg;
         }
     }
 }

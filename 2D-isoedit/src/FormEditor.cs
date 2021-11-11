@@ -57,8 +57,9 @@ namespace Program
             Fullscreen(settings.Fullscreen);
 
             renderer = new IsometricRenderer();
-            renderer.LoadDataFromBitmapFile(settings.DirectoryImport + "/Mountain_512.png");
-            renderer.TexturePack.Load(settings.Directory + "/default.tex");
+            renderer.Data.LoadFromBitmapFiles(settings.DefaultMap);
+            renderer.TexturePack.Load(settings.DefaultTexture);
+            renderer.Data.UseTexturePack(renderer.TexturePack);
 
             Console.WriteLine("Init Renderer");
             result = null;
@@ -390,9 +391,10 @@ namespace Program
                 //FormImport form = new FormImport();
                 //if (form.ShowDialog(this,out ImportOptions options) == DialogResult.OK)
                 //{
-                    renderer.LoadDataFromBitmapFile(dialog.FileName);
-                    settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
-                    Repainting = true;
+                renderer.Data.LoadFromBitmapFiles(dialog.FileName);
+                renderer.Data.UseTexturePack(renderer.TexturePack);
+                settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
+                Repainting = true;
                 //}
                 //else
                 //{
