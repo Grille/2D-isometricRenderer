@@ -7,13 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Program
+namespace Program;
+
+public partial class FormToolbox : Form
 {
-    public partial class FormToolbox : Form
+    public FormToolbox()
     {
-        public FormToolbox()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

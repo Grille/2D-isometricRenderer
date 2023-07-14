@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Program
+namespace Program;
+
+public struct TextureSegment
 {
-    public struct TextureSegment
-    {
-        public int A;
-        public int R;
-        public int G;
-        public int B;
-        public int Repeat;
-    }
+    public int A;
+    public int R;
+    public int G;
+    public int B;
+    public int Repeat;
 }

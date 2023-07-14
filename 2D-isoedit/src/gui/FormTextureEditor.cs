@@ -7,13 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Program
+namespace Program;
+
+public partial class FormTextureEditor : Form
 {
-    public partial class FormTextureEditor : Form
+    public FormTextureEditor()
     {
-        public FormTextureEditor()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

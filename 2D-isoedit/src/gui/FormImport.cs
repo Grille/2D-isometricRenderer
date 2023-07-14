@@ -7,37 +7,36 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Program
+namespace Program;
+
+public partial class FormImport : Form
 {
-    public partial class FormImport : Form
+    public FormImport()
     {
-        public FormImport()
-        {
-            InitializeComponent();
-        }
-
-        public DialogResult ShowDialog(IWin32Window owner,out ImportOptions options)
-        {
-            ShowDialog(owner);
-            options.HeightSrc = comboBoxHeight.SelectedIndex;
-            options.TextureSrc = comboBoxTexture.SelectedIndex;
-            return DialogResult;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            DialogResult = DialogResult.OK;
-            Close();
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
+        InitializeComponent();
     }
-    public struct ImportOptions
+
+    public DialogResult ShowDialog(IWin32Window owner,out ImportOptions options)
     {
-        public int HeightSrc, TextureSrc;
+        ShowDialog(owner);
+        options.HeightSrc = comboBoxHeight.SelectedIndex;
+        options.TextureSrc = comboBoxTexture.SelectedIndex;
+        return DialogResult;
     }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        Close();
+    }
+
+}
+public struct ImportOptions
+{
+    public int HeightSrc, TextureSrc;
 }

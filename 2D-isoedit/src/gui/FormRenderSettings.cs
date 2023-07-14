@@ -7,13 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Program
+namespace Program;
+
+public partial class FormRenderSettings : Form
 {
-    public partial class FormRenderSettings : Form
+    public FormRenderSettings()
     {
-        public FormRenderSettings()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
