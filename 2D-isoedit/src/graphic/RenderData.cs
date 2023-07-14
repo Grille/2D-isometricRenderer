@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
-using GGL;
+using System.Drawing.Imaging;
 using System.IO;
 
 namespace Program
@@ -11,11 +11,8 @@ namespace Program
     public class RenderData
     {
         public int Width, Height;
-        public byte[] HeightMap;
-        public byte[] TextureTypeMap;
-        public byte[] TextureMap;
-        public Color[] ColorMap;
-        public byte[] ShadowMap;
+
+        public RenderDataCell[] Buffer;
 
         public RenderData() : this(0, 0) { }
         public RenderData(int width,int height)
@@ -29,11 +26,8 @@ namespace Program
                 return;
             Width = width;
             Height = height;
-            HeightMap = new byte[width * height];
-            TextureMap = new byte[width * height];
-            ShadowMap = new byte[width * height];
 
-            ColorMap = new Color[width * height];
+            Buffer = new RenderDataCell[width * height];
         }
 
 
@@ -41,7 +35,7 @@ namespace Program
         {
             for (int i = 0; i < Width * Height; i++)
             {
-                TextureMap[i] = (byte)textures.GetId(ColorMap[i]);
+                Buffer[i].TextureIndex = (byte)textures.GetId(Buffer[i].Color);
             }
         }
 
@@ -61,27 +55,78 @@ namespace Program
             LoadTextureMapFromBitmapFile(pathTexture);
         }
 
-        public void LoadTextureMapFromBitmapFile(string path)
+        public unsafe void LoadTextureMapFromBitmapFile(string path)
+        {
+            
+            try
+            {
+                using var bitmap = new Bitmap(path);
+
+                var data = LockBits(bitmap);
+                byte* ptr = (byte*)data.Ptr;
+                int size = data.Size;
+                int stride = data.Stride;
+
+                switch (stride)
+                {
+                    case 3:
+                    {
+                        for (int i = 0; i < size; i++)
+                        {
+                            Buffer[i].TextureIndex = 0;
+                            Buffer[i].Color = Color.FromArgb(
+                                ptr[i * 3 + 2],
+                                ptr[i * 3 + 1],
+                                ptr[i * 3 + 0]
+                            );
+                        }
+                    }
+                    break;
+                    case 4:
+                    {
+                        for (int i = 0; i < size; i++)
+                        {
+                            Buffer[i].TextureIndex = 0;
+                            Buffer[i].Color = Color.FromArgb(
+                                ptr[i * 4 + 3],
+                                ptr[i * 4 + 2],
+                                ptr[i * 4 + 1],
+                                ptr[i * 4 + 0]
+                            );
+                        }
+                    }
+                    break;
+                    default:
+                    {
+                        throw new Exception();
+                    }
+                }
+
+                Console.WriteLine("LoadData: " + path);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("LoadData: " + path + " Failed " + e.Message);
+            }
+            
+        }
+
+        public unsafe void LoadHeightFromBitmapFile(string path)
         {
             try
             {
-                using (var bmpTemp = new Bitmap(path))
+                using var bitmap = new Bitmap(path);
+
+                var data = LockBits(bitmap);
+                byte* ptr = (byte*)data.Ptr;
+                int size = data.Size;
+                int stride = data.Stride;
+
+                for (int i = 0; i < size; i++)
                 {
-                    var lockBitmap = new LockBitmap(new Bitmap(bmpTemp), false);
-                    int width = lockBitmap.Width, 
-                        height = lockBitmap.Height;
-                    init(width, height);
-                    for (int i = 0; i < width * height; i++)
-                    {
-                        TextureMap[i] = 0;// lockBitmap.Data[i * 4 + 0];
-                        ColorMap[i] = Color.FromArgb(
-                            lockBitmap.Data[i * 4 + 3],
-                            lockBitmap.Data[i * 4 + 2],
-                            lockBitmap.Data[i * 4 + 1],
-                            lockBitmap.Data[i * 4 + 0]
-                        );
-                    }
+                    Buffer[i].Height = ptr[i * stride];
                 }
+
                 Console.WriteLine("LoadData: " + path);
             }
             catch (Exception e)
@@ -91,29 +136,27 @@ namespace Program
 
         }
 
-        public void LoadHeightFromBitmapFile(string path)
+        record struct BitmapData(nint Ptr, int Stride, int Size);
+        BitmapData LockBits(Bitmap bitmap)
         {
-            try
-            {
-                using (var bmpTemp = new Bitmap(path))
-                {
-                    var lockBitmap = new LockBitmap(new Bitmap(bmpTemp), false);
-                    int width = lockBitmap.Width, 
-                        height = lockBitmap.Height;
-                    init(width, height);
-                    for (int i = 0; i < width * height; i++)
-                    {
-                        HeightMap[i] = lockBitmap.Data[i * 4];
+            var bitmapRect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            var bitmapData = bitmap.LockBits(bitmapRect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
-                    }
-                }
-                Console.WriteLine("LoadData: " + path);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("LoadData: " + path + " Failed " + e.Message);
-            }
+            nint ptr = bitmapData.Scan0;
 
+            init(bitmap.Width, bitmap.Height);
+
+            int size = bitmapRect.Width * bitmapRect.Height;
+
+            int stride = bitmap.PixelFormat switch
+            {
+                PixelFormat.Format8bppIndexed => 1,
+                PixelFormat.Format24bppRgb => 3,
+                PixelFormat.Format32bppArgb => 4,
+                _ => throw new Exception(),
+            };
+
+            return new BitmapData(ptr, stride, size);
         }
     }
 }

@@ -1,21 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <ApplicationIcon>assets\cube.ico</ApplicationIcon>
 	<UseWindowsForms>true</UseWindowsForms>
 	<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>False</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="assets\cube.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
 	<ContentWithTargetPath Include="examples\config.ini">
@@ -43,5 +39,8 @@
     <None Update="examples\Mountain_512_tex.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\util\" />
   </ItemGroup>
 </Project>

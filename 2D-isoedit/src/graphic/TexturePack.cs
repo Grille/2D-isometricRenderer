@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using GGL.IO;
 using System.Drawing;
 
 namespace Program
 {
     public class TexturePack : List<Texture>
     {
-        public TexturePack()
-        {
-            
-        }
+        public TexturePack() { }
 
         public int GetId(Color color)
         {
@@ -27,10 +23,10 @@ namespace Program
 
         public void Load(string path)
         {
-            parse(File.ReadAllText(path));
+            Parse(File.ReadAllText(path));
         }
 
-        private void parse(string code)
+        public void Parse(string code)
         {
             var lines = code.Split(new[] { '\n' });
 
@@ -38,28 +34,28 @@ namespace Program
             foreach (var line in lines)
             {
                 var tline = line.Trim();
-                if (tline.Length > 0)
-                {
-                    if (tline[0] == '<')
-                    {
-                        string name = tline.Trim(new[] { '<', '>' });
-                        texture = new Texture();
-                        texture.Name = name;
-                        Add(texture);
-                    }
-                    else {
-                        var split = tline.Split(new[] { ' ' }, 2);
-                        string op = split[0].Trim();
-                        string value = split[1]?.Trim();
 
-                        if (op == "C")
-                        {
-                            var seg = parseSegment(value);
-                            texture.AddSegment(seg);
-                        }
-                    }
+                if (tline.Length == 0)
+                    continue;
+
+                if (tline[0] == '[')
+                {
+                    string name = tline.Trim(new[] { '[', ']' });
+                    texture = new Texture();
+                    texture.Name = name;
+                    Add(texture);
+                    continue;
                 }
 
+                var split = tline.Split(new[] { ' ' }, 2);
+                string op = split[0].Trim().ToLower();
+                string value = split[1]?.Trim();
+
+                if (op == "c")
+                {
+                    var seg = parseSegment(value);
+                    texture.AddSegment(seg);
+                }
             }
             foreach (var tex in this)
             {
@@ -80,10 +76,10 @@ namespace Program
             var split = line.Split('*');
             if (split.Length == 2)
             {
-                int repeat = int.Parse(split[1]);
+                int repeat = int.Parse(split[1].Trim());
                 seg.Repeat = repeat;
             }
-            var csplit = split[0].Trim(new[] { '(', ')' }).Split(',');
+            var csplit = split[0].Trim().Trim(new[] { '(', ')' }).Split(',');
 
             if (csplit.Length >= 3)
             {

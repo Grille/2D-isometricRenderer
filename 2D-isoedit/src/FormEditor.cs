@@ -11,8 +11,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using GGL;
-using GGL.IO;
 using System.Drawing.Drawing2D;
 /// <summary>-</summary>
 namespace Program
@@ -287,13 +285,15 @@ namespace Program
             dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
+                /*
                 ByteStream bs = new ByteStream(dialog.FileName);
                 bs.ReadByte();
                 Program.MainForm.renderer.Data = new RenderData(bs.ReadInt(), bs.ReadInt());
-                Program.MainForm.renderer.Data.HeightMap = bs.ReadByteArray();
-                Program.MainForm.renderer.Data.TextureMap = bs.ReadByteArray();
+                //Program.MainForm.renderer.Data.HeightMap = bs.ReadByteArray();
+                //Program.MainForm.renderer.Data.TextureMap = bs.ReadByteArray();
                 Program.MainForm.Repainting = true;
                 settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
+                */
             });
             dialog.ShowDialog(this);
         }
@@ -307,14 +307,16 @@ namespace Program
             dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
             dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
             {
+                /*
                 ByteStream bs = new ByteStream();
                 bs.WriteByte(0);
                 bs.WriteInt(Program.MainForm.renderer.Data.Width);
                 bs.WriteInt(Program.MainForm.renderer.Data.Height);
-                bs.WriteByteArray(Program.MainForm.renderer.Data.HeightMap,CompressMode.Auto);
-                bs.WriteByteArray(Program.MainForm.renderer.Data.TextureMap, CompressMode.Auto);
+                //bs.WriteByteArray(Program.MainForm.renderer.Data.HeightMap,CompressMode.Auto);
+                //bs.WriteByteArray(Program.MainForm.renderer.Data.TextureMap, CompressMode.Auto);
                 bs.Save(dialog.FileName);
                 settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
+                */
             });
             dialog.ShowDialog(this);
             //ByteStream bs = new ByteStream();
