@@ -72,6 +72,12 @@ public class TexturePack : IReadOnlyList<Texture>
                 var seg = parseSegment(value);
                 texture.AddSegment(seg);
             }
+
+            if (op == "k")
+            {
+                var seg = parseSegment(value);
+                texture.Key = seg.Color;
+            }
         }
 
         Console.WriteLine("To array");

@@ -98,7 +98,8 @@ public unsafe class IsometricRenderer
     //rotate byte pixel array
     private void Rotate(float start, float end)
     {
-        int inputW = input.Width, inputH = input.Height, resultW = work.Width, resultH = work.Height;
+        int srcWidth = input.Width, srcHeight = input.Height; 
+        int dstWidth = work.Width, dstHeight = work.Height;
 
         double sinma = Math.Sin(-angle * 3.14159265 / 180);
         double cosma = Math.Cos(-angle * 3.14159265 / 180);
@@ -106,22 +107,22 @@ public unsafe class IsometricRenderer
         var dst = work.Buffer;
         var src = input.Buffer;
 
-        for (int x = (int)(resultW * start); x < (int)(resultW * end); x++)
+        int srcHalfWidth = srcWidth / 2;
+        int srcHalfHeight = srcHeight / 2;
+
+        for (int x = (int)(dstWidth * start); x < (int)(dstWidth * end); x++)
         {
-            for (int y = 0; y < resultH; y++)
+            for (int y = 0; y < dstHeight; y++)
             {
-                int hwidth = inputW / 2;
-                int hheight = inputH / 2;
+                int xt = (int)(x - srcHalfWidth * 1.5);
+                int yt = (int)(y - srcHalfHeight * 1.5);
 
-                int xt = (int)(x - hwidth * 1.5);
-                int yt = (int)(y - hheight * 1.5);
+                int xs = (int)((cosma * xt - sinma * yt) + srcHalfWidth);
+                int ys = (int)((sinma * xt + cosma * yt) + srcHalfHeight);
 
-                int xs = (int)((cosma * xt - sinma * yt) + hwidth);
-                int ys = (int)((sinma * xt + cosma * yt) + hheight);
-
-                int offsetDst = (x + y * resultW);
-                int offsetSrc = (xs + ys * inputW);
-                if (xs >= 0 && xs < inputW && ys >= 0 && ys < inputH)
+                int offsetDst = (x + y * dstWidth);
+                int offsetSrc = (xs + ys * srcWidth);
+                if (xs >= 0 && xs < srcWidth && ys >= 0 && ys < srcHeight)
                 {
                     dst[offsetDst] = src[offsetSrc];
                 }
@@ -148,16 +149,18 @@ public unsafe class IsometricRenderer
                 int offset = ix + iy * width;
                 int i = 0;
 
-                float shadowHeight = (buffer[offset].Height);
+                float shadowHeight = buffer[offset].Height;
                 while (buffer[offset].Shadow < shadowHeight)
                 {
-                    if (i > 0) buffer[offset].Shadow = (byte)(shadowHeight * 1f);
+                    if (i > 0) 
+                        buffer[offset].Shadow = (byte)(shadowHeight * 1f);
 
-                    if (buffer[offset].Height > shadowHeight + 1) break;
+                    if (buffer[offset].Height > shadowHeight + 1) 
+                        break;
+
                     i++; shadowHeight -= 1f; offset += 1;
                 }
             }
-
         }
 
     }
@@ -211,7 +214,7 @@ public unsafe class IsometricRenderer
                                 if (iz < pixels[offSrc].Shadow + 1)
                                     shadow = 0.75f;
 
-                                var color = this.input.Textures[pixels[offSrc].TextureIndex].GetColorAt(iz);
+                                var color = input.Textures[pixels[offSrc].TextureIndex].GetColorAt(iz);
                                 float ff = 0.01f;// color.A / 255f;
                                 float ff2 = 1 - ff;
                                 //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b

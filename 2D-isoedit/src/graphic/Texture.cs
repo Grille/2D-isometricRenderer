@@ -55,7 +55,11 @@ public class Texture
                 }
             }
         }
-        Key = data[0];
+
+        if (Key == default)
+        {
+            Key = data[0];
+        }
     }
 
 

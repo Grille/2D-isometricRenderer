@@ -20,13 +20,12 @@ namespace Program;
 public partial class FormEditor : Form
 {
     //Graphic
-    public IsometricRenderer renderer;
+    IsometricRenderer renderer;
+    Camera camera;
+
     //Rendering Values
     public bool Repainting = false;
     private bool resultRedy = false;
-
-    //mouse
-    private Point lastMousePos;
 
     //setings
     private Settings settings;
@@ -36,8 +35,6 @@ public partial class FormEditor : Form
 
     //Editor Values
     bool curTextureEdit;
-
-    float camPosX, camPosY, camScale = 1;
 
     public FormEditor()
     {
@@ -52,6 +49,8 @@ public partial class FormEditor : Form
         Width = settings.WindowWidth;
         Height = settings.WindowHeight;
         Fullscreen(settings.Fullscreen);
+
+        camera = new Camera();
 
         var textures = TexturePack.FromFile(settings.DefaultTexture);
         var input = new InputData(settings.DefaultMap)
@@ -76,26 +75,30 @@ public partial class FormEditor : Form
         if (result == null) 
             return;
 
+        camera.ScreenSize = pBResult.Size;
+
         var g = e.Graphics;
         g.InterpolationMode = InterpolationMode.NearestNeighbor;
         g.SmoothingMode = SmoothingMode.None;
 
-        Rectangle windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
-        g.FillRectangle(new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical), windowRect);
-        float drawPosX = ((-camPosX) * camScale) + Width / 2;
-        float drawPosY = ((-camPosY) * camScale) + Height / 2;
-        g.DrawImage(result,
-            new RectangleF(drawPosX - (result.Width / 2) * camScale, drawPosY - 255 * camScale - ((result.Height - 255) / 2) * camScale, result.Width * camScale, result.Height * camScale),
-            new RectangleF(0, 0, result.Width, result.Height), GraphicsUnit.Pixel);
+        var windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
+        var windowBrush = new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical);
+        g.FillRectangle(windowBrush, windowRect);
+
+        float scale = camera.Scale;
+        var nullPos = camera.WorldToScreenSpace(PointF.Empty);
+        var drawPos = new PointF(nullPos.X - (result.Width / 2) * scale, nullPos.Y - 255 * scale - ((result.Height - 255) / 2) * scale);
+
+        var dstRect = new RectangleF(drawPos.X, drawPos.Y, result.Width * scale, result.Height * scale);
+        var srcRect = new RectangleF(0, 0, result.Width, result.Height);
+
+        g.DrawImage(result, dstRect, srcRect, GraphicsUnit.Pixel);
         //g.DrawString("" + renderer.RenderTime + "ms", new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
 
-        float X=0, Y=0, Z=0;
+        //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPos.X, drawPos.Y-100), new PointF(drawPos.X, drawPos.Y + 100));
+        //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPos.X- (result.Width/2) * camScale, drawPos.Y), new PointF(drawPos.X+ (result.Width / 2) * camScale, drawPos.Y));
+        //g.DrawLine(new Pen(Color.FromArgb(100, Color.Lime), 2), new PointF(drawPos.X - 100, drawPos.Y - 50), new PointF(drawPos.X + 100, drawPos.Y + 50));
 
-        //renderer.AddAngle(curAngle - lastAngle);
-        
-        //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPosX, drawPosY-100), new PointF(drawPosX, drawPosY + 100));
-        //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPosX- (result.Width/2) * camScale, drawPosY), new PointF(drawPosX+ (result.Width / 2) * camScale, drawPosY));
-        //g.DrawLine(new Pen(Color.FromArgb(100, Color.Lime), 2), new PointF(drawPosX - 100, drawPosY - 50), new PointF(drawPosX + 100, drawPosY + 50));
         toolStripStatusLabelRenderTime.Text = "RenderTime " + renderer.RenderTime + "ms";
     }
 
@@ -118,66 +121,57 @@ public partial class FormEditor : Form
             renderTask = Task.Run(Render);
             Repainting = false;
         }
-        if (resultRedy)
-        {
+        //if (resultRedy)
+        //{
             pBResult.Refresh();
             resultRedy = false;
-        }
+        //}
     }
 
     #region GUI events
     private void pBRender_MouseMove(object sender, MouseEventArgs e)
     {
-        pBResult.Focus();
-        //if (e.X > heightMapPosX && e.Y > heightMapPosY)
-        //{
+        bool move = false;
+        bool refresh = false;
+
         if (e.Button == MouseButtons.Middle)
         {
-            camPosX += (lastMousePos.X - e.X) / camScale;
-            camPosY += (lastMousePos.Y - e.Y) / camScale;
-            pBResult.Refresh();
+            move = true;
+            refresh = true;
         }
         else if (e.Button == MouseButtons.Left)
         {
             if (toolStripButtonDrag.Checked)
             {
-                camPosX += (lastMousePos.X - e.X)/camScale;
-                camPosY += (lastMousePos.Y - e.Y)/camScale;
-                pBResult.Refresh();
-                //Render();
+                move = true;
+                refresh = true;
             }
             else if (toolStripButtonRotate.Checked)
             {
-                float curPosX = e.X - Width / 2 + camPosX * camScale, curPosY = (e.Y - Height / 2 + camPosY * camScale);
-                float lastPosX = lastMousePos.X - Width / 2 + camPosX * camScale, lastPosY = (lastMousePos.Y - Height / 2 + camPosY * camScale);
+                
+                var curPos = camera.ScreenToWorldSpace(e.Location);
+                var lastPos = camera.ScreenToWorldSpace(camera.LastLocation);
 
-                float curAngle = (float)(Math.Atan2(curPosY * 2, curPosX) * (180 / Math.PI));
-                float lastAngle = (float)(Math.Atan2(lastPosY * 2, lastPosX) * (180 / Math.PI));
+                float curAngle = (float)(Math.Atan2(curPos.Y * 2, curPos.X) * (180 / Math.PI));
+                float lastAngle = (float)(Math.Atan2(lastPos.Y * 2, lastPos.X) * (180 / Math.PI));
 
                 renderer.Angle += curAngle - lastAngle;
                 Repainting = true;
+                
             }
-            //pBResult.Refresh();
         }
-        //}
-        lastMousePos = e.Location;
+        
+        
+        camera.MouseMoveEvent(e, move);
+        if (refresh)
+        {
+            pBResult.Refresh();
+        }
     }
     private void pBRender_MouseWheel(object sender, MouseEventArgs e)
     {
-        
-        float posX = -camPosX + (e.X - Width / 2) / camScale;
-        float posY = -camPosY + (e.Y - Height / 2) / camScale;
+        camera.MouseScrollEvent(e, 1.5f);
 
-        
-        camScale += (e.Delta / 500f) * camScale;
-
-        if (camScale < 0.1) camScale = 0.1f;
-        else if (camScale > 4f) camScale = 4f;
-
-        
-        camPosX += (camPosX - (-posX + (Width / 2 * (e.X / (float)Width * 2 - 1)) / camScale));
-        camPosY += (camPosY - (-posY + (Height / 2 * (e.Y / (float)Height * 2 - 1)) / camScale));
-        
         pBResult.Refresh();
     }
 
@@ -266,7 +260,7 @@ public partial class FormEditor : Form
 
     private void pBResult_MouseDown(object sender, MouseEventArgs e)
     {
-        lastMousePos = e.Location;
+        camera.MouseMoveEvent(e, false);
     }
 
     private void toolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
