@@ -13,6 +13,8 @@ namespace Program;
 public class Texture
 {
     public string Name;
+    public Color Key;
+
     private Color[] data;//[r,g,b,a,l]
     private List<TextureSegment> segments;
 
@@ -53,7 +55,7 @@ public class Texture
                 }
             }
         }
-
+        Key = data[0];
     }
 
 

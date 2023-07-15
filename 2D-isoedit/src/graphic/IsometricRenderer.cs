@@ -20,11 +20,25 @@ public unsafe class IsometricRenderer
     float cores = (int)Environment.ProcessorCount;
 
     //Tasks
-    public RenderData Data;
-    private RenderData translatedData;
-    public TexturePack TexturePack;
+    public InputData InputData
+    {
+        get => input;
+        set
+        {
+            if (input == value) 
+                return;
 
-    public Bitmap Result { get; private set; }
+            input = value;
+            work = new WorkData((int)(input.Width * 1.5), (int)(input.Height * 1.5));
+            swapchain = new Swapchain(work.Width, work.Height / 2 + heightExcess);
+        }
+    }
+
+    InputData input;
+    WorkData work;
+    Swapchain swapchain;
+
+    public Bitmap Result => swapchain.Result;
 
 
 
@@ -38,13 +52,7 @@ public unsafe class IsometricRenderer
 
     public bool IsRendering { get; private set; } = false;
 
-    public IsometricRenderer()
-    {
-        //LoadDataFromFile("../examples/maps/autosave.png");
-        Data = new RenderData();
-        TexturePack = new TexturePack();
-        //TexturePack.Load("../examples/textures/default.tex");
-    }
+    public IsometricRenderer() { }
 
     public float Angle
     {
@@ -60,80 +68,77 @@ public unsafe class IsometricRenderer
         }
     }
 
-    //Prepare the heightMap call rotate and shadow    
-    private RenderData translateMap(RenderData input)
+    void DistributeTasks(Action<float, float> func)
     {
-        translatedData = new RenderData((int)(input.Width * 1.5), (int)(input.Height * 1.5));
-        //LockBitmap resultLB = new LockBitmap((int)(inputLB.Width * 1.5), (int)(inputLB.Height * 1.5));
         if (cores == 1)
         {
-            rotate(input, translatedData, 0, 1);
+            func(0, 1);
+            return;
         }
-        else
+
+        Task[] tasks = new Task[(int)cores];
+
+        for (int i = 0; i < cores; i++)
         {
-            Task[] tasks = new Task[(int)cores];
-
-            for (int i = 0; i < cores; i++)
-            {
-                int thmp = i + 1;
-                tasks[i] = Task.Run(() =>
-                    rotate(input, translatedData, thmp / cores - 1 / cores, thmp / cores)
-                );
-            }
-
-            Task.WaitAll(tasks);
+            int thmp = i + 1;
+            tasks[i] = Task.Run(() =>
+                func(thmp / cores - 1 / cores, thmp / cores)
+            );
         }
 
-        shadows(translatedData, ShadowQuality);
+        Task.WaitAll(tasks);
+    }
 
-        return translatedData;
+    //Prepare the heightMap call rotate and shadow    
+    private void Rotate()
+    {
+        DistributeTasks(Rotate);
     }
 
     //rotate byte pixel array
-    private void rotate(RenderData input, RenderData result, float start, float end)
+    private void Rotate(float start, float end)
     {
-        int inputW = input.Width, inputH = input.Height, resultW = result.Width, resultH = result.Height;
+        int inputW = input.Width, inputH = input.Height, resultW = work.Width, resultH = work.Height;
 
         double sinma = Math.Sin(-angle * 3.14159265 / 180);
         double cosma = Math.Cos(-angle * 3.14159265 / 180);
 
-        fixed (RenderDataCell* ptrDst = result.Buffer, ptrSrc = input.Buffer)
+        var dst = work.Buffer;
+        var src = input.Buffer;
+
+        for (int x = (int)(resultW * start); x < (int)(resultW * end); x++)
         {
-
-            for (int x = (int)(resultW * start); x < (int)(resultW * end); x++)
+            for (int y = 0; y < resultH; y++)
             {
-                for (int y = 0; y < resultH; y++)
+                int hwidth = inputW / 2;
+                int hheight = inputH / 2;
+
+                int xt = (int)(x - hwidth * 1.5);
+                int yt = (int)(y - hheight * 1.5);
+
+                int xs = (int)((cosma * xt - sinma * yt) + hwidth);
+                int ys = (int)((sinma * xt + cosma * yt) + hheight);
+
+                int offsetDst = (x + y * resultW);
+                int offsetSrc = (xs + ys * inputW);
+                if (xs >= 0 && xs < inputW && ys >= 0 && ys < inputH)
                 {
-                    int hwidth = inputW / 2;
-                    int hheight = inputH / 2;
-
-                    int xt = (int)(x - hwidth * 1.5);
-                    int yt = (int)(y - hheight * 1.5);
-
-                    int xs = (int)((cosma * xt - sinma * yt) + hwidth);
-                    int ys = (int)((sinma * xt + cosma * yt) + hheight);
-
-                    int offsetDst = (x + y * resultW);
-                    int offsetSrc = (xs + ys * inputW);
-                    if (xs >= 0 && xs < inputW && ys >= 0 && ys < inputH)
-                    {
-                        ptrDst[offsetDst] = ptrSrc[offsetSrc];
-                    }
+                    dst[offsetDst] = src[offsetSrc];
                 }
             }
         }
-
     }
 
     //add shadows
-    private void shadows(RenderData result, int resulution)
+    private void CalcShadows(int resulution)
     {
 
         if (resulution == 0) 
             return;
 
-        int width = result.Width;
-        int height = result.Height;
+        var buffer = work.Buffer;
+        int width = work.Width;
+        int height = work.Height;
 
         for (int iy = 0; iy < height; iy++)//y 0 to 1
         {
@@ -143,12 +148,12 @@ public unsafe class IsometricRenderer
                 int offset = ix + iy * width;
                 int i = 0;
 
-                float shadowHeight = (result.Buffer[offset].Height);
-                while (result.Buffer[offset].Shadow < shadowHeight)
+                float shadowHeight = (buffer[offset].Height);
+                while (buffer[offset].Shadow < shadowHeight)
                 {
-                    if (i > 0) result.Buffer[offset].Shadow = (byte)(shadowHeight * 1f);
+                    if (i > 0) buffer[offset].Shadow = (byte)(shadowHeight * 1f);
 
-                    if (result.Buffer[offset].Height > shadowHeight + 1) break;
+                    if (buffer[offset].Height > shadowHeight + 1) break;
                     i++; shadowHeight -= 1f; offset += 1;
                 }
             }
@@ -158,58 +163,32 @@ public unsafe class IsometricRenderer
     }
 
     //Rendering the image call elevate
-    private void renderResult(RenderData input)
+    private void Elevate()
     {
-        if (input == null) 
-            return;
-
-        var bitmap = new Bitmap(input.Width, (input.Height / 2) + heightExcess);
-        var bitmapRect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-        var bitmapData = bitmap.LockBits(bitmapRect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
-
-        if (cores == 1)
-        {
-            elevate(input, bitmapData, 0, 1);
-        }
-        else
-        {
-            Task[] tasks = new Task[(int)cores];
-
-            for (int i = 0; i < cores; i++)
-            {
-                int thmp = i + 1;
-                tasks[i] = Task.Run(() => 
-                    elevate(input, bitmapData, thmp / cores - 1 / cores, thmp / cores)
-                );
-            }
-
-            Task.WaitAll(tasks);
-        }
-
-        bitmap.UnlockBits(bitmapData);
-        Result = bitmap;
+        DistributeTasks(Elevate);
     }
 
     //Rendering the part of image from heightmap (elevate and apply textures & shadows)
-    private unsafe void elevate(RenderData input, BitmapData resultLB, float start, float end)
+    private unsafe void Elevate(float start, float end)
     {
-        byte* resultRGB = (byte*)resultLB.Scan0;
+        var data = swapchain.Data;
+        byte* resultRGB = (byte*)data.Scan0;
 
-        int widthSrc = input.Width, 
-            heightSrc = input.Height, 
-            widthDst = resultLB.Width, 
-            heightDst = resultLB.Height;
+        int widthSrc = work.Width, 
+            heightSrc = work.Height, 
+            widthDst = data.Width, 
+            heightDst = data.Height;
 
         int beginX = (int)(widthSrc * start),
             endX = (int)(heightSrc * end);
 
-        fixed (RenderDataCell* pixels = input.Buffer)
+        fixed (RenderDataCell* pixels = work.Buffer)
         {
 
             for (int ix = beginX; ix < endX; ix++) //L->R
             {
                 for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) //Downwards
-                                                                 //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
+                //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
                 {
                     //get positions
                     int offSrc = (ix + iy * widthSrc);
@@ -232,7 +211,7 @@ public unsafe class IsometricRenderer
                                 if (iz < pixels[offSrc].Shadow + 1)
                                     shadow = 0.75f;
 
-                                var color = TexturePack[pixels[offSrc].TextureIndex].GetColorAt(iz);
+                                var color = this.input.Textures[pixels[offSrc].TextureIndex].GetColorAt(iz);
                                 float ff = 0.01f;// color.A / 255f;
                                 float ff2 = 1 - ff;
                                 //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
@@ -266,19 +245,25 @@ public unsafe class IsometricRenderer
     }
 
     //Render
-    public Bitmap Render()
+    public void Render()
     {
-        if (this.Data == null)
-            return new Bitmap(1, 1);
+        if (InputData == null)
+            throw new InvalidOperationException("No input data given.");
 
-        Stopwatch now = new Stopwatch();
-        now.Start();
+        var sw = Stopwatch.StartNew();
+
         IsRendering = true;
-        renderResult(translateMap(this.Data));
+
+        work.Clear();
+
+        Rotate();
+        CalcShadows(ShadowQuality);
+        Elevate();
+
+        swapchain.Swap();
+
         IsRendering = false;
-        RenderTime = (int)now.ElapsedMilliseconds;
-        return Result;
-        //drawImage = true;
-        //result.renderInfo = ("RenderTime: " + now.ElapsedMilliseconds + "\nFPS: " + 1000 / (now.ElapsedMilliseconds + 0.1f) + "\nTasks: " + (int)cores);
+
+        RenderTime = (int)sw.ElapsedMilliseconds;
     }
 }

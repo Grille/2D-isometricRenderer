@@ -1,4 +1,5 @@
 [err] 
+k 0xFFFFFF
 c (255, 255, 255)
 
 [grass0] 

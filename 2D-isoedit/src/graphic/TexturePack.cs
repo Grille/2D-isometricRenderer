@@ -4,31 +4,43 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Drawing;
+using System.Collections;
 
 namespace Program;
 
-public class TexturePack : List<Texture>
+public class TexturePack : IReadOnlyList<Texture>
 {
-    public TexturePack() { }
+    Texture[] textures;
+
+    public TexturePack(string code) { 
+        Parse(code);
+    }
+
+    public Texture this[int index] => textures[index];
+
+    public int Count => textures.Length;
 
     public int GetId(Color color)
     {
         for (int i = 0; i < Count; i++)
         {
-            if (this[i].GetColorAt(0) == color)
+            if (this[i].Key == color)
                 return i;
         }
         return 0;
     }
 
-    public void Load(string path)
+    public static TexturePack FromFile(string path)
     {
-        Parse(File.ReadAllText(path));
+        var code = File.ReadAllText(path);
+        return new TexturePack(code);
     }
 
-    public void Parse(string code)
+    void Parse(string code)
     {
         var lines = code.Split(new[] { '\n' });
+
+        var list = new List<Texture>();
 
         Texture texture = null;
         foreach (var line in lines)
@@ -40,10 +52,14 @@ public class TexturePack : List<Texture>
 
             if (tline[0] == '[')
             {
-                string name = tline.Trim(new[] { '[', ']' });
-                texture = new Texture();
-                texture.Name = name;
-                Add(texture);
+                string name = tline.Trim(new[] {
+                    '[', ']'
+                });
+                texture = new Texture()
+                {
+                    Name = name,
+                };
+                list.Add(texture);
                 continue;
             }
 
@@ -57,11 +73,16 @@ public class TexturePack : List<Texture>
                 texture.AddSegment(seg);
             }
         }
-        foreach (var tex in this)
+
+        Console.WriteLine("To array");
+        textures = list.ToArray();
+
+        foreach (var tex in textures)
         {
             tex.FillData();
         }
     }
+
     private TextureSegment parseSegment(string line)
     {
         var seg = new TextureSegment()
@@ -94,5 +115,15 @@ public class TexturePack : List<Texture>
         }
 
         return seg;
+    }
+
+    public IEnumerator<Texture> GetEnumerator()
+    {
+        return ((IEnumerable<Texture>)textures).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return textures.GetEnumerator();
     }
 }

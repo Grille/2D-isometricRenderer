@@ -21,7 +21,6 @@ public partial class FormEditor : Form
 {
     //Graphic
     public IsometricRenderer renderer;
-    private Bitmap result;
     //Rendering Values
     public bool Repainting = false;
     private bool resultRedy = false;
@@ -54,13 +53,18 @@ public partial class FormEditor : Form
         Height = settings.WindowHeight;
         Fullscreen(settings.Fullscreen);
 
-        renderer = new IsometricRenderer();
-        renderer.Data.LoadFromBitmapFiles(settings.DefaultMap);
-        renderer.TexturePack.Load(settings.DefaultTexture);
-        renderer.Data.UseTexturePack(renderer.TexturePack);
+        var textures = TexturePack.FromFile(settings.DefaultTexture);
+        var input = new InputData(settings.DefaultMap)
+        {
+            Textures = textures
+        };
+
+        renderer = new IsometricRenderer()
+        {
+            InputData = input,
+        };
 
         Console.WriteLine("Init Renderer");
-        result = null;
         renderTimer.Start();
         Repainting = true;
     }
@@ -68,9 +72,11 @@ public partial class FormEditor : Form
     //Draw rendered image
     private void pBRender_Paint(object sender, PaintEventArgs e)
     {
+        var result = renderer.Result;
+        if (result == null) 
+            return;
 
-        Graphics g = e.Graphics;
-        if (result == null) return;
+        var g = e.Graphics;
         g.InterpolationMode = InterpolationMode.NearestNeighbor;
         g.SmoothingMode = SmoothingMode.None;
 
@@ -96,7 +102,7 @@ public partial class FormEditor : Form
     //Render Image
     private void Render()
     {
-        result = renderer.Render();
+        renderer.Render();
         resultRedy = true;
     }
     //RenderLoop & AutoRotate
@@ -109,8 +115,7 @@ public partial class FormEditor : Form
         }
         if (!renderer.IsRendering && Repainting)
         {
-            renderTask = new Task(() => Render());
-            renderTask.Start();
+            renderTask = Task.Run(Render);
             Repainting = false;
         }
         if (resultRedy)
@@ -213,11 +218,11 @@ public partial class FormEditor : Form
     private void bSave_Click(object sender, EventArgs e)
     {
         Render();
-        Bitmap save = new Bitmap(result);
-        result.Save("../output/render.png", System.Drawing.Imaging.ImageFormat.Png);
+        //Bitmap save = new Bitmap(result);
+        //result.Save("../output/render.png", System.Drawing.Imaging.ImageFormat.Png);
         //save = inputLB.returnBitmap();
-        save.Save("../output/work.png", System.Drawing.Imaging.ImageFormat.Png);
-        save.Save("../input/autoSave.png", System.Drawing.Imaging.ImageFormat.Png);
+        //save.Save("../output/work.png", System.Drawing.Imaging.ImageFormat.Png);
+        //save.Save("../input/autoSave.png", System.Drawing.Imaging.ImageFormat.Png);
         //inputLB = new LockBitmap(save, false);
     }
     private void bLoad_Click(object sender, EventArgs e)
@@ -393,8 +398,12 @@ public partial class FormEditor : Form
             //FormImport form = new FormImport();
             //if (form.ShowDialog(this,out ImportOptions options) == DialogResult.OK)
             //{
-            renderer.Data.LoadFromBitmapFiles(dialog.FileName);
-            renderer.Data.UseTexturePack(renderer.TexturePack);
+            var input = new InputData(dialog.FileName)
+            {
+                Textures = renderer.InputData.Textures,
+            };
+
+            renderer.InputData = input;
             settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
             Repainting = true;
             //}
