@@ -37,12 +37,12 @@ public unsafe class IsometricRenderer
     InputData input;
     WorkData work;
     Swapchain swapchain;
+    Profiler profiler;
 
-    public Bitmap Result => swapchain.Result;
+    public MonitorHandle<Bitmap> Result => swapchain.Result;
+    public float FrameTime => profiler.FrameTime;
+    public float FPS => profiler.FPS;
 
-
-
-    public int RenderTime;
     //settings
     public int ShadowQuality = 1;
 
@@ -50,9 +50,9 @@ public unsafe class IsometricRenderer
 
     byte heightExcess = 255;
 
-    public bool IsRendering { get; private set; } = false;
-
-    public IsometricRenderer() { }
+    public IsometricRenderer() { 
+        profiler = new Profiler();
+    }
 
     public float Angle
     {
@@ -101,7 +101,7 @@ public unsafe class IsometricRenderer
         int srcWidth = input.Width, srcHeight = input.Height; 
         int dstWidth = work.Width, dstHeight = work.Height;
 
-        double rad = -(double)(int)angle * Math.PI / 180;
+        double rad = -angle * Math.PI / 180;
         double sinma = Math.Sin(rad);
         double cosma = Math.Cos(rad);
 
@@ -254,20 +254,19 @@ public unsafe class IsometricRenderer
         if (InputData == null)
             throw new InvalidOperationException("No input data given.");
 
-        var sw = Stopwatch.StartNew();
-
-        IsRendering = true;
+        profiler.Begin();
 
         work.Clear();
 
         Rotate();
         CalcShadows(ShadowQuality);
+
+        swapchain.LockActive();
         Elevate();
+        swapchain.UnlockActive();
 
-        swapchain.Swap();
+        swapchain.Next();
 
-        IsRendering = false;
-
-        RenderTime = (int)sw.ElapsedMilliseconds;
+        profiler.End();
     }
 }

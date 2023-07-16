@@ -51,6 +51,7 @@
             toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             autoRotateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pBResult = new System.Windows.Forms.PictureBox();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
@@ -67,7 +68,7 @@
             // 
             // renderTimer
             // 
-            renderTimer.Interval = 17;
+            renderTimer.Interval = 1;
             renderTimer.Tick += renderTimer_Tick;
             // 
             // menuStrip1
@@ -171,7 +172,7 @@
             // 
             // displayToolStripMenuItem
             // 
-            displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { fullscrenToolStripMenuItem, toolStripSeparator2, settingsToolStripMenuItem, toolStripSeparator4, toolStripMenuItem1, autoRotateToolStripMenuItem });
+            displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { fullscrenToolStripMenuItem, toolStripSeparator2, settingsToolStripMenuItem, toolStripSeparator4, toolStripMenuItem1, autoRotateToolStripMenuItem, debugToolStripMenuItem });
             displayToolStripMenuItem.Name = "displayToolStripMenuItem";
             displayToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
             displayToolStripMenuItem.Text = "Display";
@@ -180,27 +181,27 @@
             // 
             fullscrenToolStripMenuItem.Name = "fullscrenToolStripMenuItem";
             fullscrenToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
-            fullscrenToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            fullscrenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             fullscrenToolStripMenuItem.Text = "Fullscreen";
             fullscrenToolStripMenuItem.Click += fullscrenToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Enabled = false;
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            settingsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             settingsToolStripMenuItem.Text = "Settings";
             settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+            toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // toolStripMenuItem1
             // 
@@ -209,7 +210,7 @@
             toolStripMenuItem1.CheckOnClick = true;
             toolStripMenuItem1.CheckState = System.Windows.Forms.CheckState.Checked;
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             toolStripMenuItem1.Text = "Shadow";
             toolStripMenuItem1.CheckedChanged += toolStripMenuItem1_CheckedChanged;
             // 
@@ -218,8 +219,17 @@
             autoRotateToolStripMenuItem.BackColor = System.Drawing.SystemColors.ButtonFace;
             autoRotateToolStripMenuItem.CheckOnClick = true;
             autoRotateToolStripMenuItem.Name = "autoRotateToolStripMenuItem";
-            autoRotateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            autoRotateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             autoRotateToolStripMenuItem.Text = "AutoRotate";
+            // 
+            // debugToolStripMenuItem
+            // 
+            debugToolStripMenuItem.BackColor = System.Drawing.SystemColors.ButtonFace;
+            debugToolStripMenuItem.CheckOnClick = true;
+            debugToolStripMenuItem.Name = "debugToolStripMenuItem";
+            debugToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            debugToolStripMenuItem.Text = "Debug";
+            debugToolStripMenuItem.Click += debugToolStripMenuItem_Click;
             // 
             // pBResult
             // 
@@ -361,6 +371,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelRenderTime;
+        private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
     }
 }
 

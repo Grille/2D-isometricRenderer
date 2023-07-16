@@ -5,23 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading;
 
 namespace Program;
 
 internal unsafe class Swapchain : IDisposable
 {
-    Bitmap active;
-    Bitmap result;
-    BitmapData data;
-    byte* ptr;
+    Bitmap[] bitmaps;
+    int position = 0;
 
-    private bool disposed;
+    bool disposed;
+    BitmapData data;
 
     public BitmapData Data => data;
 
-    public byte* Ptr => ptr;
-
-    public Bitmap Result => result;
+    public MonitorHandle<Bitmap> Result => new(Get(position - 1));
 
     public int Width { get; private set; }
     public int Height { get; private set; }
@@ -33,54 +31,65 @@ internal unsafe class Swapchain : IDisposable
         Height = height;
         Size = Width * Height;
 
-        var fromat = PixelFormat.Format32bppArgb;
-        active = new Bitmap(width, height, fromat);
-        result = new Bitmap(width, height, fromat);
-
-        LockActive();
+        bitmaps = new Bitmap[3];
+        for (int i = 0; i < bitmaps.Length; i++)
+        {
+            bitmaps[i] = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+        }
     }
 
-    void LockActive()
+    Bitmap Get(int pos)
     {
-        var rect = new Rectangle(0, 0, active.Width, active.Height);
-        data = active.LockBits(rect, ImageLockMode.ReadWrite, active.PixelFormat);
-        ptr = (byte*)data.Scan0;
+        if (pos == -1)
+            pos = bitmaps.Length - 1;
 
-        int size = active.Width * active.Height;
-        var iptr = (int*)ptr;
-        /*
+        var bitmap = bitmaps[pos % bitmaps.Length];
+        return bitmap;
+    }
+
+    public void Next()
+    {
+        position += 1;
+    }
+
+    public unsafe void LockActive()
+    {
+        var bitmap = Get(position);
+
+        Monitor.Enter(bitmap);
+
+        var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+        data = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
+        int size = bitmap.Width * bitmap.Height;
+        var iptr = (int*)data.Scan0;
+
         for (int i = 0; i < size; i++)
         {
             iptr[i] = 0;
         }
-        */
     }
 
-    void UnlockActive()
+    public void UnlockActive()
     {
-        active.UnlockBits(data);
-    }
+        var bitmap = Get(position);
 
-    public void Swap()
-    {
-        UnlockActive();
+        Monitor.Exit(bitmap);
 
-        var temp = active;
-        var fromat = PixelFormat.Format32bppArgb;
-        active = new Bitmap(Width, Height, fromat);
-        result = temp;
-
-        LockActive();
-
+        bitmap.UnlockBits(data);
     }
 
     public void Dispose()
     {
-        if (disposed)
+        if (disposed) 
             return;
 
+        for (int i = 0; i < bitmaps.Length; i++)
+        {
+            var bitmap = (Bitmap)bitmaps[i];
+            bitmap.Dispose();
+        }
+
         disposed = true;
-        active.Dispose();
-        result.Dispose();
     }
 }

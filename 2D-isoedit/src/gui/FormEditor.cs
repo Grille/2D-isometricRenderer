@@ -22,16 +22,17 @@ public partial class FormEditor : Form
     //Graphic
     IsometricRenderer renderer;
     Camera camera;
+    Profiler profiler;
+    Profiler profilerTimer;
+
+    Task task;
 
     //Rendering Values
-    public bool Repainting = false;
-    private bool resultRedy = false;
+    public bool NeedRender = false;
+    public bool NeedRefresh = false;
 
     //setings
     private Settings settings;
-
-    //Tasks
-    private Task renderTask;
 
     //Editor Values
     bool curTextureEdit;
@@ -51,6 +52,11 @@ public partial class FormEditor : Form
         Height = settings.WindowHeight;
         Fullscreen(settings.Fullscreen);
 
+        task = Task.CompletedTask;
+
+        profiler = new Profiler();
+        profilerTimer = new Profiler();
+
         camera = new Camera();
 
         var textures = TexturePack.FromFile(settings.DefaultTexture);
@@ -66,15 +72,19 @@ public partial class FormEditor : Form
 
         Console.WriteLine("Init Renderer");
         renderTimer.Start();
-        Repainting = true;
+        NeedRender = true;
     }
 
     //Draw rendered image
     private void pBRender_Paint(object sender, PaintEventArgs e)
     {
-        var result = renderer.Result;
-        if (result == null)
+        using var handle = renderer.Result;
+        var bitmap = handle.Object;
+
+        if (bitmap == null)
             return;
+
+        profiler.Begin();
 
         camera.ScreenSize = pBResult.Size;
 
@@ -84,49 +94,77 @@ public partial class FormEditor : Form
 
         var windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
         var windowBrush = new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical);
-        g.FillRectangle(windowBrush, windowRect);
+        //g.FillRectangle(windowBrush, windowRect);
 
         float scale = camera.Scale;
         var nullPos = camera.WorldToScreenSpace(PointF.Empty);
-        var drawPos = new PointF(nullPos.X - (result.Width / 2) * scale, nullPos.Y - 255 * scale - ((result.Height - 255) / 2) * scale);
+        var drawPos = new PointF(nullPos.X - (bitmap.Width / 2) * scale, nullPos.Y - 255 * scale - ((bitmap.Height - 255) / 2) * scale);
 
-        var dstRect = new RectangleF(drawPos.X, drawPos.Y, result.Width * scale, result.Height * scale);
-        var srcRect = new RectangleF(0, 0, result.Width, result.Height);
+        var dstRect = new RectangleF(drawPos.X, drawPos.Y, bitmap.Width * scale, bitmap.Height * scale);
+        var srcRect = new RectangleF(0, 0, bitmap.Width, bitmap.Height);
 
-        g.DrawImage(result, dstRect, srcRect, GraphicsUnit.Pixel);
-        //g.DrawString("" + renderer.RenderTime + "ms", new Font("consolas", 11), new SolidBrush(Color.White), new Point(0, 0));
+        g.DrawImage(bitmap, dstRect, srcRect, GraphicsUnit.Pixel);
+
+        profiler.End();
+
+        if (debugToolStripMenuItem.Checked)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"Render:");
+            sb.AppendLine($"  {renderer.FPS:F2}fps");
+            sb.AppendLine($"  {renderer.FrameTime:F2}ms");
+            sb.AppendLine();
+            sb.AppendLine($"Display:");
+            sb.AppendLine($"  {profiler.FPS:F2}fps");
+            sb.AppendLine($"  {profiler.FrameTime:F2}ms");
+
+            var font = new Font("consolas", 11);
+            var text = sb.ToString();
+            var textsize = g.MeasureString(text, font);
+            var textrect = new RectangleF(PointF.Empty, textsize);
+            g.FillRectangle(new SolidBrush(Color.FromArgb(128, 0, 0, 0)), textrect);
+            g.DrawString(text, font, new SolidBrush(Color.White), textrect);
+        }
+
 
         //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPos.X, drawPos.Y-100), new PointF(drawPos.X, drawPos.Y + 100));
         //g.DrawLine(new Pen(Color.FromArgb(100, Color.Red), 2), new PointF(drawPos.X- (result.Width/2) * camScale, drawPos.Y), new PointF(drawPos.X+ (result.Width / 2) * camScale, drawPos.Y));
         //g.DrawLine(new Pen(Color.FromArgb(100, Color.Lime), 2), new PointF(drawPos.X - 100, drawPos.Y - 50), new PointF(drawPos.X + 100, drawPos.Y + 50));
 
-        toolStripStatusLabelRenderTime.Text = "RenderTime " + renderer.RenderTime + "ms";
+        toolStripStatusLabelRenderTime.Text = "RenderTime " + renderer.FrameTime + "ms";
     }
 
     //Render Image
     private void Render()
     {
         renderer.Render();
-        resultRedy = true;
+        NeedRefresh = true;
     }
+
     //RenderLoop & AutoRotate
     private void renderTimer_Tick(object sender, EventArgs e)
     {
+        profilerTimer.Log();
+
         if (autoRotateToolStripMenuItem.Checked)
         {
-            renderer.Angle += 1;
-            Repainting = true;
+            renderer.Angle += (profilerTimer.Delta / 64);
+            NeedRender = true;
+            NeedRefresh = true;
         }
-        if (!renderer.IsRendering && Repainting)
+
+        if (NeedRender && task.IsCompleted)
         {
-            renderTask = Task.Run(Render);
-            Repainting = false;
+            task = Task.Run(Render);
+            NeedRender = false;
         }
-        //if (resultRedy)
-        //{
-        pBResult.Refresh();
-        resultRedy = false;
-        //}
+
+        if (NeedRefresh)
+        {
+            pBResult.Refresh();
+            NeedRefresh = false;
+        }
     }
 
     #region GUI events
@@ -157,40 +195,36 @@ public partial class FormEditor : Form
                 float lastAngle = (float)(Math.Atan2(lastPos.Y * 2, lastPos.X) * (180 / Math.PI));
 
                 renderer.Angle += curAngle - lastAngle;
-                Repainting = true;
+                NeedRender = true;
 
             }
         }
 
-
         camera.MouseMoveEvent(e, move);
-        if (refresh)
-        {
-            //pBResult.Invalidate();
-        }
+        NeedRefresh |= refresh;
     }
     private void pBRender_MouseWheel(object sender, MouseEventArgs e)
     {
         camera.MouseScrollEvent(e, 1.5f);
 
-        pBResult.Refresh();
+        NeedRefresh = true;
     }
 
     //Buttons
     private void bRotL_Click(object sender, EventArgs e)
     {
         renderer.Angle -= 45;
-        Repainting = true;
+        NeedRender = true;
     }
     private void bRotR_Click(object sender, EventArgs e)
     {
         renderer.Angle += 45;
-        Repainting = true;
+        NeedRender = true;
     }
     private void bRot_Click(object sender, EventArgs e)
     {
         renderer.Angle = 0;
-        Repainting = true;
+        NeedRender = true;
     }
 
     private void bClose_Click(object sender, EventArgs e)
@@ -269,12 +303,12 @@ public partial class FormEditor : Form
         if (toolStripMenuItem1.Checked)
         {
             renderer.ShadowQuality = 1;
-            Repainting = true;
+            NeedRender = true;
         }
         else
         {
             renderer.ShadowQuality = 0;
-            Repainting = true;
+            NeedRender = true;
         }
     }
 
@@ -332,7 +366,7 @@ public partial class FormEditor : Form
         switch (e.KeyData)
         {
             case Keys.F5:
-                Program.MainForm.Repainting = true;
+                Program.MainForm.NeedRender = true;
                 break;
         }
     }
@@ -400,7 +434,7 @@ public partial class FormEditor : Form
 
             renderer.InputData = input;
             settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
-            Repainting = true;
+            NeedRender = true;
             //}
             //else
             //{
@@ -419,15 +453,17 @@ public partial class FormEditor : Form
         dialog.DefaultExt = ".png";
         dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
         {
+            using var handle = renderer.Result;
+            var bitmap = handle.Object;
 
-            if (Program.MainForm.Repainting)
+            if (Program.MainForm.NeedRender)
                 renderer.Render();
             switch (Path.GetExtension(dialog.FileName).ToLower())
             {
-                case ".bmp": renderer.Result.Save(dialog.FileName, ImageFormat.Bmp); break;
-                case ".jpg": renderer.Result.Save(dialog.FileName, ImageFormat.Jpeg); break;
-                case ".gif": renderer.Result.Save(dialog.FileName, ImageFormat.Gif); break;
-                default: renderer.Result.Save(dialog.FileName, ImageFormat.Png); break;
+                case ".bmp": bitmap.Save(dialog.FileName, ImageFormat.Bmp); break;
+                case ".jpg": bitmap.Save(dialog.FileName, ImageFormat.Jpeg); break;
+                case ".gif": bitmap.Save(dialog.FileName, ImageFormat.Gif); break;
+                default: bitmap.Save(dialog.FileName, ImageFormat.Png); break;
             }
 
             settings.DirectoryExport = Path.GetDirectoryName(dialog.FileName);
@@ -438,4 +474,8 @@ public partial class FormEditor : Form
     }
     #endregion
 
+    private void debugToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        NeedRefresh = true;
+    }
 }
