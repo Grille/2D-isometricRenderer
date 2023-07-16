@@ -42,7 +42,8 @@ public partial class FormEditor : Form
         InitializeComponent();
 
         settings = new Settings();
-        if (!settings.Load("config.ini")) { 
+        if (!settings.Load("config.ini"))
+        {
             Console.WriteLine("config not found");
         }
 
@@ -72,7 +73,7 @@ public partial class FormEditor : Form
     private void pBRender_Paint(object sender, PaintEventArgs e)
     {
         var result = renderer.Result;
-        if (result == null) 
+        if (result == null)
             return;
 
         camera.ScreenSize = pBResult.Size;
@@ -113,7 +114,7 @@ public partial class FormEditor : Form
     {
         if (autoRotateToolStripMenuItem.Checked)
         {
-            renderer.Angle+=1;
+            renderer.Angle += 1;
             Repainting = true;
         }
         if (!renderer.IsRendering && Repainting)
@@ -123,8 +124,8 @@ public partial class FormEditor : Form
         }
         //if (resultRedy)
         //{
-            pBResult.Refresh();
-            resultRedy = false;
+        pBResult.Refresh();
+        resultRedy = false;
         //}
     }
 
@@ -148,7 +149,7 @@ public partial class FormEditor : Form
             }
             else if (toolStripButtonRotate.Checked)
             {
-                
+
                 var curPos = camera.ScreenToWorldSpace(e.Location);
                 var lastPos = camera.ScreenToWorldSpace(camera.LastLocation);
 
@@ -157,15 +158,15 @@ public partial class FormEditor : Form
 
                 renderer.Angle += curAngle - lastAngle;
                 Repainting = true;
-                
+
             }
         }
-        
-        
+
+
         camera.MouseMoveEvent(e, move);
         if (refresh)
         {
-            pBResult.Refresh();
+            //pBResult.Invalidate();
         }
     }
     private void pBRender_MouseWheel(object sender, MouseEventArgs e)
@@ -418,12 +419,12 @@ public partial class FormEditor : Form
         dialog.DefaultExt = ".png";
         dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
         {
-            
+
             if (Program.MainForm.Repainting)
-            renderer.Render();
+                renderer.Render();
             switch (Path.GetExtension(dialog.FileName).ToLower())
             {
-                case ".bmp": renderer.Result.Save(dialog.FileName, ImageFormat.Bmp);break;
+                case ".bmp": renderer.Result.Save(dialog.FileName, ImageFormat.Bmp); break;
                 case ".jpg": renderer.Result.Save(dialog.FileName, ImageFormat.Jpeg); break;
                 case ".gif": renderer.Result.Save(dialog.FileName, ImageFormat.Gif); break;
                 default: renderer.Result.Save(dialog.FileName, ImageFormat.Png); break;

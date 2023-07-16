@@ -80,9 +80,9 @@ public unsafe class IsometricRenderer
 
         for (int i = 0; i < cores; i++)
         {
-            int thmp = i + 1;
+            int tempi = i;
             tasks[i] = Task.Run(() =>
-                func(thmp / cores - 1 / cores, thmp / cores)
+                func(tempi / cores, (tempi + 1) / cores)
             );
         }
 
@@ -101,8 +101,9 @@ public unsafe class IsometricRenderer
         int srcWidth = input.Width, srcHeight = input.Height; 
         int dstWidth = work.Width, dstHeight = work.Height;
 
-        double sinma = Math.Sin(-angle * 3.14159265 / 180);
-        double cosma = Math.Cos(-angle * 3.14159265 / 180);
+        double rad = -(double)(int)angle * Math.PI / 180;
+        double sinma = Math.Sin(rad);
+        double cosma = Math.Cos(rad);
 
         var dst = work.Buffer;
         var src = input.Buffer;
@@ -175,7 +176,7 @@ public unsafe class IsometricRenderer
     private unsafe void Elevate(float start, float end)
     {
         var data = swapchain.Data;
-        byte* resultRGB = (byte*)data.Scan0;
+        byte* pixels = (byte*)data.Scan0;
 
         int widthSrc = work.Width, 
             heightSrc = work.Height, 
@@ -185,65 +186,65 @@ public unsafe class IsometricRenderer
         int beginX = (int)(widthSrc * start),
             endX = (int)(heightSrc * end);
 
-        fixed (RenderDataCell* pixels = work.Buffer)
+        var src = work.Buffer;
+
+
+        for (int ix = beginX; ix < endX; ix++) //L->R
         {
-
-            for (int ix = beginX; ix < endX; ix++) //L->R
+            for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) //Downwards
+                                                             //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
             {
-                for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) //Downwards
-                //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
+                //get positions
+                int offSrc = (ix + iy * widthSrc);
+                int offDst = (ix + iy / 2 * widthDst) * 4;
+
+                int iz = src[offSrc].Height;
+                while (iz > 0) //Downwards
                 {
-                    //get positions
-                    int offSrc = (ix + iy * widthSrc);
-                    int offDst = (ix + iy / 2 * widthDst) * 4;
-
-                    int iz = pixels[offSrc].Height;
-                    while (iz > 0) //Downwards
+                    //save
+                    if (iy + heightExcess - iz >= 0)
                     {
-                        //save
-                        if (iy + heightExcess - iz >= 0)
+                        //get position on z axe
+                        int offDstZ = offDst - (widthDst * iz * 4) + widthDst * heightExcess * 4;//pos + curent height
+
+                        //pixel not yet drawn
+                        if (pixels[offDstZ + 3] == 0)
                         {
-                            //get position on z axe
-                            int offDstZ = offDst - (widthDst * iz * 4) + widthDst * heightExcess * 4;//pos + curent height
+                            //draw pixel
+                            float shadow = 1f;
+                            if (iz < src[offSrc].Shadow + 1)
+                                shadow = 0.75f;
 
-                            //pixel not yet drawn
-                            if (resultRGB[offDstZ + 3] == 0)
-                            {
-                                //draw pixel
-                                float shadow = 1f;
-                                if (iz < pixels[offSrc].Shadow + 1)
-                                    shadow = 0.75f;
+                            var color = input.Textures[src[offSrc].TextureIndex].GetColorAt(iz);
+                            float ff = 0.01f;// color.A / 255f;
+                            float ff2 = 1 - ff;
+                            //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
+                            //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
+                            //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
+                            //resultRGB[offDstZ + 3] = (byte)(255);//a
+                            /*
+                            resultRGB[offDstZ + 0] = (byte)(resultRGB[offDstZ + 0] * ff2 + color.B * shadow * ff);//b
+                            resultRGB[offDstZ + 1] = (byte)(resultRGB[offDstZ + 1] * ff2 + color.G * shadow * ff);//g
+                            resultRGB[offDstZ + 2] = (byte)(resultRGB[offDstZ + 2] * ff2 + color.R * shadow * ff);//r
+                            resultRGB[offDstZ + 3] = 255;// (byte)(resultRGB[offDstZ + 3] * ff2 + color.A * shadow * ff); ;// (byte)(color.A);//a
+                            */
 
-                                var color = input.Textures[pixels[offSrc].TextureIndex].GetColorAt(iz);
-                                float ff = 0.01f;// color.A / 255f;
-                                float ff2 = 1 - ff;
-                                //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
-                                //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
-                                //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
-                                //resultRGB[offDstZ + 3] = (byte)(255);//a
-                                /*
-                                resultRGB[offDstZ + 0] = (byte)(resultRGB[offDstZ + 0] * ff2 + color.B * shadow * ff);//b
-                                resultRGB[offDstZ + 1] = (byte)(resultRGB[offDstZ + 1] * ff2 + color.G * shadow * ff);//g
-                                resultRGB[offDstZ + 2] = (byte)(resultRGB[offDstZ + 2] * ff2 + color.R * shadow * ff);//r
-                                resultRGB[offDstZ + 3] = 255;// (byte)(resultRGB[offDstZ + 3] * ff2 + color.A * shadow * ff); ;// (byte)(color.A);//a
-                                */
+                            pixels[offDstZ + 0] = (byte)(color.B * shadow);//b
+                            pixels[offDstZ + 1] = (byte)(color.G * shadow);//g
+                            pixels[offDstZ + 2] = (byte)(color.R * shadow);//r
+                            pixels[offDstZ + 3] = 255;// (byte)(color.A);//a
 
-                                resultRGB[offDstZ + 0] += (byte)(color.B * shadow);//b
-                                resultRGB[offDstZ + 1] += (byte)(color.G * shadow);//g
-                                resultRGB[offDstZ + 2] += (byte)(color.R * shadow);//r
-                                resultRGB[offDstZ + 3] += 255;// (byte)(color.A);//a
-
-                            }
-                            else
-                            {
-                                break;
-                            }
                         }
-                        iz--;
+                        else
+                        {
+                            break;
+                        }
                     }
+                    iz--;
                 }
-
             }
+
+
         }
     }
 
