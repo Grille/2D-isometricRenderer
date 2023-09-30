@@ -12,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using System.Drawing.Drawing2D;
+using System.Reflection;
+using System.Reflection.Metadata;
 /// <summary>-</summary>
 namespace Program;
 
@@ -19,6 +21,8 @@ namespace Program;
 //[System.ComponentModel.DesignerCategory("code")]
 public partial class FormEditor : Form
 {
+    const string ImageFilter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
+
     //Graphic
     IsometricRenderer renderer;
     Camera camera;
@@ -32,7 +36,7 @@ public partial class FormEditor : Form
     public bool NeedRefresh = false;
 
     //setings
-    private Settings settings;
+    private SettingsFile settings;
 
     //Editor Values
     bool curTextureEdit;
@@ -42,10 +46,14 @@ public partial class FormEditor : Form
         Console.WriteLine("Start");
         InitializeComponent();
 
-        settings = new Settings();
-        if (!settings.Load("config.ini"))
+        settings = new SettingsFile();
+        try
         {
-            Console.WriteLine("config not found");
+            settings.Load("config.ini");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
         }
 
         Width = settings.WindowWidth;
@@ -79,7 +87,7 @@ public partial class FormEditor : Form
     private void pBRender_Paint(object sender, PaintEventArgs e)
     {
         using var handle = renderer.Result;
-        var bitmap = handle.Object;
+        var bitmap = handle.Value;
 
         if (bitmap == null)
             return;
@@ -94,7 +102,7 @@ public partial class FormEditor : Form
 
         var windowRect = new Rectangle(0, 0, pBResult.Width, pBResult.Height);
         var windowBrush = new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical);
-        //g.FillRectangle(windowBrush, windowRect);
+        //sg.FillRectangle(windowBrush, windowRect);
 
         float scale = camera.Scale;
         var nullPos = camera.WorldToScreenSpace(PointF.Empty);
@@ -146,6 +154,11 @@ public partial class FormEditor : Form
     private void renderTimer_Tick(object sender, EventArgs e)
     {
         profilerTimer.Log();
+
+        if (!TextBoxRotate.Focused)
+        {
+            TextBoxRotate.Text = renderer.Angle.ToString();
+        }
 
         if (autoRotateToolStripMenuItem.Checked)
         {
@@ -329,7 +342,10 @@ public partial class FormEditor : Form
             settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
             */
         });
-        dialog.ShowDialog(this);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+
+        }
     }
 
     private void saveRenderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -352,7 +368,10 @@ public partial class FormEditor : Form
             settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
             */
         });
-        dialog.ShowDialog(this);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+
+        }
         //ByteStream bs = new ByteStream();
     }
 
@@ -417,16 +436,14 @@ public partial class FormEditor : Form
         }
     }
 
-    private void importToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ImportMenuItemClick(object sender, EventArgs e)
     {
         var dialog = new OpenFileDialog();
         dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
-        dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
-        dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
+        dialog.Filter = ImageFilter;
+
+        if (dialog.ShowDialog(this) == DialogResult.OK)
         {
-            //FormImport form = new FormImport();
-            //if (form.ShowDialog(this,out ImportOptions options) == DialogResult.OK)
-            //{
             var input = new InputData(dialog.FileName)
             {
                 Textures = renderer.InputData.Textures,
@@ -435,47 +452,102 @@ public partial class FormEditor : Form
             renderer.InputData = input;
             settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
             NeedRender = true;
-            //}
-            //else
-            //{
-            //    ce.Cancel = true;
-            //}
-        });
-        dialog.ShowDialog(this);
+        }
     }
 
-    private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ImportTextureMenuItemClick(object sender, EventArgs e)
+    {
+        var dialog = new OpenFileDialog();
+        dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
+        dialog.Filter = ImageFilter;
+
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            renderer.InputData.LoadTextureBitmap(dialog.FileName);
+            settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
+            NeedRender = true;
+        }
+    }
+
+    private void ExportMenuItemClick(object sender, EventArgs e)
     {
         var dialog = new SaveFileDialog();
         dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryExport);
         dialog.AddExtension = true;
-        dialog.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
+        dialog.Filter = ImageFilter;
         dialog.DefaultExt = ".png";
-        dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
+
+        if (dialog.ShowDialog(this) == DialogResult.OK)
         {
             using var handle = renderer.Result;
-            var bitmap = handle.Object;
+            var bitmap = handle.Value;
 
             if (Program.MainForm.NeedRender)
                 renderer.Render();
-            switch (Path.GetExtension(dialog.FileName).ToLower())
-            {
-                case ".bmp": bitmap.Save(dialog.FileName, ImageFormat.Bmp); break;
-                case ".jpg": bitmap.Save(dialog.FileName, ImageFormat.Jpeg); break;
-                case ".gif": bitmap.Save(dialog.FileName, ImageFormat.Gif); break;
-                default: bitmap.Save(dialog.FileName, ImageFormat.Png); break;
-            }
 
+            var extension = Path.GetExtension(dialog.FileName).ToLower();
+            var format = extension switch
+            {
+                ".bmp" => ImageFormat.Bmp,
+                ".jpg" => ImageFormat.Jpeg,
+                ".jpeg" => ImageFormat.Jpeg,
+                ".gif" => ImageFormat.Gif,
+                ".png" => ImageFormat.Png,
+                _ => ImageFormat.Png,
+            };
+
+            bitmap.Save(dialog.FileName, format);
             settings.DirectoryExport = Path.GetDirectoryName(dialog.FileName);
-            //Program.MainForm.Repainting = true;
-            //ce.Cancel = false;
-        });
-        dialog.ShowDialog(this);
+        }
     }
     #endregion
 
-    private void debugToolStripMenuItem_Click(object sender, EventArgs e)
+    private void DebugMenuItemClick(object sender, EventArgs e)
     {
+        NeedRefresh = true;
+    }
+
+    private void ButtonReset_Click(object sender, EventArgs e)
+    {
+        camera.Position = PointF.Empty;
+        renderer.Angle = 45;
+        NeedRender = true;
+        NeedRefresh = true;
+    }
+
+    private void TextBoxRotate_TextChanged(object sender, EventArgs e)
+    {
+        if (float.TryParse(TextBoxRotate.Text, out float angle))
+        {
+            if (renderer.Angle != angle)
+            {
+                TextBoxRotate.ForeColor = Color.Blue;
+                renderer.Angle = angle;
+                NeedRender = true;
+                NeedRefresh = true;
+            }
+            else
+            {
+                TextBoxRotate.ForeColor = Color.Black;
+            }
+        }
+        else
+        {
+            TextBoxRotate.ForeColor = Color.Red;
+        }
+    }
+
+    private void ButtonRight_Click(object sender, EventArgs e)
+    {
+        renderer.Angle += 45;
+        NeedRender = true;
+        NeedRefresh = true;
+    }
+
+    private void ButtonLeft_Click(object sender, EventArgs e)
+    {
+        renderer.Angle -= 45;
+        NeedRender = true;
         NeedRefresh = true;
     }
 }

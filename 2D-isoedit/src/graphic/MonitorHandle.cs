@@ -13,13 +13,13 @@ public class MonitorHandle<T> : IDisposable
 {
     bool disposed;
 
-    public readonly T Object;
+    public readonly T Value;
 
     public MonitorHandle(T obj)
     {
-        Object = obj;
+        Value = obj;
 
-        Monitor.Enter(Object);
+        Monitor.Enter(Value);
     }
 
     public void Dispose()
@@ -27,7 +27,7 @@ public class MonitorHandle<T> : IDisposable
         if (disposed)
             return;
 
-        Monitor.Exit(Object);
+        Monitor.Exit(Value);
 
         disposed = true;
     }

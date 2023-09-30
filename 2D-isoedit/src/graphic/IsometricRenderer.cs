@@ -11,14 +11,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using System.Drawing.Imaging;
+using Program.src.graphic;
+using System.Numerics;
 
 namespace Program;
 
 public unsafe class IsometricRenderer
 {
-    //setings
-    float cores = (int)Environment.ProcessorCount;
-
     //Tasks
     public InputData InputData
     {
@@ -39,19 +38,64 @@ public unsafe class IsometricRenderer
     Swapchain swapchain;
     Profiler profiler;
 
+    ParallelExecutor parallel;
+
+    public Func<IVector3, RenderDataCell, ARGBColor> PixelShader { get; set; }
+
     public MonitorHandle<Bitmap> Result => swapchain.Result;
     public float FrameTime => profiler.FrameTime;
     public float FPS => profiler.FPS;
 
+    SemaphoreSlim semaphore;
+
     //settings
-    public int ShadowQuality = 1;
+    public int ShadowQuality { get; set; } = 1;
 
     float angle = 45;
 
-    byte heightExcess = 255;
+    int heightExcess = 255;
 
-    public IsometricRenderer() { 
+    public IsometricRenderer() {
+        parallel = new ParallelExecutor(Environment.ProcessorCount);
         profiler = new Profiler();
+        PixelShader = new((location, cell) =>
+        {
+            if (location.Z < cell.ShadowHeight + 1)
+            {
+                return cell.Color.ApplyShadow(0.75f);
+            }
+            return cell.Color;
+        });
+
+        /*
+        var groundcurve = new ColorCurve();
+        groundcurve.Add(0.0f, new ARGBColor(90,117,55));
+        groundcurve.Add(0.3f, new ARGBColor(93, 65, 45));
+        groundcurve.Add(0.5f, new ARGBColor(70, 65, 45));
+        groundcurve.Add(0.6f, new ARGBColor(227, 243, 255));
+        groundcurve.Add(1.0f, new ARGBColor(255, 255, 255));
+
+        var wallcurve = new ColorCurve();
+        wallcurve.Add(0.0f, new ARGBColor(100,100,100));
+        wallcurve.Add(1.0f, new ARGBColor(40,40,40));
+
+        var groundbake = groundcurve.Bake(255);
+        var wallbake = wallcurve.Bake(255);
+
+        PixelShader = new((location, cell) =>
+        {
+            var ground = groundbake[cell.Height];
+            var wall = wallbake[cell.Height];
+            var color = ARGBColor.Mix(ground, wall, Math.Clamp(cell.HeightDifference / 6f, 0f, 1f));// = new ARGBColor(0, location.Z % 16 < 1 ? (byte)255 : (byte)0, (byte)(location.Z));
+
+            if (location.Z < cell.ShadowHeight + 1)
+            {
+                return color.ApplyShadow(0.75f);
+            }
+            return color;
+        });
+        */
+        
     }
 
     public float Angle
@@ -68,34 +112,14 @@ public unsafe class IsometricRenderer
         }
     }
 
-    void DistributeTasks(Action<float, float> func)
-    {
-        if (cores == 1)
-        {
-            func(0, 1);
-            return;
-        }
 
-        Task[] tasks = new Task[(int)cores];
-
-        for (int i = 0; i < cores; i++)
-        {
-            int tempi = i;
-            tasks[i] = Task.Run(() =>
-                func(tempi / cores, (tempi + 1) / cores)
-            );
-        }
-
-        Task.WaitAll(tasks);
-    }
-
-    //Prepare the heightMap call rotate and shadow    
+    // Rotate byte pixel array
     private void Rotate()
     {
-        DistributeTasks(Rotate);
+        parallel.Run(Rotate);
     }
 
-    //rotate byte pixel array
+    // Rotate part of the byte pixel array
     private void Rotate(float start, float end)
     {
         int srcWidth = input.Width, srcHeight = input.Height; 
@@ -131,11 +155,11 @@ public unsafe class IsometricRenderer
         }
     }
 
-    //add shadows
-    private void CalcShadows(int resulution)
+    // Add shadows
+    private void CalcShadows(int resolution)
     {
 
-        if (resulution == 0) 
+        if (resolution == 0) 
             return;
 
         var buffer = work.Buffer;
@@ -144,17 +168,17 @@ public unsafe class IsometricRenderer
 
         for (int iy = 0; iy < height; iy++)//y 0 to 1
         {
-            for (int ix = 0; ix < width; ix += resulution)//x 0 to 1
+            for (int ix = 0; ix < width; ix += resolution)//x 0 to 1
             {
                 //get position
                 int offset = ix + iy * width;
                 int i = 0;
 
                 float shadowHeight = buffer[offset].Height;
-                while (buffer[offset].Shadow < shadowHeight)
+                while (buffer[offset].ShadowHeight < shadowHeight)
                 {
                     if (i > 0) 
-                        buffer[offset].Shadow = (byte)(shadowHeight * 1f);
+                        buffer[offset].ShadowHeight = (byte)(shadowHeight * 1f);
 
                     if (buffer[offset].Height > shadowHeight + 1) 
                         break;
@@ -166,17 +190,17 @@ public unsafe class IsometricRenderer
 
     }
 
-    //Rendering the image call elevate
+    // Rendering the image
     private void Elevate()
     {
-        DistributeTasks(Elevate);
+        parallel.Run(Elevate);
     }
 
-    //Rendering the part of image from heightmap (elevate and apply textures & shadows)
+    // Rendering the part of image from heightmap (elevate and apply textures & shadows)
     private unsafe void Elevate(float start, float end)
     {
         var data = swapchain.Data;
-        byte* pixels = (byte*)data.Scan0;
+        var pixels = (ARGBColor*)data.Scan0;
 
         int widthSrc = work.Width, 
             heightSrc = work.Height, 
@@ -188,52 +212,30 @@ public unsafe class IsometricRenderer
 
         var src = work.Buffer;
 
-
-        for (int ix = beginX; ix < endX; ix++) //L->R
+        for (int ix = beginX; ix < endX; ix++) // Left -> Right
         {
-            for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) //Downwards
+            for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) // Bottom -> Top
                                                              //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
             {
-                //get positions
+                // get positions
                 int offSrc = (ix + iy * widthSrc);
-                int offDst = (ix + iy / 2 * widthDst) * 4;
+                int offDst = (ix + iy / 2 * widthDst);
 
                 int iz = src[offSrc].Height;
-                while (iz > 0) //Downwards
+                while (iz > 0) // Downwards
                 {
-                    //save
+                    // save
                     if (iy + heightExcess - iz >= 0)
                     {
-                        //get position on z axe
-                        int offDstZ = offDst - (widthDst * iz * 4) + widthDst * heightExcess * 4;//pos + curent height
+                        // get position on z axe
+                        int offDstZ = offDst - (widthDst * iz) + widthDst * heightExcess;//pos + curent height
 
-                        //pixel not yet drawn
-                        if (pixels[offDstZ + 3] == 0)
+                        // pixel not yet drawn
+                        if (pixels[offDstZ].A == 0)
                         {
-                            //draw pixel
-                            float shadow = 1f;
-                            if (iz < src[offSrc].Shadow + 1)
-                                shadow = 0.75f;
+                            var location = new IVector3(ix, iy, iz);
 
-                            var color = input.Textures[src[offSrc].TextureIndex].GetColorAt(iz);
-                            float ff = 0.01f;// color.A / 255f;
-                            float ff2 = 1 - ff;
-                            //resultRGB[offDstZ + 0] = (byte)(255 * shadow);//b
-                            //resultRGB[offDstZ + 1] = (byte)(255 * (iz % 5) * shadow);//g
-                            //resultRGB[offDstZ + 2] = (byte)(0 * shadow);//r
-                            //resultRGB[offDstZ + 3] = (byte)(255);//a
-                            /*
-                            resultRGB[offDstZ + 0] = (byte)(resultRGB[offDstZ + 0] * ff2 + color.B * shadow * ff);//b
-                            resultRGB[offDstZ + 1] = (byte)(resultRGB[offDstZ + 1] * ff2 + color.G * shadow * ff);//g
-                            resultRGB[offDstZ + 2] = (byte)(resultRGB[offDstZ + 2] * ff2 + color.R * shadow * ff);//r
-                            resultRGB[offDstZ + 3] = 255;// (byte)(resultRGB[offDstZ + 3] * ff2 + color.A * shadow * ff); ;// (byte)(color.A);//a
-                            */
-
-                            pixels[offDstZ + 0] = (byte)(color.B * shadow);//b
-                            pixels[offDstZ + 1] = (byte)(color.G * shadow);//g
-                            pixels[offDstZ + 2] = (byte)(color.R * shadow);//r
-                            pixels[offDstZ + 3] = 255;// (byte)(color.A);//a
-
+                            pixels[offDstZ] = PixelShader(location, src[offSrc]);
                         }
                         else
                         {
@@ -243,12 +245,10 @@ public unsafe class IsometricRenderer
                     iz--;
                 }
             }
-
-
         }
     }
 
-    //Render
+    // Render
     public void Render()
     {
         if (InputData == null)

@@ -74,9 +74,9 @@ internal unsafe class Swapchain : IDisposable
     {
         var bitmap = Get(position);
 
-        Monitor.Exit(bitmap);
-
         bitmap.UnlockBits(data);
+
+        Monitor.Exit(bitmap);
     }
 
     public void Dispose()
@@ -86,7 +86,7 @@ internal unsafe class Swapchain : IDisposable
 
         for (int i = 0; i < bitmaps.Length; i++)
         {
-            var bitmap = (Bitmap)bitmaps[i];
+            var bitmap = bitmaps[i];
             bitmap.Dispose();
         }
 

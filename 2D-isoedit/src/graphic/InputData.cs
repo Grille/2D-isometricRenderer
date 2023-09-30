@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using Program.src.graphic;
 
 namespace Program;
 
@@ -73,6 +75,16 @@ public class InputData
         LoadTextureBitmap(bitmapTexture);
     }
 
+    public ref RenderDataCell this[int index]
+    {
+        get => ref Buffer[index];
+    }
+
+    public ref RenderDataCell this[IVector2 index]
+    {
+        get => ref Buffer[index.X + index.Y * Width];
+    }
+
     void Init(int width, int height)
     {
         Width = width;
@@ -99,15 +111,52 @@ public class InputData
 
     public unsafe void LoadTextureBitmap(Bitmap bitmap)
     {
+        if (bitmap.Width != Width || bitmap.Height != Height)
+        {
+            var newbitmap = new Bitmap(Width, Height);
+            using (var g = Graphics.FromImage(newbitmap))
+            {
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.DrawImage(bitmap, new Rectangle(0, 0, Width, Height));
+            }
+            bitmap = newbitmap;
+        }
 
         var data = LockBits(bitmap);
-        byte* ptr = (byte*)data.Ptr;
-        int size = data.Size;
-        int stride = data.Stride;
+        byte* ptr = (byte*)data.Scan0;
+        int size = data.Width*data.Height;
 
-        switch (stride)
+        switch (data.PixelFormat)
         {
-            case 3:
+            case PixelFormat.Format4bppIndexed:
+            {
+                var palette = bitmap.Palette.Entries;
+                int iDst = 0;
+                for (int iSrc = 0; iSrc < size / 2; iSrc++)
+                {
+                    byte idx8 = ptr[iSrc];
+
+                    Buffer[iDst].TextureIndex = 0;
+                    Buffer[iDst].Color = palette[idx8 & 15];
+                    ++iDst;
+
+                    Buffer[iDst].TextureIndex = 0;
+                    Buffer[iDst].Color = palette[idx8 >> 4];
+                    ++iDst;
+                }
+            }
+            break;
+            case PixelFormat.Format8bppIndexed:
+            {
+                var palette = bitmap.Palette.Entries;
+                for (int i = 0; i < size; i++)
+                {
+                    Buffer[i].TextureIndex = 0;
+                    Buffer[i].Color = palette[ptr[i]];
+                }
+            }
+            break;
+            case PixelFormat.Format24bppRgb:
             {
                 for (int i = 0; i < size; i++)
                 {
@@ -120,23 +169,19 @@ public class InputData
                 }
             }
             break;
-            case 4:
+            case PixelFormat.Format32bppArgb:
             {
+                var cptr = (ARGBColor*)ptr;
                 for (int i = 0; i < size; i++)
                 {
                     Buffer[i].TextureIndex = 0;
-                    Buffer[i].Color = Color.FromArgb(
-                        ptr[i * 4 + 3],
-                        ptr[i * 4 + 2],
-                        ptr[i * 4 + 1],
-                        ptr[i * 4 + 0]
-                    );
+                    Buffer[i].Color = cptr[i];
                 }
             }
             break;
             default:
             {
-                throw new Exception();
+                throw new InvalidDataException($"{data.PixelFormat}");
             }
         }
 
@@ -155,37 +200,61 @@ public class InputData
     public unsafe void LoadHeightBitmap(Bitmap bitmap)
     {
         var data = LockBits(bitmap);
-        byte* ptr = (byte*)data.Ptr;
-        int size = data.Size;
-        int stride = data.Stride;
+        byte* ptr = (byte*)data.Scan0;
+        int size = data.Width * data.Height;
+        int stride = data.Stride / data.Width;
 
         for (int i = 0; i < size; i++)
         {
             Buffer[i].Height = ptr[i * stride];
         }
+
+        CalculateHeightDifference();
     }
 
-    record struct BitmapData(nint Ptr, int Stride, int Size);
+    public unsafe void CalculateHeightDifference()
+    {
+        var offsets = new IVector2[] {
+            new IVector2(1, 0),
+            new IVector2(-1, 0),
+            new IVector2(0, 1),
+            new IVector2(0, -1),
+            new IVector2(1, 1),
+            new IVector2(-1, -1),
+            new IVector2(1, -1),
+            new IVector2(-1, 1)
+        };
+
+        int SampleHeightDifference(IVector2 location1, IVector2 location2)
+        {
+            return Math.Abs(this[location1].Height - this[location2].Height);
+        }
+
+        for (int ix = 0; ix < Width; ix++)
+        {
+            for (int iy = 0; iy < Height; iy++)
+            {
+                var location = new IVector2(ix, iy);
+
+                int max = 0;
+
+                foreach (var offset in offsets)
+                {
+                    var location2 = (location + offset).Clamp(0, Height - 1);
+                    max = Math.Max(max, SampleHeightDifference(location, location2));
+                }
+
+                this[location].HeightDifference = (ushort)max;
+            }
+        }
+    }
+
     BitmapData LockBits(Bitmap bitmap)
     {
         if (bitmap.Width != Width || bitmap.Height != Height)
             throw new ArgumentException();
 
         var bitmapRect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-        var bitmapData = bitmap.LockBits(bitmapRect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
-
-        nint ptr = bitmapData.Scan0;
-
-        int size = bitmapRect.Width * bitmapRect.Height;
-
-        int stride = bitmap.PixelFormat switch
-        {
-            PixelFormat.Format8bppIndexed => 1,
-            PixelFormat.Format24bppRgb => 3,
-            PixelFormat.Format32bppArgb => 4,
-            _ => throw new Exception(),
-        };
-
-        return new BitmapData(ptr, stride, size);
+        return bitmap.LockBits(bitmapRect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
     }
 }
