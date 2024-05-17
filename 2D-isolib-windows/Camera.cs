@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Program;
+namespace Grille.Graphics.Isometric.WinForms;
 
-class Camera
+public class Camera
 {
     public float PosX, PosY;
     public float Scale = 1;

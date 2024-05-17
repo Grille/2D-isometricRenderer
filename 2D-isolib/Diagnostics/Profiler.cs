@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Program;
+namespace Grille.Graphics.Isometric.Diagnostics;
 
-internal class Profiler
+public class Profiler
 {
     float fps = 0;
     float frameTime = 0;
+    float cumulativeFrameTime = 0;
     float delta;
 
     int count = 0;
@@ -31,7 +32,11 @@ internal class Profiler
     public void End()
     {
         sw.Stop();
-        frameTime = (float)sw.Elapsed.TotalMilliseconds;
+
+        count += 1;
+
+        cumulativeFrameTime += (float)sw.Elapsed.TotalMilliseconds;
+
         var now = DateTime.Now;
 
         delta = (float)(now - lastEndTime).TotalMilliseconds;
@@ -41,10 +46,11 @@ internal class Profiler
         if (lastFpsDelta > TimeSpan.FromSeconds(1))
         {
             fps = (float)(count / lastFpsDelta.TotalSeconds);
+            frameTime = cumulativeFrameTime / count;
             count = 0;
             lastFpsTime = now;
+            cumulativeFrameTime = 0;
         }
-        count += 1;
     }
 
     public void Log()

@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEditor));
             renderTimer = new System.Windows.Forms.Timer(components);
             menuStrip1 = new System.Windows.Forms.MenuStrip();
             fgdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,7 +45,6 @@
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             autoRotateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            pBResult = new System.Windows.Forms.PictureBox();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             toolStripButtonDrag = new System.Windows.Forms.ToolStripButton();
@@ -58,8 +56,8 @@
             TextBoxRotate = new System.Windows.Forms.ToolStripTextBox();
             statusStrip1 = new System.Windows.Forms.StatusStrip();
             toolStripStatusLabelRenderTime = new System.Windows.Forms.ToolStripStatusLabel();
+            pBResult = new Grille.Graphics.Isometric.WinForms.RenderSurface();
             menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pBResult).BeginInit();
             toolStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             SuspendLayout();
@@ -192,22 +190,6 @@
             debugToolStripMenuItem.Text = "Debug";
             debugToolStripMenuItem.Click += DebugMenuItemClick;
             // 
-            // pBResult
-            // 
-            pBResult.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            pBResult.BackColor = System.Drawing.Color.FromArgb(20, 25, 45);
-            pBResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            pBResult.Location = new System.Drawing.Point(0, 49);
-            pBResult.Margin = new System.Windows.Forms.Padding(0);
-            pBResult.Name = "pBResult";
-            pBResult.Size = new System.Drawing.Size(728, 438);
-            pBResult.TabIndex = 3;
-            pBResult.TabStop = false;
-            pBResult.Paint += pBRender_Paint;
-            pBResult.MouseDown += pBResult_MouseDown;
-            pBResult.MouseMove += pBRender_MouseMove;
-            pBResult.MouseWheel += pBRender_MouseWheel;
-            // 
             // toolStrip1
             // 
             toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, toolStripButtonDrag, toolStripButtonRotate, toolStripSeparator5, ButtonReset, ButtonLeft, ButtonRight, TextBoxRotate });
@@ -306,6 +288,19 @@
             toolStripStatusLabelRenderTime.Size = new System.Drawing.Size(95, 17);
             toolStripStatusLabelRenderTime.Text = "RenderTime 0ms";
             // 
+            // pBResult
+            // 
+            pBResult.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            pBResult.BackColor = System.Drawing.Color.FromArgb(20, 25, 45);
+            pBResult.DebugInfoEnabled = false;
+            pBResult.Location = new System.Drawing.Point(0, 49);
+            pBResult.Margin = new System.Windows.Forms.Padding(0);
+            pBResult.Name = "pBResult";
+            pBResult.Size = new System.Drawing.Size(728, 438);
+            pBResult.TabIndex = 25;
+            pBResult.Text = "renderSurface1";
+            pBResult.Paint += pBRender_Paint;
+            // 
             // FormEditor
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -316,7 +311,6 @@
             Controls.Add(statusStrip1);
             Controls.Add(toolStrip1);
             Controls.Add(menuStrip1);
-            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             IsMdiContainer = true;
             KeyPreview = true;
             MainMenuStrip = menuStrip1;
@@ -330,7 +324,6 @@
             Resize += FormEditor_Resize;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pBResult).EndInit();
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -344,7 +337,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fgdToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dgfToolStripMenuItem;
-        private System.Windows.Forms.PictureBox pBResult;
         private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fullscrenToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
@@ -368,6 +360,7 @@
         private System.Windows.Forms.ToolStripButton ButtonRight;
         private System.Windows.Forms.ToolStripButton ButtonReset;
         private System.Windows.Forms.ToolStripTextBox TextBoxRotate;
+        private Grille.Graphics.Isometric.WinForms.RenderSurface pBResult;
     }
 }
 

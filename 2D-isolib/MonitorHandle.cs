@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Program;
+namespace Grille.Graphics.Isometric;
 
-public class MonitorHandle<T> : IDisposable
+public class MonitorHandle<T> : IDisposable where T : notnull
 {
     bool disposed;
 

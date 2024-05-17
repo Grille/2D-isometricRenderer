@@ -6,9 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static Program.RenderDataCell;
 
-namespace Program.src.graphic;
+namespace Grille.Graphics.Isometric.Numerics;
 
 [StructLayout(LayoutKind.Explicit, Size = 4)]
 public struct ARGBColor
@@ -47,13 +46,14 @@ public struct ARGBColor
 
     public ARGBColor ApplyShadow(float shadow)
     {
-        return new ARGBColor(A, (byte)(R*shadow), (byte)(G * shadow), (byte)(B * shadow));
+        return new ARGBColor(A, (byte)(R * shadow), (byte)(G * shadow), (byte)(B * shadow));
     }
 
-    public ARGBColor(byte r, byte g, byte b) : 
-        this(255, r, g, b) 
+    public ARGBColor(byte r, byte g, byte b) :
+        this(255, r, g, b)
     { }
 
+    public static explicit operator ARGBColor(S8Vec2 normals) => new ARGBColor((byte)(normals.X + 127), (byte)(normals.Y + 127), 255);
 
     public static implicit operator ARGBColor(int argb) => Unsafe.As<int, ARGBColor>(ref argb);
 
@@ -61,5 +61,5 @@ public struct ARGBColor
 
     public static implicit operator ARGBColor(Color color) => color.ToArgb();
 
-    public static implicit operator Color(ARGBColor color) => Color.FromArgb(color.ARGB) ;
+    public static implicit operator Color(ARGBColor color) => Color.FromArgb(color.ARGB);
 }

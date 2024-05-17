@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Program;
 
-public static class Program
+public static class CProgram
 {
     /// <summary>
     /// Der Haupteinstiegspunkt für die Anwendung.

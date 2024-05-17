@@ -1,12 +1,12 @@
-﻿using Program.src.graphic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Grille.Graphics.Isometric.Numerics;
 
-namespace Program;
+namespace Grille.Graphics.Isometric.Shading;
 
 public class ColorCurve
 {
@@ -49,7 +49,7 @@ public class ColorCurve
 
 
 
-        for (int i = 0; i < array.Length;i++)
+        for (int i = 0; i < array.Length; i++)
         {
             var point = array[i];
 

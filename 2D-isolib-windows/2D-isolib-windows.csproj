@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<RootNamespace>Grille.Graphics.Isometric.WinForms</RootNamespace>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<Nullable>enable</Nullable>
+
+		<PackageId>Grille.Graphics.Isometric.WinForms</PackageId>
+		<Title>Grille.Graphics.Isometric.WinForms</Title>
+		<Owners>Grille</Owners>
+		<RepositoryUrl>https://github.com/Grille/2D-isometricRenderer</RepositoryUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Copyright>Copyright (c) 2024 Paul Hirch</Copyright>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageIcon>Cube.png</PackageIcon>
+		<Version>0.1.0</Version>
+		<Authors>Grille</Authors>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;1591</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\Assets\Cube.png" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="..\LICENSE" Pack="true" PackagePath="\" Visible="false" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\2d-isolib\2D-isolib.csproj" />
+	</ItemGroup>
+
+</Project>
