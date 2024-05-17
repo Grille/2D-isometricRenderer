@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFrameworks>net6-windows;net8-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
 		<RootNamespace>Grille.Graphics.Isometric.WinForms</RootNamespace>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>

@@ -8,11 +8,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9297D0EE-9FD0-4C03-87CB-5F18D51737F0}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "2D-isolib", "2d-isolib\2D-isolib.csproj", "{73D9B119-D4E7-42DA-AC28-E7FFE31497FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2D-isolib-windows", "2D-isolib-windows\2D-isolib-windows.csproj", "{A35E0444-022C-4D77-BCA0-B479AD7DF775}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "2D-isolib-windows", "2D-isolib-windows\2D-isolib-windows.csproj", "{A35E0444-022C-4D77-BCA0-B479AD7DF775}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
