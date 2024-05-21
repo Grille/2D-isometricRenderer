@@ -18,6 +18,10 @@ using System.Reflection.Metadata;
 using Grille.Graphics.Isometric;
 using Grille.Graphics.Isometric.Diagnostics;
 using Grille.Graphics.Isometric.WinForms;
+using Grille.Graphics.Isometric.Shading;
+using System.Numerics;
+using Grille.Graphics.Isometric.Buffers;
+using System.Globalization;
 
 /// <summary>-</summary>
 namespace Program;
@@ -26,10 +30,10 @@ namespace Program;
 //[System.ComponentModel.DesignerCategory("code")]
 public partial class FormEditor : Form
 {
-    const string ImageFilter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
+    const string ImageFilter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG;*.TIFF)|*.bmp;*.jpg;*.gif;*.png;*.tiff|All files (*.*)|*.*";
 
     //Graphic
-    RenderDataBuffer inputData;
+    NativeBuffer<InputData> inputData;
     IsometricRenderer renderer;
     Camera camera;
     Profiler profilerTimer;
@@ -37,8 +41,23 @@ public partial class FormEditor : Form
     //setings
     private SettingsFile settings;
 
+    Dictionary<string, ShaderProgram> _shaders;
+
+    float _scale = 1;
+
     public FormEditor()
     {
+        _shaders = new Dictionary<string, ShaderProgram>
+        {
+            { "Shaded", new ShaderProgram(ScaleHeight, Shaders.NormalShading) },
+            { "Shaded2", new ShaderProgram(ScaleHeight, Shaders.NormalShading){ EnabledRecalcNormalsAfterRotation = true } },
+            { "Debug_Normals", new ShaderProgram(ScaleHeight, Shaders.DebugNormals) },
+            { "Debug_Position", new ShaderProgram(ScaleHeight, Shaders.DebugPosition) },
+            { "Debug_Height", new ShaderProgram(ScaleHeight, Shaders.DebugHeight) },
+            { "Raw Color", new ShaderProgram(ScaleHeight, Shaders.RawColor) },
+            { "Alpha Blend", new ShaderProgram(ScaleHeight, Shaders.AlphaBlend) },
+        };
+
         Icon = Properties.Resources.Cube;
 
         Console.WriteLine("Start");
@@ -62,8 +81,14 @@ public partial class FormEditor : Form
 
         camera = pBResult.Camera;
 
-        inputData = BitmapInputData.FromBitmap(settings.DefaultMap);
+        if (File.Exists(settings.DefaultMap))
+            inputData = BitmapInputData.FromBitmap(settings.DefaultMap);
+        else
+        {
+            inputData = new(16, 16);
+        }
         renderer = pBResult.Renderer;
+        renderer.Shader = _shaders["Shaded"];
 
         renderer.SetInput(inputData, false);
 
@@ -71,9 +96,11 @@ public partial class FormEditor : Form
         Console.WriteLine("Init Renderer");
         renderTimer.Start();
         pBResult.InvalidateRender();
+    }
 
-        pBResult.Timer.Interval = 1;
-        pBResult.Timer.Start();
+    private ushort ScaleHeight(ushort value)
+    {
+        return (ushort)(value * _scale + 1);
     }
 
     //Draw rendered image
@@ -89,12 +116,12 @@ public partial class FormEditor : Form
 
         if (!TextBoxRotate.Focused)
         {
-            TextBoxRotate.Text = renderer.Angle.ToString();
+            TextBoxRotate.Text = camera.Angle.ToString();
         }
 
         if (autoRotateToolStripMenuItem.Checked)
         {
-            renderer.Angle += (profilerTimer.Delta / 64);
+            camera.Angle += (profilerTimer.Delta / 64);
             pBResult.InvalidateRender();
         }
     }
@@ -122,7 +149,7 @@ public partial class FormEditor : Form
 
     private void toolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
     {
-        if (toolStripMenuItem1.Checked)
+        if (toolStripMenuItemShaders.Checked)
         {
             renderer.ShadowQuality = 1;
             pBResult.InvalidateRender();
@@ -314,8 +341,8 @@ public partial class FormEditor : Form
 
     private void ButtonReset_Click(object sender, EventArgs e)
     {
-        camera.Position = PointF.Empty;
-        renderer.Angle = 45;
+        camera.Position = Vector2.Zero;
+        camera.Angle = 45;
         pBResult.InvalidateRender();
     }
 
@@ -323,10 +350,10 @@ public partial class FormEditor : Form
     {
         if (float.TryParse(TextBoxRotate.Text, out float angle))
         {
-            if (renderer.Angle != angle)
+            if (camera.Angle != angle)
             {
                 TextBoxRotate.ForeColor = Color.Blue;
-                renderer.Angle = angle;
+                camera.Angle = angle;
                 pBResult.InvalidateRender();
             }
             else
@@ -342,13 +369,108 @@ public partial class FormEditor : Form
 
     private void ButtonRight_Click(object sender, EventArgs e)
     {
-        renderer.Angle += 45;
+        camera.Angle += 45;
         pBResult.InvalidateRender();
     }
 
     private void ButtonLeft_Click(object sender, EventArgs e)
     {
-        renderer.Angle -= 45;
+        camera.Angle -= 45;
         pBResult.InvalidateRender();
+    }
+
+    private void FormEditor_Load(object sender, EventArgs e)
+    {
+        pBResult.Timer.Start();
+
+        var node = toolStripMenuItemShaders;
+        var items = node.DropDownItems;
+
+        void handler(object obj, EventArgs args)
+        {
+            var item = (ToolStripMenuItem)obj;
+            foreach (var sobj in items)
+            {
+                var sitem = (ToolStripMenuItem)sobj;
+                sitem.Checked = false;
+            }
+            item.Checked = true;
+
+            var text = item.Text;
+
+            var shader = _shaders[text];
+            renderer.Shader = shader;
+
+            pBResult.InvalidateRender();
+        }
+
+
+        bool first = true;
+        foreach (var shader in _shaders)
+        {
+            var item = new ToolStripMenuItem(shader.Key, null, handler);
+            item.Checked = first;
+            item.Image = node.Image;
+            items.Add(item);
+            first = false;
+        }
+    }
+
+    private void TextBoxTilt_TextChanged(object sender, EventArgs e)
+    {
+        if (TryGetNumberFromToolStripTextBox(sender, out float value))
+        {
+            camera.Tilt = value;
+            pBResult.InvalidateRender();
+        }
+    }
+
+    private void TextBoxHeight_TextChanged(object sender, EventArgs e)
+    {
+        if (TryGetNumberFromToolStripTextBox(sender, out float value))
+        {
+            renderer.MaxHeight = (int)value;
+            pBResult.InvalidateRender();
+        }
+    }
+
+    private void TextBoxScaling_TextChanged(object sender, EventArgs e)
+    {
+        if (TryGetNumberFromToolStripTextBox(sender, out float value))
+        {
+            _scale = value;
+            pBResult.InvalidateRender();
+        }
+    }
+
+    bool TryGetNumberFromToolStripTextBox(object sender, out float value)
+    {
+        var control = (ToolStripTextBox)sender;
+        var text = control.Text;
+
+        if (float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+        {
+            if (value >= 0)
+            {
+                control.ForeColor = Color.Black;
+                return true;
+            }
+        }
+        control.ForeColor = Color.Red;
+        return false;
+    }
+
+    private void importNormalsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        var dialog = new OpenFileDialog();
+        dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
+        dialog.Filter = ImageFilter;
+
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            inputData.LoadNormalBitmap(dialog.FileName);
+            settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
+            pBResult.InvalidateRender();
+        }
     }
 }

@@ -17,15 +17,17 @@ public abstract unsafe class Swapchain : IDisposable
 
     public int ImageHeight { get; private set; }
 
+    public int ImageLength => ImageWidth * ImageHeight;
+
     public int Position { get; private set; }
 
-    public int Size { get; }
+    public int Count { get; }
 
     public abstract ARGBColor* ImageData { get; }
 
-    public Swapchain(int size)
+    public Swapchain(int count)
     {
-        Size = size;
+        Count = count;
     }
 
     public void Next()
@@ -55,6 +57,8 @@ public abstract unsafe class Swapchain : IDisposable
 
 public abstract unsafe class Swapchain<T> : Swapchain where T : class
 {
+    MonitorHandle<T>? _handle;
+    readonly object[] _locks;
     readonly T[] _items;
 
     ARGBColor* imageData;
@@ -62,15 +66,33 @@ public abstract unsafe class Swapchain<T> : Swapchain where T : class
 
     public override ARGBColor* ImageData => imageData;
 
-    public MonitorHandle<T> Image => new(Get(Position - 1));
+    public MonitorHandle<T> Image
+    {
+        get
+        {
+            if (_handle?.disposed == false)
+                throw new InvalidOperationException("Last handle not disposed.");
+
+            var index = GetIndex(Position - 1);
+            return new MonitorHandle<T>(_items[index], _locks[index]);
+        }
+    }
 
     public Swapchain(int size) : base(size)
     {
         _items = new T[size];
+        _locks = new object[size];
+        for (int i = 0; i < size; i++)
+        {
+            _locks[i] = new object();
+        }
     }
 
     public override sealed void OnResizeImages()
     {
+        foreach (var item in _locks)
+            Monitor.Enter(item);
+
         DisposeItems();
         for (int i = 0; i < _items.Length; i++)
         {
@@ -81,47 +103,37 @@ public abstract unsafe class Swapchain<T> : Swapchain where T : class
             }
             _items[i] = item;
         }
+
+        foreach (var item in _locks)
+            Monitor.Exit(item);
     }
 
     protected abstract T OnCreateItem();
 
     protected abstract void OnDisposeItem(T item);
 
-
-
-    T Get(int pos)
+    int GetIndex(int position)
     {
-        if (pos == -1)
-            pos = _items.Length - 1;
+        if (position == -1)
+            position = _items.Length - 1;
 
-        var bitmap = _items[pos % _items.Length];
-        return bitmap;
+        return position % _items.Length;
     }
 
     public override sealed unsafe void LockActive()
     {
-        var bitmap = Get(Position);
+        var index = GetIndex(Position);
 
-        Monitor.Enter(bitmap);
-
-        var ptr = OnLockActive(bitmap);
+        Monitor.Enter(_locks[index]);
+        var ptr = OnLockActive(_items[index]);
         imageData = ptr;
-
-        /*
-        for (int i = 0; i < size; i++)
-        {
-            iptr[i] = 0;
-        }
-        */
     }
 
     public override sealed void UnlockActive()
     {
-        var bitmap = Get(Position);
-
-        OnUnlockActive(bitmap);
-
-        Monitor.Exit(bitmap);
+        var index = GetIndex(Position);
+        OnUnlockActive(_items[index]);
+        Monitor.Exit(_locks[index]);
     }
 
     protected abstract ARGBColor* OnLockActive(T item);

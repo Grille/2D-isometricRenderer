@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,6 +34,34 @@ public struct ARGBColor
         Unsafe.SkipInit(out ARGB);
     }
 
+    public void Blend(ARGBColor color)
+    {
+        this = BlendColors(this, color);
+    }
+
+    public static ARGBColor BlendColors(ARGBColor color1, ARGBColor color2)
+    {
+        // Convert alpha from 0-255 to 0-1
+        float alpha1 = color1.A / 255f;
+        float alpha2 = color2.A / 255f;
+
+        // Calculate the resulting alpha
+        float outAlpha = alpha1 + alpha2 * (1 - alpha1);
+
+        // Calculate the resulting color components
+        float outR = (color1.R * alpha1 + color2.R * alpha2 * (1 - alpha1)) / outAlpha;
+        float outG = (color1.G * alpha1 + color2.G * alpha2 * (1 - alpha1)) / outAlpha;
+        float outB = (color1.B * alpha1 + color2.B * alpha2 * (1 - alpha1)) / outAlpha;
+
+        // Convert back to 0-255 range
+        int outA = (int)(outAlpha * 255);
+        int outRed = (int)(outR);
+        int outGreen = (int)(outG);
+        int outBlue = (int)(outB);
+
+        return new ARGBColor((byte)outA, (byte)outRed, (byte)outGreen, (byte)outBlue);
+    }
+
     public static ARGBColor Mix(ARGBColor a, ARGBColor b, float factor)
     {
         // Interpolate between the two colors
@@ -44,10 +73,22 @@ public struct ARGBColor
         );
     }
 
-    public ARGBColor ApplyShadow(float shadow)
+    public ARGBColor ApplyShading(float shadow)
     {
         return new ARGBColor(A, (byte)(R * shadow), (byte)(G * shadow), (byte)(B * shadow));
     }
+
+    public ARGBColor ApplyShadingClamped(float shadow)
+    {
+        return new ARGBColor(A, ClampColor(R * shadow), ClampColor(G * shadow), ClampColor(B * shadow));
+    }
+
+    public ARGBColor ApplyShadingClamped(Vector3 shadow)
+    {
+        return new ARGBColor(A, ClampColor(R * shadow.X), ClampColor(G * shadow.Y), ClampColor(B * shadow.Z));
+    }
+
+    static byte ClampColor(float color) =>(byte)Math.Clamp(color, 0f, 255f);
 
     public ARGBColor(byte r, byte g, byte b) :
         this(255, r, g, b)

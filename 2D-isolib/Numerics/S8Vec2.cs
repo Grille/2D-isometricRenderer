@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,11 +12,24 @@ namespace Grille.Graphics.Isometric.Numerics;
 [StructLayout(LayoutKind.Explicit)]
 public struct S8Vec2
 {
+    public static S8Vec2 FromBytes(byte x, byte y)
+    {
+        return new S8Vec2((sbyte)(x - 127), (sbyte)(y - 127));
+    }
+
+    public static S8Vec2 FromSingles(float x, float y)
+    {
+        return new S8Vec2((sbyte)(x * 127f), (sbyte)(y * 127f));
+    }
+
     public S8Vec2(sbyte x, sbyte y)
     {
         X = x; Y = y;
         Unsafe.SkipInit(out XY);
     }
+
+    const float mul = 1f / 127f;
+    public Vector2 ToVector2() =>new Vector2(X * mul, Y * mul);
 
     [FieldOffset(0)]
     public short XY;

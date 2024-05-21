@@ -8,67 +8,78 @@ using System.Text;
 using System.Threading.Tasks;
 using Grille.Graphics.Isometric.Numerics;
 
-namespace Grille.Graphics.Isometric;
+namespace Grille.Graphics.Isometric.Buffers;
 
-public unsafe class RenderDataBuffer : IDisposable
+public unsafe class NativeBuffer<T> : IDisposable where T : unmanaged
 {
     private bool disposedValue;
 
-    public readonly RenderData* Pointer;
+    public readonly T* Pointer;
 
     public int Width { get; }
     public int Height { get; }
     public int Length { get; }
 
-    public static RenderDataBuffer Empty { get; } = new RenderDataBuffer(0, 0);
+    public static NativeBuffer<T> Empty { get; } = new NativeBuffer<T>(0, 0);
 
-    public RenderDataBuffer(int width, int height)
+    public NativeBuffer(int width, int height)
     {
         Width = width;
         Height = height;
         Length = width * height;
 
-        nuint size = (nuint)(Length * sizeof(RenderData));
-        Pointer = (RenderData*)NativeMemory.AllocZeroed(size);
+        nuint size = (nuint)(Length * sizeof(T));
+        Pointer = (T*)NativeMemory.AllocZeroed(size);
     }
 
-    public ref RenderData this[int index]
+    public ref T this[int index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref Pointer[index];
     }
 
-    public ref RenderData this[S32Vec2 index]
+    public ref T this[S32Vec2 index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref Pointer[index.X + index.Y * Width];
     }
 
-    public ref RenderData this[int x, int y]
+    public ref T this[int x, int y]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref Pointer[x + y * Width];
     }
 
-    public ref RenderData GetClamped(int x, int y)
+    public int GetClampedIndex(int x, int y)
     {
         x = Math.Clamp(x, 0, Width - 1);
         y = Math.Clamp(y, 0, Height - 1);
-        int idx = y * Width + x;
+        return y * Width + x;
+    }
+
+    public T* GetClampedPointer(int x, int y)
+    {
+        int idx = GetClampedIndex(x, y);
+        return Pointer + idx;
+    }
+
+    public ref T GetClamped(int x, int y)
+    {
+        int idx = GetClampedIndex(x, y);
         return ref Pointer[idx];
     }
 
-    public RenderDataBuffer Copy()
+    public NativeBuffer<T> Copy()
     {
-        var buffer = new RenderDataBuffer(Width, Height);
-        uint size = (uint)(Length * sizeof(RenderData));
+        var buffer = new NativeBuffer<T>(Width, Height);
+        uint size = (uint)(Length * sizeof(T));
         Unsafe.CopyBlock(Pointer, buffer.Pointer, size);
         return buffer;
     }
 
     public void Clear()
     {
-        new Span<RenderData>(Pointer, Length).Clear();
+        new Span<T>(Pointer, Length).Clear();
     }
 
     void Dispose(bool disposing)
@@ -81,7 +92,9 @@ public unsafe class RenderDataBuffer : IDisposable
         }
     }
 
-    ~RenderDataBuffer()
+    public Span<T> AsSpan() => new Span<T>(Pointer, Length);
+
+    ~NativeBuffer()
     {
         Dispose(disposing: false);
     }

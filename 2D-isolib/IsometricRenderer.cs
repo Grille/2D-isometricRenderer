@@ -16,21 +16,22 @@ using Grille.Graphics.Isometric.Shading;
 using Grille.Graphics.Isometric.Numerics;
 using System.Runtime.CompilerServices;
 using Grille.Graphics.Isometric.Diagnostics;
+using Grille.Graphics.Isometric.Buffers;
 
 namespace Grille.Graphics.Isometric;
 
 public unsafe class IsometricRenderer
 {
     //Tasks
-    RenderDataBuffer input;
-    RenderDataBuffer work;
+    NativeBuffer<InputData> input;
+    NativeBuffer<int> work;
 
     ParallelExecutor parallel;
 
     readonly Swapchain swapchain;
     readonly Profiler profiler;
 
-    public Func<ShaderArgs, ARGBColor> PixelShader { get; set; }
+    public ShaderProgram Shader { get; set; }
 
     public float FrameTime => profiler.FrameTime;
     public float FPS => profiler.FPS;
@@ -38,13 +39,25 @@ public unsafe class IsometricRenderer
     //settings
     public int ShadowQuality { get; set; } = 1;
 
-    float angle = 45;
+    float _tilt = 0.5f;
 
-    bool angleChanged = false;
+    float _angle = 45;
 
-    int heightExcess = 255;
+    int _maxHeight = 255;
+
+    public int MaxHeight
+    {
+        get => _maxHeight;
+        set
+        {
+            _maxHeight = value;
+            InputChanged();
+        }
+    }
 
     int _workerCount;
+
+    static readonly float sqrt2 = MathF.Sqrt(2);
 
     public int WorkerCount
     {
@@ -58,48 +71,44 @@ public unsafe class IsometricRenderer
         }
     }
 
+    public float Angle
+    {
+        set
+        {
+            if (_angle == value) return;
+            _angle = value;
+            if (_angle <= 0) _angle += 360;
+            else if (_angle >= 360) _angle -= 360;
+        }
+        get
+        {
+            return _angle;
+        }
+    }
+
+    public float Tilt
+    {
+        get => _tilt;
+        set
+        {
+            _tilt = value;
+            InputChanged();
+        }
+    }
+
+
     public IsometricRenderer(Swapchain swapchain, int workerCount)
     {
         parallel = new ParallelExecutor(workerCount);
         profiler = new Profiler();
         this.swapchain = swapchain;
 
-
-        PixelShader = DefaultShaders.DefaultShader;
-
-        /*
-        var groundcurve = new ColorCurve();
-        groundcurve.Add(0.0f, new ARGBColor(90,117,55));
-        groundcurve.Add(0.3f, new ARGBColor(93, 65, 45));
-        groundcurve.Add(0.5f, new ARGBColor(70, 65, 45));
-        groundcurve.Add(0.6f, new ARGBColor(227, 243, 255));
-        groundcurve.Add(1.0f, new ARGBColor(255, 255, 255));
-
-        var wallcurve = new ColorCurve();
-        wallcurve.Add(0.0f, new ARGBColor(100,100,100));
-        wallcurve.Add(1.0f, new ARGBColor(40,40,40));
-
-        var groundbake = groundcurve.Bake(255);
-        var wallbake = wallcurve.Bake(255);
-
-        PixelShader = new((args) =>
-        {
-            var ground = groundbake[args.Cell->Height];
-            var wall = wallbake[args.Cell->Height];
-            var color = ARGBColor.Mix(ground, wall, Math.Clamp(args.Cell->HeightDifference / 6f, 0f, 1f));// = new ARGBColor(0, location.Z % 16 < 1 ? (byte)255 : (byte)0, (byte)(location.Z));
-
-            if (args.Location.Z < args.Cell->ShadowHeight + 1)
-            {
-                return color.ApplyShadow(0.75f);
-            }
-            return color;
-        });
-        */
-
-
+        Shader = ShaderProgram.Default;
+        input = new(0, 0);
+        work = new(0, 0);
     }
 
-    public void SetInput(RenderDataBuffer buffer, bool copy = true)
+    public void SetInput(NativeBuffer<InputData> buffer, bool copy = true)
     {
         if (copy == true)
         {
@@ -109,20 +118,14 @@ public unsafe class IsometricRenderer
 
         input = buffer;
 
-
-        if (work != null)
-        {
-            work.Dispose();
-        }
-        work = new RenderDataBuffer((int)(input.Width * 1.5), (int)(input.Height * 1.5));
-        swapchain.ResizeImages(work.Width, work.Height / 2 + heightExcess);
+        InputChanged();
     }
 
-    public void SetInput(RenderData[,] array)
+    public void SetInput(InputData[,] array)
     {
         var width = array.GetLength(0);
         var height = array.GetLength(1);
-        var buffer = new RenderDataBuffer(width, height);
+        var buffer = new NativeBuffer<InputData>(width, height);
         for (int ix = 0; ix < width; ix++)
         {
             for (int iy = 0; iy < height; iy++)
@@ -133,82 +136,47 @@ public unsafe class IsometricRenderer
         SetInput(buffer, false);
     }
 
-    public float Angle
+    public void InputChanged()
     {
-        set
+        bool rebuildBuffer = false;
+        bool resizeSwapchain = false;
+
+        S32Vec2 bufferSize = (S32Vec2)new Vector2(input.Width * sqrt2, input.Height * sqrt2);
+        S32Vec2 swapchainSize = new S32Vec2(bufferSize.X, (int)(bufferSize.Y * MathF.Abs(_tilt)) + _maxHeight);
+        if (swapchainSize.X == 0) swapchainSize.X = 1;
+        if (swapchainSize.Y == 0) swapchainSize.Y = 1;
+
+        if (work.Width != bufferSize.X || work.Height != bufferSize.Y)
+            rebuildBuffer = true;
+
+        if (swapchain.ImageWidth != swapchainSize.X || swapchain.ImageHeight != swapchainSize.Y)
+            resizeSwapchain = true;
+
+        if (rebuildBuffer)
         {
-            if (angle == value) return;
-            angle = value;
-            if (angle <= 0) angle += 360;
-            else if (angle >= 360) angle -= 360;
-            angleChanged = true;
-        }
-        get
-        {
-            return angle;
-        }
-    }
-
-
-    // Rotate byte pixel array
-    private void Rotate()
-    {
-        parallel.Run(Rotate);
-    }
-
-    // Rotate part of the byte pixel array
-    private void Rotate(float start, float end)
-    {
-        int srcWidth = input.Width, srcHeight = input.Height; 
-        int dstWidth = work.Width, dstHeight = work.Height;
-
-        float rad = -angle * MathF.PI / 180f;
-        float sinma = MathF.Sin(rad);
-        float cosma = MathF.Cos(rad);
-
-        float srcHalfWidth = srcWidth / 2f;
-        float srcHalfHeight = srcHeight / 2f;
-
-        int ixStart = (int)(dstWidth * start);
-        int ixEnd = (int)(dstWidth * end);
-        int ixCount = ixEnd - ixStart;
-        int ixSkip = dstWidth - ixCount;
-
-        var dst = work.Pointer;
-        var src = input.Pointer;
-
-        var dstPtr = dst + ixStart;
-
-        for (int y = 0; y < dstHeight; y++)
-        {
-            for (int x = ixStart; x < ixEnd; x++)
+            lock (work)
             {
-                dstPtr += 1;
-
-                float xt = x - srcHalfWidth * 1.5f;
-                float yt = y - srcHalfHeight * 1.5f;
-
-                int xs = (int)((cosma * xt - sinma * yt) + srcHalfWidth);
-                int ys = (int)((sinma * xt + cosma * yt) + srcHalfHeight);
-
-                int offsetSrc = (xs + ys * srcWidth);
-                if (xs >= 0 && xs < srcWidth && ys >= 0 && ys < srcHeight)
-                {
-                    var srcPtr = src + offsetSrc;
-                    Unsafe.CopyBlock(dstPtr, srcPtr, 10);
-                    dstPtr->Position = new U16Vec2((ushort)xs, (ushort)ys);
-                }
+                work.Dispose();
+                work = new NativeBuffer<int>(bufferSize.X, bufferSize.Y);
             }
-
-            dstPtr += ixSkip;
         }
 
+        if (resizeSwapchain)
+        {
+            swapchain.ResizeImages(swapchainSize.X, swapchainSize.Y);
+        }
     }
 
+    public void ApplyCamera(Camera camera)
+    {
+        _angle = camera.Angle;
+        _tilt = camera.Tilt;
+        InputChanged();
+    }
+    /*
     // Add shadows
     private void CalcShadows(int resolution)
     {
-
         if (resolution == 0) 
             return;
 
@@ -224,13 +192,13 @@ public unsafe class IsometricRenderer
                 int offset = ix + iy * width;
                 int i = 0;
 
-                float shadowHeight = buffer[offset].Height;
-                while (buffer[offset].ShadowHeight < shadowHeight)
+                float shadowHeight = Shader.HeightShader(buffer[offset].Height);
+                while (buffer[offset].Data < shadowHeight)
                 {
                     if (i > 0) 
-                        buffer[offset].ShadowHeight = (byte)(shadowHeight * 1f);
+                        buffer[offset].Data = (byte)(shadowHeight * 1f);
 
-                    if (buffer[offset].Height > shadowHeight + 1) 
+                    if (Shader.HeightShader(buffer[offset].Height) > shadowHeight + 1) 
                         break;
 
                     i++; shadowHeight -= 1f; offset += 1;
@@ -239,64 +207,112 @@ public unsafe class IsometricRenderer
         }
 
     }
+    */
 
     // Rendering the image
     private void Elevate()
     {
-        parallel.Run(Elevate);
+        lock (work)
+        {
+            parallel.Run(Elevate);
+        }
     }
 
     // Rendering the part of image from heightmap (elevate and apply textures & shadows)
     private unsafe void Elevate(float start, float end)
     {
+        int srcWidth = input.Width, srcHeight = input.Height;
+
+        float rad = -_angle * MathF.PI / 180f;
+        float sinma = MathF.Sin(rad);
+        float cosma = MathF.Cos(rad);
+
+        float srcHalfWidth = srcWidth / 2f;
+        float srcHalfHeight = srcHeight / 2f;
+
+        float srcFactorWidth = srcHalfWidth * sqrt2;
+        float srcFactorHeight = srcHalfHeight * sqrt2;
+
+        var src = input.Pointer;
+
+        bool Sample(RenderData* cell, int x, int y)
+        {
+            float xt = x - srcFactorWidth;
+            float yt = y - srcFactorHeight;
+
+            int xs = (int)((cosma * xt - sinma * yt) + srcHalfWidth);
+            int ys = (int)((sinma * xt + cosma * yt) + srcHalfHeight);
+
+            int offsetSrc = (xs + ys * srcWidth);
+            if (xs >= 0 && xs < srcWidth && ys >= 0 && ys < srcHeight)
+            {
+                var srcPtr = src + offsetSrc;
+
+                Unsafe.CopyBlock(cell, srcPtr, InputData.Layout.Size);
+                cell->Position = new U16Vec2((ushort)xs, (ushort)ys);
+
+                return true;
+            }
+            return false;
+        }
+
         var pixels = swapchain.ImageData;
 
-        int widthSrc = work.Width, 
-            heightSrc = work.Height, 
-            widthDst = swapchain.ImageWidth, 
-            heightDst = swapchain.ImageHeight;
+        int workWidth = work.Width, 
+            workHeight = work.Height, 
+            dstWidth = swapchain.ImageWidth, 
+            dstHeight = swapchain.ImageHeight;
 
-        int beginX = (int)(widthSrc * start),
-            endX = (int)(heightSrc * end);
+        int beginX = (int)(workWidth * start),
+            endX = (int)(workHeight * end);
 
-        var src = work.Pointer;
-
+        var argsptr = new ShaderArgs.PointerGroup();
         var args = new ShaderArgs();
+        args._Ptr = &argsptr;
 
+        int maxHeightOffset = dstWidth * _maxHeight;
+
+        S32Vec3 location;
+        RenderData cell;
+
+        argsptr.Location = &location;
+        argsptr.Cell = &cell;
 
         //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
-        for (int iy = (heightSrc - 1); iy >= 0; iy -= 1) // Bottom -> Top                                              
+        for (int iy = (workHeight - 1); iy >= 0; iy -= 1) // Bottom -> Top                                              
         {
-            args.Location.Y = iy;
+            location.Y = iy;
             for (int ix = beginX; ix < endX; ix++) // Left -> Right
             {
-                args.Location.X = ix;
+                location.X = ix;
                 // get positions
-                int offSrc = (ix + iy * widthSrc);
-                int offDst = (ix + iy / 2 * widthDst);
+                int offSrc = (ix + iy * workWidth);
+                int offDst = (ix + (int)(iy * Tilt) * dstWidth);
 
-                int iz = src[offSrc].Height;
+                if (!Sample(&cell, ix, iy))
+                    continue;
+
+                int iz = Shader.HeightShader(cell.Height);
+                if (iz > _maxHeight)
+                    iz = _maxHeight;
                 while (iz > 0) // Downwards
                 {
-                    // save
-                    if (iy + heightExcess - iz >= 0)
+                    // get position on z axe
+                    int offDstZ = offDst - (dstWidth * iz) + maxHeightOffset;//pos + curent height
+
+                    // pixel not yet drawn
+                    if (pixels[offDstZ].A < 255)
                     {
-                        // get position on z axe
-                        int offDstZ = offDst - (widthDst * iz) + widthDst * heightExcess;//pos + curent height
-
-                        // pixel not yet drawn
-                        if (pixels[offDstZ].A == 0)
-                        {
-                            args.Location.Z = iz;
-                            args.Cell = src + offSrc;
-
-                            pixels[offDstZ] = PixelShader(args);
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        location.Z = iz;
+                        argsptr.Color = pixels + offDstZ;
+                        pixels[offDstZ].A = 255;
+                        Shader.PixelShader(args);
                     }
+                    else
+                    {
+                        break;
+                    }
+
                     iz--;
                 }
             }
@@ -313,13 +329,21 @@ public unsafe class IsometricRenderer
         if (work == null)
             throw new InvalidOperationException();
 
+        if (Tilt < 0)
+            throw new InvalidOperationException("Value must be >0.");
+
+
         profiler.Begin();
 
-        work.Clear();
+        //work.Clear();
 
-        Rotate();
+        //Rotate();
 
-        CalcShadows(ShadowQuality);
+        if (Shader.EnabledRecalcNormalsAfterRotation)
+            work.CalculateNormals();
+
+        //if (Shader.EnableHeightShadows)
+        //    CalcShadows(ShadowQuality);
 
         swapchain.LockActive();
         Elevate();

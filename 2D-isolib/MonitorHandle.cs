@@ -11,15 +11,17 @@ namespace Grille.Graphics.Isometric;
 
 public class MonitorHandle<T> : IDisposable where T : notnull
 {
-    bool disposed;
+    internal bool disposed;
 
+    readonly object _key;
     public readonly T Value;
 
-    public MonitorHandle(T obj)
+    public MonitorHandle(T obj, object key)
     {
         Value = obj;
+        _key = key;
 
-        Monitor.Enter(Value);
+        Monitor.Enter(_key);
     }
 
     public void Dispose()
@@ -27,7 +29,7 @@ public class MonitorHandle<T> : IDisposable where T : notnull
         if (disposed)
             return;
 
-        Monitor.Exit(Value);
+        Monitor.Exit(_key);
 
         disposed = true;
     }

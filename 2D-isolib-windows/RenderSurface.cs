@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
+using System.Numerics;
 
 namespace Grille.Graphics.Isometric.WinForms;
 
@@ -31,18 +33,19 @@ public class RenderSurface : Control
 
     public bool DefaultMouseEventsEnabled { get; set; } = true;
 
+    public bool DrawBoundings {  get; set; } = true;
+
     public LDownAction OnLeftMouseDown { get; set; } = LDownAction.Drag;
 
-    public Timer Timer { get; }
+    public RenderTimer Timer { get; }
 
     public MonitorHandle<Bitmap> Image => Swapchain.Image;
 
     Task renderTaks;
 
-    Task timerTask;
-
     bool _needRender = true;
     bool _needRefresh = true;
+    object _lock = new object();
 
     public RenderSurface()
     {
@@ -54,14 +57,11 @@ public class RenderSurface : Control
         Swapchain = new BitmapSwapchain(16, 16);
         Renderer = new IsometricRenderer(Swapchain, Environment.ProcessorCount);
 
-        Timer = new Timer()
-        {
-            Interval = 10
-        };
+        Timer = new RenderTimer(Tick);
+        Timer.TargetFPS = 1200;
+        
 
         renderTaks = Task.CompletedTask;
-
-        Timer.Tick += Tick;
     }
 
     public void InvalidateRender()
@@ -71,23 +71,27 @@ public class RenderSurface : Control
 
     void Render()
     {
+        Renderer.ApplyCamera(Camera);
         Renderer.Render();
         _needRefresh = true;
-        Invoke(() => Tick(null, null!));
+        Tick();
     }
 
-    private void Tick(object? sender, EventArgs e)
+    private void Tick()
     {
-        if (_needRender && renderTaks.IsCompleted)
+        lock (_lock)
         {
-            renderTaks = Task.Run(Render);
-            _needRender = false;
-        }
+            if (_needRender && renderTaks.IsCompleted)
+            {
+                renderTaks = Task.Run(Render);
+                _needRender = false;
+            }
 
-        if (_needRefresh)
-        {
-            Refresh();
-            _needRefresh = false;
+            if (_needRefresh)
+            {
+                Invoke(Refresh);
+                _needRefresh = false;
+            }
         }
     }
 
@@ -101,7 +105,7 @@ public class RenderSurface : Control
 
         Profiler.Begin();
 
-        Camera.ScreenSize = ClientSize;
+        Camera.ScreenSize = (Vector2)(SizeF)ClientSize;
 
         var g = e.Graphics;
         g.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -111,12 +115,15 @@ public class RenderSurface : Control
         var windowBrush = new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical);
         //sg.FillRectangle(windowBrush, windowRect);
 
-        float scale = Camera.Scale;
-        var nullPos = Camera.WorldToScreenSpace(PointF.Empty);
-        var drawPos = new PointF(nullPos.X - (bitmap.Width / 2) * scale, nullPos.Y - 255 * scale - ((bitmap.Height - 255) / 2) * scale);
-
-        var dstRect = new RectangleF(drawPos.X, drawPos.Y, bitmap.Width * scale, bitmap.Height * scale);
+        var dstRect = GetScreenSpaceBoundings();
         var srcRect = new RectangleF(0, 0, bitmap.Width, bitmap.Height);
+
+        if (DrawBoundings)
+        {
+            g.DrawRectangle(Pens.White, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height);
+            _DrawBoundings(g, bitmap.Width / 2f * (1 / 1.41f), Renderer.MaxHeight);
+            DrawCoords(g, Vector3.Zero);
+        }
 
         g.DrawImage(bitmap, dstRect, srcRect, GraphicsUnit.Pixel);
 
@@ -145,11 +152,62 @@ public class RenderSurface : Control
         base.OnPaint(e);
     }
 
+    public RectangleF GetScreenSpaceBoundings()
+    {
+        float scale = Camera.Scale;
+        var nullPos = Camera.WorldToScreenSpace(Vector2.Zero);
+        var drawPos = new PointF(nullPos.X - (Swapchain.ImageWidth / 2) * scale, nullPos.Y - Renderer.MaxHeight * scale - ((Swapchain.ImageHeight - Renderer.MaxHeight) / 2) * scale);
+        var dstRect = new RectangleF(drawPos.X, drawPos.Y, Swapchain.ImageWidth * scale, Swapchain.ImageHeight * scale);
+        if (dstRect.Y is float.NaN)
+            throw new Exception();
+        return dstRect;
+    }
+
+    void DrawLine3D(System.Drawing.Graphics g, Vector3 pos1, Vector3 pos2)
+    {
+        DrawLine3D(g, pos1, pos2, Pens.White);
+    }
+
+    void DrawLine3D(System.Drawing.Graphics g, Vector3 pos1, Vector3 pos2, Pen pen)
+    {
+        var tpos1 = Camera.WorldToScreenSpace(pos1);
+        var tpos2 = Camera.WorldToScreenSpace(pos2);
+
+        g.DrawLine(pen, (PointF)tpos1, (PointF)tpos2);
+    }
+
+    void DrawCoords(System.Drawing.Graphics g, Vector3 pos)
+    {
+        DrawLine3D(g, pos, pos + new Vector3(1000, 0, 0), Pens.Red);
+        DrawLine3D(g, pos, pos + new Vector3(0, 1000, 0), Pens.Blue);
+        DrawLine3D(g, pos, pos + new Vector3(0, 0, 1000), Pens.Lime);
+    }
+
+    void _DrawBoundings(System.Drawing.Graphics g, float size, float height)
+    {
+        void DrawQuad(float h)
+        {
+            DrawLine3D(g, new Vector3(-size, size, h), new Vector3(size, size, h));
+            DrawLine3D(g, new Vector3(-size, -size, h), new Vector3(size, -size, h));
+            DrawLine3D(g, new Vector3(-size, size, h), new Vector3(-size, -size, h));
+            DrawLine3D(g, new Vector3(size, size, h), new Vector3(size, -size, h));
+        }
+
+        DrawLine3D(g, new Vector3(size, size, 0), new Vector3(size, size, height));
+        DrawLine3D(g, new Vector3(-size, -size, 0), new Vector3(-size, -size, height));
+        DrawLine3D(g, new Vector3(-size, size, 0), new Vector3(-size, size, height));
+        DrawLine3D(g, new Vector3(size, -size, 0), new Vector3(size, -size, height));
+
+        DrawQuad(0);
+        DrawQuad(height);
+
+    }
+
     protected override void OnMouseWheel(MouseEventArgs e)
     {
         if (DefaultMouseEventsEnabled)
         {
-            Camera.MouseScrollEvent(e, 1.5f);
+            Camera.MouseScroll(e, 1.5f);
             _needRefresh = true;
         }
 
@@ -160,7 +218,7 @@ public class RenderSurface : Control
     {
         if (DefaultMouseEventsEnabled)
         {
-            Camera.MouseMoveEvent(e, false);
+            Camera.MouseMove(e, false);
         }
 
         base.OnMouseDown(e);
@@ -187,19 +245,19 @@ public class RenderSurface : Control
                 }
                 else if (OnLeftMouseDown == LDownAction.Rotate)
                 {
-                    var curPos = Camera.ScreenToWorldSpace(e.Location);
-                    var lastPos = Camera.ScreenToWorldSpace(Camera.LastLocation);
+                    var curPos = Camera.ScreenToWorldSpace((Vector2)(PointF)e.Location, false);
+                    var lastPos = Camera.ScreenToWorldSpace(Camera.LastLocation, false);
 
-                    float curAngle = (float)(Math.Atan2(curPos.Y * 2, curPos.X) * (180 / Math.PI));
-                    float lastAngle = (float)(Math.Atan2(lastPos.Y * 2, lastPos.X) * (180 / Math.PI));
+                    float curAngle = (float)(Math.Atan2(curPos.Y, curPos.X) * (180 / Math.PI));
+                    float lastAngle = (float)(Math.Atan2(lastPos.Y, lastPos.X) * (180 / Math.PI));
 
-                    Renderer.Angle += curAngle - lastAngle;
+                    Camera.Angle += curAngle - lastAngle;
                     _needRender = true;
 
                 }
             }
 
-            Camera.MouseMoveEvent(e, move);
+            Camera.MouseMove(e, move);
             _needRefresh |= refresh;
         }
 
