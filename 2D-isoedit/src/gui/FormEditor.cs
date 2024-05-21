@@ -47,10 +47,13 @@ public partial class FormEditor : Form
 
     public FormEditor()
     {
+        Console.WriteLine("Start");
+        InitializeComponent();
+
         _shaders = new Dictionary<string, ShaderProgram>
         {
-            { "Shaded", new ShaderProgram(ScaleHeight, Shaders.NormalShading) },
-            { "Shaded2", new ShaderProgram(ScaleHeight, Shaders.NormalShading){ EnabledRecalcNormalsAfterRotation = true } },
+            { "Dynamic Shading", new ShaderProgram(ScaleHeight, pBResult.DemoShader.PixelShader) },
+            { "Fixed Shading", new ShaderProgram(ScaleHeight, Shaders.NormalShading) },
             { "Debug_Normals", new ShaderProgram(ScaleHeight, Shaders.DebugNormals) },
             { "Debug_Position", new ShaderProgram(ScaleHeight, Shaders.DebugPosition) },
             { "Debug_Height", new ShaderProgram(ScaleHeight, Shaders.DebugHeight) },
@@ -59,9 +62,6 @@ public partial class FormEditor : Form
         };
 
         Icon = Properties.Resources.Cube;
-
-        Console.WriteLine("Start");
-        InitializeComponent();
 
         settings = new SettingsFile();
         try
@@ -88,7 +88,7 @@ public partial class FormEditor : Form
             inputData = new(16, 16);
         }
         renderer = pBResult.Renderer;
-        renderer.Shader = _shaders["Shaded"];
+        renderer.Shader = _shaders["Dynamic Shading"];
 
         renderer.SetInput(inputData, false);
 
@@ -246,14 +246,29 @@ public partial class FormEditor : Form
 
     private void toolStripButtonDrag_Click(object sender, EventArgs e)
     {
-        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.Drag;
+        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.DragView;
+        toolStripButtonDrag.Checked = true;
         toolStripButtonRotate.Checked = false;
+        toolStripButtonLight.Checked = false;
+        pBResult.Invalidate();
     }
 
     private void toolStripButtonRotate_Click(object sender, EventArgs e)
     {
-        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.Rotate;
+        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.RotateRender;
         toolStripButtonDrag.Checked = false;
+        toolStripButtonRotate.Checked = true;
+        toolStripButtonLight.Checked = false;
+        pBResult.Invalidate();
+    }
+
+    private void toolStripButtonLight_Click(object sender, EventArgs e)
+    {
+        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.DragLight;
+        toolStripButtonRotate.Checked = false;
+        toolStripButtonDrag.Checked = false;
+        toolStripButtonLight.Checked = true;
+        pBResult.Invalidate();
     }
 
     public void Fullscreen(bool fullscreen)

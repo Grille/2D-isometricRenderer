@@ -17,9 +17,9 @@ public struct S8Vec2
         return new S8Vec2((sbyte)(x - 127), (sbyte)(y - 127));
     }
 
-    public static S8Vec2 FromSingles(float x, float y)
+    public static S8Vec2 FromVector2(Vector2 vector)
     {
-        return new S8Vec2((sbyte)(x * 127f), (sbyte)(y * 127f));
+        return new S8Vec2((sbyte)(vector.X * 127f), (sbyte)(vector.Y * 127f));
     }
 
     public S8Vec2(sbyte x, sbyte y)
@@ -29,7 +29,7 @@ public struct S8Vec2
     }
 
     const float mul = 1f / 127f;
-    public Vector2 ToVector2() =>new Vector2(X * mul, Y * mul);
+    public Vector2 ToVector2() => new Vector2(X * mul, Y * mul);
 
     [FieldOffset(0)]
     public short XY;

@@ -23,13 +23,15 @@ namespace Grille.Graphics.Isometric;
 public unsafe class IsometricRenderer
 {
     //Tasks
-    NativeBuffer<InputData> input;
-    NativeBuffer<int> work;
+    NativeBuffer<InputData> _input;
+    NativeBuffer<int> _work;
 
     ParallelExecutor parallel;
 
     readonly Swapchain swapchain;
     readonly Profiler profiler;
+
+    public NativeBuffer<InputData> Input => _input;
 
     public ShaderProgram Shader { get; set; }
 
@@ -104,8 +106,8 @@ public unsafe class IsometricRenderer
         this.swapchain = swapchain;
 
         Shader = ShaderProgram.Default;
-        input = new(0, 0);
-        work = new(0, 0);
+        _input = new(0, 0);
+        _work = new(0, 0);
     }
 
     public void SetInput(NativeBuffer<InputData> buffer, bool copy = true)
@@ -116,7 +118,7 @@ public unsafe class IsometricRenderer
             return;
         }
 
-        input = buffer;
+        _input = buffer;
 
         InputChanged();
     }
@@ -141,12 +143,12 @@ public unsafe class IsometricRenderer
         bool rebuildBuffer = false;
         bool resizeSwapchain = false;
 
-        S32Vec2 bufferSize = (S32Vec2)new Vector2(input.Width * sqrt2, input.Height * sqrt2);
+        S32Vec2 bufferSize = (S32Vec2)new Vector2(_input.Width * sqrt2, _input.Height * sqrt2);
         S32Vec2 swapchainSize = new S32Vec2(bufferSize.X, (int)(bufferSize.Y * MathF.Abs(_tilt)) + _maxHeight);
         if (swapchainSize.X == 0) swapchainSize.X = 1;
         if (swapchainSize.Y == 0) swapchainSize.Y = 1;
 
-        if (work.Width != bufferSize.X || work.Height != bufferSize.Y)
+        if (_work.Width != bufferSize.X || _work.Height != bufferSize.Y)
             rebuildBuffer = true;
 
         if (swapchain.ImageWidth != swapchainSize.X || swapchain.ImageHeight != swapchainSize.Y)
@@ -154,10 +156,10 @@ public unsafe class IsometricRenderer
 
         if (rebuildBuffer)
         {
-            lock (work)
+            lock (_work)
             {
-                work.Dispose();
-                work = new NativeBuffer<int>(bufferSize.X, bufferSize.Y);
+                _work.Dispose();
+                _work = new NativeBuffer<int>(bufferSize.X, bufferSize.Y);
             }
         }
 
@@ -212,7 +214,7 @@ public unsafe class IsometricRenderer
     // Rendering the image
     private void Elevate()
     {
-        lock (work)
+        lock (_work)
         {
             parallel.Run(Elevate);
         }
@@ -221,7 +223,7 @@ public unsafe class IsometricRenderer
     // Rendering the part of image from heightmap (elevate and apply textures & shadows)
     private unsafe void Elevate(float start, float end)
     {
-        int srcWidth = input.Width, srcHeight = input.Height;
+        int srcWidth = _input.Width, srcHeight = _input.Height;
 
         float rad = -_angle * MathF.PI / 180f;
         float sinma = MathF.Sin(rad);
@@ -233,7 +235,7 @@ public unsafe class IsometricRenderer
         float srcFactorWidth = srcHalfWidth * sqrt2;
         float srcFactorHeight = srcHalfHeight * sqrt2;
 
-        var src = input.Pointer;
+        var src = _input.Pointer;
 
         bool Sample(RenderData* cell, int x, int y)
         {
@@ -258,8 +260,8 @@ public unsafe class IsometricRenderer
 
         var pixels = swapchain.ImageData;
 
-        int workWidth = work.Width, 
-            workHeight = work.Height, 
+        int workWidth = _work.Width, 
+            workHeight = _work.Height, 
             dstWidth = swapchain.ImageWidth, 
             dstHeight = swapchain.ImageHeight;
 
@@ -323,10 +325,10 @@ public unsafe class IsometricRenderer
     // Render
     public void Render()
     {
-        if (input == null)
+        if (_input == null)
             throw new InvalidOperationException("No input data given.");
 
-        if (work == null)
+        if (_work == null)
             throw new InvalidOperationException();
 
         if (Tilt < 0)
@@ -340,7 +342,7 @@ public unsafe class IsometricRenderer
         //Rotate();
 
         if (Shader.EnabledRecalcNormalsAfterRotation)
-            work.CalculateNormals();
+            _work.CalculateNormals();
 
         //if (Shader.EnableHeightShadows)
         //    CalcShadows(ShadowQuality);

@@ -14,7 +14,7 @@ public class Camera
     private Vector2 _screenSize;
     private Vector2 _screenSizeHalf;
 
-    public Vector2 Origin { get; set; }
+    public Vector2 Origin { get; } = Vector2.Zero;
 
     public Vector2 Position { get; set; }
 
@@ -131,7 +131,7 @@ public class Camera
         return pos;
     }
 
-    Vector2 Rotate(Vector2 value, float angle)
+    public static Vector2 Rotate(Vector2 value, float angle)
     {
         float rad = angle * MathF.PI / 180f;
 
@@ -154,5 +154,19 @@ public class Camera
         var pos = WorldToScreenSpace(new Vector2(worldPos.X, worldPos.Y));
         pos.Y -= worldPos.Z * Scale;
         return pos;
+    }
+
+    public float AngleFromScreenPosition(Vector2 screenPos)
+    {
+        var worldPos = ScreenToWorldSpace(screenPos, false);
+        return (float)(Math.Atan2(worldPos.Y, worldPos.X) * (180 / Math.PI));
+    }
+
+    public float MouseMoveAngleAroundOrigin(Vector2 position)
+    {
+        float curAngle = AngleFromScreenPosition(position);
+        float lastAngle = AngleFromScreenPosition(LastLocation);
+
+        return curAngle - lastAngle;
     }
 }

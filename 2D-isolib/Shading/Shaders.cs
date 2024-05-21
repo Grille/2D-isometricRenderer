@@ -37,7 +37,7 @@ public unsafe static class Shaders
     {
         var cell =  args.Cell;
 
-        var shading = (cell->Normals.X+ cell->Normals.Y) / 255f + 1f;
+        var shading = cell->Normals.X / 255f + 1f;
 
         *args.Color = cell->Color.ApplyShadingClamped(shading);
 

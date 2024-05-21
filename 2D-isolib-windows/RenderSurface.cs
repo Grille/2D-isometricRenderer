@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.Numerics;
+using Grille.Graphics.Isometric.Shading;
+using static System.Windows.Forms.DataFormats;
 
 namespace Grille.Graphics.Isometric.WinForms;
 
@@ -17,9 +19,12 @@ public class RenderSurface : Control
     public enum LDownAction
     {
         None,
-        Drag,
-        Rotate,
+        DragView,
+        DragLight,
+        RotateRender,
     }
+
+    public GdiRenderer GdiRenderer { get; }
 
     public Profiler Profiler { get; }
 
@@ -33,11 +38,19 @@ public class RenderSurface : Control
 
     public bool DefaultMouseEventsEnabled { get; set; } = true;
 
-    public bool DrawBoundings {  get; set; } = true;
+    public bool DrawBoundingsEnabled {  get; set; } = true;
 
-    public LDownAction OnLeftMouseDown { get; set; } = LDownAction.Drag;
+    public bool FancyBackgroundEnabled { get; set; } = false;
+
+    public LDownAction OnLeftMouseDown { get; set; } = LDownAction.DragView;
 
     public RenderTimer Timer { get; }
+
+    public float LightAngle { get; set; }
+
+    public Vector2 LightDirection { get; private set; }
+
+    public ShaderProgram DemoShader { get; }
 
     public MonitorHandle<Bitmap> Image => Swapchain.Image;
 
@@ -51,8 +64,11 @@ public class RenderSurface : Control
     {
         DoubleBuffered = true;
 
+        DemoShader = new ShaderProgram(Shaders.RawHeight, PixelShader);
+
         Profiler = new Profiler();
         Camera = new Camera();
+        GdiRenderer = new GdiRenderer(Camera);
 
         Swapchain = new BitmapSwapchain(16, 16);
         Renderer = new IsometricRenderer(Swapchain, Environment.ProcessorCount);
@@ -60,8 +76,19 @@ public class RenderSurface : Control
         Timer = new RenderTimer(Tick);
         Timer.TargetFPS = 1200;
         
-
         renderTaks = Task.CompletedTask;
+    }
+
+    unsafe void PixelShader(ShaderArgs args)
+    {
+        var cell = args.Cell;
+        var normal = cell->Normals.ToVector2();
+
+        float dotProduct = Vector2.Dot(normal, LightDirection);
+        float shading = dotProduct * 0.5f + 1f;
+
+
+        *args.Color = cell->Color.ApplyShadingClamped(shading);
     }
 
     public void InvalidateRender()
@@ -71,6 +98,8 @@ public class RenderSurface : Control
 
     void Render()
     {
+        float angle = (LightAngle - Camera.Angle) * MathF.PI / 180f;
+        LightDirection = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
         Renderer.ApplyCamera(Camera);
         Renderer.Render();
         _needRefresh = true;
@@ -97,35 +126,40 @@ public class RenderSurface : Control
 
     protected override void OnPaint(PaintEventArgs e)
     {
-        using var handle = Swapchain.Image;
-        var bitmap = handle.Value;
-
-        if (bitmap == null)
-            return;
-
-        Profiler.Begin();
-
-        Camera.ScreenSize = (Vector2)(SizeF)ClientSize;
-
         var g = e.Graphics;
         g.InterpolationMode = InterpolationMode.NearestNeighbor;
         g.SmoothingMode = SmoothingMode.None;
 
-        var windowRect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height);
-        var windowBrush = new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical);
-        //sg.FillRectangle(windowBrush, windowRect);
+        Camera.ScreenSize = (Vector2)(SizeF)ClientSize;
+        GdiRenderer.UseGraphics(e.Graphics);
 
-        var dstRect = GetScreenSpaceBoundings();
-        var srcRect = new RectangleF(0, 0, bitmap.Width, bitmap.Height);
+        Profiler.Begin();
 
-        if (DrawBoundings)
+        if (FancyBackgroundEnabled)
         {
-            g.DrawRectangle(Pens.White, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height);
-            _DrawBoundings(g, bitmap.Width / 2f * (1 / 1.41f), Renderer.MaxHeight);
-            DrawCoords(g, Vector3.Zero);
+            var windowRect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height);
+            var windowBrush = new LinearGradientBrush(windowRect, Color.FromArgb(50, 50, 100), Color.FromArgb(15, 15, 30), LinearGradientMode.Vertical);
+            g.FillRectangle(windowBrush, windowRect);
         }
 
-        g.DrawImage(bitmap, dstRect, srcRect, GraphicsUnit.Pixel);
+        if (DrawBoundingsEnabled)
+        {
+            GdiRenderer.DrawBoundings(Swapchain.ImageWidth / 2f * (1 / 1.41f), Renderer.MaxHeight);
+            GdiRenderer.DrawCoords(Vector3.Zero);
+        }
+
+        if (OnLeftMouseDown == LDownAction.DragLight)
+        {
+            var lightPos = Camera.Rotate(new Vector2(Swapchain.ImageWidth / 2f + 100f, 0), LightAngle - Camera.Angle);
+            GdiRenderer.DrawLine3D(Vector3.Zero, new Vector3(lightPos.X, lightPos.Y, 0), new Pen(Color.Yellow, 4f));
+            GdiRenderer.FillCircle(10, Brushes.LightYellow, lightPos);
+        }
+
+        using (var handle = Swapchain.Image)
+        {
+            var bitmap = handle.Value;
+            GdiRenderer.DrawImage(bitmap, Renderer.MaxHeight);
+        }
 
         Profiler.End();
 
@@ -150,57 +184,6 @@ public class RenderSurface : Control
         }
 
         base.OnPaint(e);
-    }
-
-    public RectangleF GetScreenSpaceBoundings()
-    {
-        float scale = Camera.Scale;
-        var nullPos = Camera.WorldToScreenSpace(Vector2.Zero);
-        var drawPos = new PointF(nullPos.X - (Swapchain.ImageWidth / 2) * scale, nullPos.Y - Renderer.MaxHeight * scale - ((Swapchain.ImageHeight - Renderer.MaxHeight) / 2) * scale);
-        var dstRect = new RectangleF(drawPos.X, drawPos.Y, Swapchain.ImageWidth * scale, Swapchain.ImageHeight * scale);
-        if (dstRect.Y is float.NaN)
-            throw new Exception();
-        return dstRect;
-    }
-
-    void DrawLine3D(System.Drawing.Graphics g, Vector3 pos1, Vector3 pos2)
-    {
-        DrawLine3D(g, pos1, pos2, Pens.White);
-    }
-
-    void DrawLine3D(System.Drawing.Graphics g, Vector3 pos1, Vector3 pos2, Pen pen)
-    {
-        var tpos1 = Camera.WorldToScreenSpace(pos1);
-        var tpos2 = Camera.WorldToScreenSpace(pos2);
-
-        g.DrawLine(pen, (PointF)tpos1, (PointF)tpos2);
-    }
-
-    void DrawCoords(System.Drawing.Graphics g, Vector3 pos)
-    {
-        DrawLine3D(g, pos, pos + new Vector3(1000, 0, 0), Pens.Red);
-        DrawLine3D(g, pos, pos + new Vector3(0, 1000, 0), Pens.Blue);
-        DrawLine3D(g, pos, pos + new Vector3(0, 0, 1000), Pens.Lime);
-    }
-
-    void _DrawBoundings(System.Drawing.Graphics g, float size, float height)
-    {
-        void DrawQuad(float h)
-        {
-            DrawLine3D(g, new Vector3(-size, size, h), new Vector3(size, size, h));
-            DrawLine3D(g, new Vector3(-size, -size, h), new Vector3(size, -size, h));
-            DrawLine3D(g, new Vector3(-size, size, h), new Vector3(-size, -size, h));
-            DrawLine3D(g, new Vector3(size, size, h), new Vector3(size, -size, h));
-        }
-
-        DrawLine3D(g, new Vector3(size, size, 0), new Vector3(size, size, height));
-        DrawLine3D(g, new Vector3(-size, -size, 0), new Vector3(-size, -size, height));
-        DrawLine3D(g, new Vector3(-size, size, 0), new Vector3(-size, size, height));
-        DrawLine3D(g, new Vector3(size, -size, 0), new Vector3(size, -size, height));
-
-        DrawQuad(0);
-        DrawQuad(height);
-
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -238,22 +221,21 @@ public class RenderSurface : Control
             }
             else if (e.Button == MouseButtons.Left)
             {
-                if (OnLeftMouseDown == LDownAction.Drag)
+                if (OnLeftMouseDown == LDownAction.DragView)
                 {
                     move = true;
                     refresh = true;
                 }
-                else if (OnLeftMouseDown == LDownAction.Rotate)
+                else if (OnLeftMouseDown == LDownAction.RotateRender)
                 {
-                    var curPos = Camera.ScreenToWorldSpace((Vector2)(PointF)e.Location, false);
-                    var lastPos = Camera.ScreenToWorldSpace(Camera.LastLocation, false);
-
-                    float curAngle = (float)(Math.Atan2(curPos.Y, curPos.X) * (180 / Math.PI));
-                    float lastAngle = (float)(Math.Atan2(lastPos.Y, lastPos.X) * (180 / Math.PI));
-
-                    Camera.Angle += curAngle - lastAngle;
+                    Camera.Angle += Camera.MouseMoveAngleAroundOrigin((Vector2)(PointF)e.Location);
                     _needRender = true;
 
+                }
+                else if (OnLeftMouseDown == LDownAction.DragLight)
+                {
+                    LightAngle = Camera.AngleFromScreenPosition((Vector2)(PointF)e.Location);
+                    _needRender = true;
                 }
             }
 
