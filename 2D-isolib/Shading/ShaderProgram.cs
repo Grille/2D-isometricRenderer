@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,21 +9,40 @@ using Grille.Graphics.Isometric.Numerics;
 
 namespace Grille.Graphics.Isometric.Shading;
 
-public class ShaderProgram
+public unsafe class ShaderProgram
 {
-    public bool EnableHeightShadows { get; init; }
-
-    public bool EnabledRecalcNormalsAfterRotation { get; init; }
-
-    public Func<ushort, ushort> HeightShader { get; }
+    public Action<ShaderArgs> LocationShader { get; }
 
     public Action<ShaderArgs> PixelShader { get; }
 
-    public ShaderProgram(Func<ushort, ushort> height, Action<ShaderArgs> pixel)
+    public bool UsePixelShader { get; }
+
+    public bool UseLocationShader { get; }
+
+    public ShaderProgram() : this(null, null) { }
+
+    public ShaderProgram(Action<ShaderArgs>? pixel) : this(pixel, null) { }
+
+    public ShaderProgram(Action<ShaderArgs>? pixel, Action<ShaderArgs>? height)
     {
-        HeightShader = height;
-        PixelShader = pixel;
+        if (UseLocationShader = height != null)
+        {
+            LocationShader = height!;
+        }
+        else
+        {
+            LocationShader = Shaders.RawHeight;
+        }
+
+        if (UsePixelShader = pixel != null)
+        {
+            PixelShader = pixel!;
+        }
+        else
+        {
+            PixelShader = Shaders.RawColor;
+        }
     }
 
-    public static ShaderProgram Default { get; } = new ShaderProgram(Shaders.RawHeight, Shaders.RawColor);
+    public static ShaderProgram Default { get; } = new ShaderProgram();
 }

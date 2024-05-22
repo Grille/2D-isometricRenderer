@@ -36,6 +36,7 @@
             importTextureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             importNormalsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exportNormalsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             dgfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,11 +47,14 @@
             toolStripMenuItemShaders = new System.Windows.Forms.ToolStripMenuItem();
             autoRotateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rAToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            boundingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStrip1 = new System.Windows.Forms.ToolStrip();
             toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             toolStripButtonDrag = new System.Windows.Forms.ToolStripButton();
             toolStripButtonRotate = new System.Windows.Forms.ToolStripButton();
             toolStripButtonLight = new System.Windows.Forms.ToolStripButton();
+            toolStripButtonTilt = new System.Windows.Forms.ToolStripButton();
             toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             ButtonReset = new System.Windows.Forms.ToolStripButton();
             ButtonLeft = new System.Windows.Forms.ToolStripButton();
@@ -83,13 +87,13 @@
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
-            menuStrip1.Size = new System.Drawing.Size(784, 24);
+            menuStrip1.Size = new System.Drawing.Size(822, 24);
             menuStrip1.TabIndex = 17;
             menuStrip1.Text = "menuStrip1";
             // 
             // fgdToolStripMenuItem
             // 
-            fgdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { importToolStripMenuItem, importTextureToolStripMenuItem, importNormalsToolStripMenuItem, exportToolStripMenuItem, toolStripSeparator1, dgfToolStripMenuItem });
+            fgdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { importToolStripMenuItem, importTextureToolStripMenuItem, importNormalsToolStripMenuItem, exportToolStripMenuItem, exportNormalsToolStripMenuItem, toolStripSeparator1, dgfToolStripMenuItem });
             fgdToolStripMenuItem.Name = "fgdToolStripMenuItem";
             fgdToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             fgdToolStripMenuItem.Text = "File";
@@ -102,7 +106,7 @@
             importToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I;
             importToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             importToolStripMenuItem.Text = "Import";
-            importToolStripMenuItem.Click += ImportMenuItemClick;
+            importToolStripMenuItem.Click += ImportMenuItem_Click;
             // 
             // importTextureToolStripMenuItem
             // 
@@ -110,7 +114,7 @@
             importTextureToolStripMenuItem.Name = "importTextureToolStripMenuItem";
             importTextureToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             importTextureToolStripMenuItem.Text = "Import Texture";
-            importTextureToolStripMenuItem.Click += ImportTextureMenuItemClick;
+            importTextureToolStripMenuItem.Click += ImportTextureMenuItem_Click;
             // 
             // importNormalsToolStripMenuItem
             // 
@@ -118,7 +122,7 @@
             importNormalsToolStripMenuItem.Name = "importNormalsToolStripMenuItem";
             importNormalsToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             importNormalsToolStripMenuItem.Text = "Import Normals";
-            importNormalsToolStripMenuItem.Click += importNormalsToolStripMenuItem_Click;
+            importNormalsToolStripMenuItem.Click += ImportNormalsMenuItem_Click;
             // 
             // exportToolStripMenuItem
             // 
@@ -127,7 +131,15 @@
             exportToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E;
             exportToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             exportToolStripMenuItem.Text = "Export";
-            exportToolStripMenuItem.Click += ExportMenuItemClick;
+            exportToolStripMenuItem.Click += ExportMenuItem_Click;
+            // 
+            // exportNormalsToolStripMenuItem
+            // 
+            exportNormalsToolStripMenuItem.Image = Properties.Resources.Save;
+            exportNormalsToolStripMenuItem.Name = "exportNormalsToolStripMenuItem";
+            exportNormalsToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            exportNormalsToolStripMenuItem.Text = "Export Normals";
+            exportNormalsToolStripMenuItem.Click += ExportNormalsMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
@@ -145,7 +157,7 @@
             // 
             // displayToolStripMenuItem
             // 
-            displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { fullscrenToolStripMenuItem, toolStripSeparator2, settingsToolStripMenuItem, toolStripSeparator4, toolStripMenuItemShaders, autoRotateToolStripMenuItem, debugToolStripMenuItem });
+            displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { fullscrenToolStripMenuItem, toolStripSeparator2, settingsToolStripMenuItem, toolStripSeparator4, toolStripMenuItemShaders, autoRotateToolStripMenuItem, debugToolStripMenuItem, rAToolStripMenuItem, boundingsToolStripMenuItem });
             displayToolStripMenuItem.Name = "displayToolStripMenuItem";
             displayToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
             displayToolStripMenuItem.Text = "Display";
@@ -155,34 +167,33 @@
             fullscrenToolStripMenuItem.Image = Properties.Resources.FullScreen;
             fullscrenToolStripMenuItem.Name = "fullscrenToolStripMenuItem";
             fullscrenToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
-            fullscrenToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            fullscrenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             fullscrenToolStripMenuItem.Text = "Fullscreen";
             fullscrenToolStripMenuItem.Click += fullscrenToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Enabled = false;
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            settingsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             settingsToolStripMenuItem.Text = "Settings";
-            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+            toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // toolStripMenuItemShaders
             // 
             toolStripMenuItemShaders.BackColor = System.Drawing.SystemColors.ButtonFace;
             toolStripMenuItemShaders.Image = Properties.Resources.ShaderSpot;
             toolStripMenuItemShaders.Name = "toolStripMenuItemShaders";
-            toolStripMenuItemShaders.Size = new System.Drawing.Size(152, 22);
+            toolStripMenuItemShaders.Size = new System.Drawing.Size(180, 22);
             toolStripMenuItemShaders.Text = "Shader";
             toolStripMenuItemShaders.CheckedChanged += toolStripMenuItem1_CheckedChanged;
             // 
@@ -192,25 +203,45 @@
             autoRotateToolStripMenuItem.CheckOnClick = true;
             autoRotateToolStripMenuItem.Image = Properties.Resources.Rotate;
             autoRotateToolStripMenuItem.Name = "autoRotateToolStripMenuItem";
-            autoRotateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            autoRotateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             autoRotateToolStripMenuItem.Text = "AutoRotate";
             // 
             // debugToolStripMenuItem
             // 
             debugToolStripMenuItem.BackColor = System.Drawing.SystemColors.ButtonFace;
+            debugToolStripMenuItem.Checked = true;
             debugToolStripMenuItem.CheckOnClick = true;
+            debugToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             debugToolStripMenuItem.Image = Properties.Resources.StatusInformationOutline;
             debugToolStripMenuItem.Name = "debugToolStripMenuItem";
-            debugToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            debugToolStripMenuItem.Text = "Debug";
+            debugToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            debugToolStripMenuItem.Text = "Performance Info";
             debugToolStripMenuItem.Click += DebugMenuItemClick;
+            // 
+            // rAToolStripMenuItem
+            // 
+            rAToolStripMenuItem.CheckOnClick = true;
+            rAToolStripMenuItem.Image = Properties.Resources.StatusInformationOutline;
+            rAToolStripMenuItem.Name = "rAToolStripMenuItem";
+            rAToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            rAToolStripMenuItem.Text = "Render Allways";
+            rAToolStripMenuItem.Click += rAToolStripMenuItem_Click;
+            // 
+            // boundingsToolStripMenuItem
+            // 
+            boundingsToolStripMenuItem.CheckOnClick = true;
+            boundingsToolStripMenuItem.Image = Properties.Resources.StatusInformationOutline;
+            boundingsToolStripMenuItem.Name = "boundingsToolStripMenuItem";
+            boundingsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            boundingsToolStripMenuItem.Text = "Boundings";
+            boundingsToolStripMenuItem.Click += boundingsToolStripMenuItem_Click;
             // 
             // toolStrip1
             // 
-            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, toolStripButtonDrag, toolStripButtonRotate, toolStripButtonLight, toolStripSeparator5, ButtonReset, ButtonLeft, ButtonRight, toolStripSeparator3, toolStripLabel4, TextBoxRotate, toolStripLabel2, TextBoxTilt, toolStripLabel3, TextBoxHeight, toolStripLabel5, TextBoxScaling });
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, toolStripButtonDrag, toolStripButtonRotate, toolStripButtonLight, toolStripButtonTilt, toolStripSeparator5, ButtonReset, ButtonLeft, ButtonRight, toolStripSeparator3, toolStripLabel4, TextBoxRotate, toolStripLabel2, TextBoxTilt, toolStripLabel3, TextBoxHeight, toolStripLabel5, TextBoxScaling });
             toolStrip1.Location = new System.Drawing.Point(0, 24);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new System.Drawing.Size(784, 25);
+            toolStrip1.Size = new System.Drawing.Size(822, 25);
             toolStrip1.TabIndex = 22;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -251,6 +282,16 @@
             toolStripButtonLight.Size = new System.Drawing.Size(23, 22);
             toolStripButtonLight.Text = "toolStripButton1";
             toolStripButtonLight.Click += toolStripButtonLight_Click;
+            // 
+            // toolStripButtonTilt
+            // 
+            toolStripButtonTilt.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            toolStripButtonTilt.Image = Properties.Resources.Tilt;
+            toolStripButtonTilt.ImageTransparentColor = System.Drawing.Color.Magenta;
+            toolStripButtonTilt.Name = "toolStripButtonTilt";
+            toolStripButtonTilt.Size = new System.Drawing.Size(23, 22);
+            toolStripButtonTilt.Text = "toolStripButton1";
+            toolStripButtonTilt.Click += toolStripButtonTilt_Click;
             // 
             // toolStripSeparator5
             // 
@@ -347,10 +388,10 @@
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripStatusLabelRenderTime });
-            statusStrip1.Location = new System.Drawing.Point(0, 539);
+            statusStrip1.Location = new System.Drawing.Point(0, 553);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
-            statusStrip1.Size = new System.Drawing.Size(784, 22);
+            statusStrip1.Size = new System.Drawing.Size(822, 22);
             statusStrip1.TabIndex = 23;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -367,14 +408,15 @@
             pBResult.BackColor = System.Drawing.Color.FromArgb(20, 25, 45);
             pBResult.DebugInfoEnabled = false;
             pBResult.DefaultMouseEventsEnabled = true;
-            pBResult.DrawBoundingsEnabled = true;
+            pBResult.DrawBoundings = true;
             pBResult.FancyBackgroundEnabled = false;
             pBResult.LightAngle = 0F;
             pBResult.Location = new System.Drawing.Point(0, 49);
             pBResult.Margin = new System.Windows.Forms.Padding(0);
             pBResult.Name = "pBResult";
             pBResult.OnLeftMouseDown = Grille.Graphics.Isometric.WinForms.RenderSurface.LDownAction.DragView;
-            pBResult.Size = new System.Drawing.Size(784, 490);
+            pBResult.RenderAllways = false;
+            pBResult.Size = new System.Drawing.Size(822, 504);
             pBResult.TabIndex = 25;
             pBResult.Text = "renderSurface1";
             pBResult.Paint += pBRender_Paint;
@@ -384,7 +426,7 @@
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             BackColor = System.Drawing.Color.FromArgb(20, 20, 30);
-            ClientSize = new System.Drawing.Size(784, 561);
+            ClientSize = new System.Drawing.Size(822, 575);
             Controls.Add(pBResult);
             Controls.Add(statusStrip1);
             Controls.Add(toolStrip1);
@@ -450,6 +492,10 @@
         private System.Windows.Forms.ToolStripTextBox TextBoxScaling;
         private System.Windows.Forms.ToolStripMenuItem importNormalsToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton toolStripButtonLight;
+        private System.Windows.Forms.ToolStripMenuItem rAToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton toolStripButtonTilt;
+        private System.Windows.Forms.ToolStripMenuItem exportNormalsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem boundingsToolStripMenuItem;
     }
 }
 

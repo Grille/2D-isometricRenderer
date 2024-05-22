@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
+		<OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<ApplicationIcon>..\Assets\Cube.ico</ApplicationIcon>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -39,19 +39,22 @@
 		<None Update="examples\Factory_256.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="examples\Factory_256_tex.png">
+		<None Update="examples\Factory_256_texture.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="examples\Maze_256.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="examples\Maze_256_tex.png">
+		<None Update="examples\Maze_256_texture.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="examples\Mountain_512.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="examples\Mountain_512_tex.png">
+		<None Update="examples\Mountain_512_normals.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="examples\Mountain_512_texture.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

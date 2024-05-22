@@ -1,7 +1,9 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Grille.Graphics.Isometric.Numerics;
@@ -33,7 +35,13 @@ public unsafe static class Shaders
         **/
     }
 
-    public static void NormalShading(ShaderArgs args)
+    public static void DynamicShading(ShaderArgs args)
+    {
+        args.CopyColorToOutput();
+        args.ApplyLightToOutput();
+    }
+
+    public static void FixedShading(ShaderArgs args)
     {
         var cell =  args.Cell;
 
@@ -60,9 +68,9 @@ public unsafe static class Shaders
         *args.Color = new ARGBColor((byte)(height*10), (byte)(height * 5), 255);
     }
 
-    public static ushort RawHeight(ushort args)
+    public static void RawHeight(ShaderArgs args)
     {
-        return args;
+        return;
     }
 
 }

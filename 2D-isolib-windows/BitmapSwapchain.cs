@@ -38,8 +38,6 @@ public unsafe class BitmapSwapchain : Swapchain<Bitmap>
         int size = bitmap.Width * bitmap.Height;
         var ptr = (ARGBColor*)_bitmapData.Scan0;
 
-        new Span<ARGBColor>(ptr, size).Clear();
-
         return ptr;
     }
 

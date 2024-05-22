@@ -13,7 +13,7 @@ public class ColorCurve
     record struct ColorPoint(float Position, ARGBColor Color);
 
     private List<ColorPoint> colorPoints = new List<ColorPoint>();
-    private ColorPoint[] array;
+    private ColorPoint[] array = Array.Empty<ColorPoint>();
 
     bool changed = false;
 

@@ -22,8 +22,7 @@ public struct RenderData
         public const int Normals = InputData.Layout.Normals;
         public const int Color = InputData.Layout.Color;
         public const int Position = InputData.Layout.Size;
-        public const int Data = InputData.Layout.Size + 4;
-        public const int Size = 16;
+        public const int Size = 12;
     }
 
     [FieldOffset(Layout.Height)]
@@ -37,7 +36,4 @@ public struct RenderData
 
     [FieldOffset(Layout.Position)]
     public U16Vec2 Position;
-
-    [FieldOffset(Layout.Data)]
-    public uint Data;
 }

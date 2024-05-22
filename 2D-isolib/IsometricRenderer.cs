@@ -38,12 +38,14 @@ public unsafe class IsometricRenderer
     public float FrameTime => profiler.FrameTime;
     public float FPS => profiler.FPS;
 
+    ShaderUniformObject _uniforms;
+
+    public ref ShaderUniformObject Uniforms => ref _uniforms;
+
     //settings
     public int ShadowQuality { get; set; } = 1;
 
-    float _tilt = 0.5f;
-
-    float _angle = 45;
+    public bool AutoResizeSwapchain { get; set; } = false;
 
     int _maxHeight = 255;
 
@@ -75,35 +77,19 @@ public unsafe class IsometricRenderer
 
     public float Angle
     {
-        set
-        {
-            if (_angle == value) return;
-            _angle = value;
-            if (_angle <= 0) _angle += 360;
-            else if (_angle >= 360) _angle -= 360;
-        }
-        get
-        {
-            return _angle;
-        }
+        set => Uniforms.Angle = value;
+        get => Uniforms.Angle;
     }
-
-    public float Tilt
-    {
-        get => _tilt;
-        set
-        {
-            _tilt = value;
-            InputChanged();
-        }
-    }
-
 
     public IsometricRenderer(Swapchain swapchain, int workerCount)
     {
         parallel = new ParallelExecutor(workerCount);
         profiler = new Profiler();
         this.swapchain = swapchain;
+
+        Uniforms.ZScale = 1;
+        Uniforms.ZOffset = 1;
+        Uniforms.YScale = 0.5f;
 
         Shader = ShaderProgram.Default;
         _input = new(0, 0);
@@ -144,12 +130,12 @@ public unsafe class IsometricRenderer
         bool resizeSwapchain = false;
 
         S32Vec2 bufferSize = (S32Vec2)new Vector2(_input.Width * sqrt2, _input.Height * sqrt2);
-        S32Vec2 swapchainSize = new S32Vec2(bufferSize.X, (int)(bufferSize.Y * MathF.Abs(_tilt)) + _maxHeight);
+        S32Vec2 swapchainSize = new S32Vec2(bufferSize.X, (int)(bufferSize.Y * MathF.Abs(Uniforms.YScale)) + _maxHeight);
         if (swapchainSize.X == 0) swapchainSize.X = 1;
         if (swapchainSize.Y == 0) swapchainSize.Y = 1;
 
         if (_work.Width != bufferSize.X || _work.Height != bufferSize.Y)
-            rebuildBuffer = true;
+            rebuildBuffer = false;
 
         if (swapchain.ImageWidth != swapchainSize.X || swapchain.ImageHeight != swapchainSize.Y)
             resizeSwapchain = true;
@@ -171,8 +157,8 @@ public unsafe class IsometricRenderer
 
     public void ApplyCamera(Camera camera)
     {
-        _angle = camera.Angle;
-        _tilt = camera.Tilt;
+        Uniforms.Angle = camera.Angle;
+        Uniforms.YScale = camera.Tilt;
         InputChanged();
     }
     /*
@@ -225,7 +211,7 @@ public unsafe class IsometricRenderer
     {
         int srcWidth = _input.Width, srcHeight = _input.Height;
 
-        float rad = -_angle * MathF.PI / 180f;
+        float rad = -Angle * MathF.PI / 180f;
         float sinma = MathF.Sin(rad);
         float cosma = MathF.Cos(rad);
 
@@ -237,6 +223,7 @@ public unsafe class IsometricRenderer
 
         var src = _input.Pointer;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool Sample(RenderData* cell, int x, int y)
         {
             float xt = x - srcFactorWidth;
@@ -260,13 +247,13 @@ public unsafe class IsometricRenderer
 
         var pixels = swapchain.ImageData;
 
-        int workWidth = _work.Width, 
-            workHeight = _work.Height, 
-            dstWidth = swapchain.ImageWidth, 
+        int workWidth = (int)(srcWidth * sqrt2),
+            workHeight = (int)(srcHeight * sqrt2),
+            dstWidth = swapchain.ImageWidth,
             dstHeight = swapchain.ImageHeight;
 
         int beginX = (int)(workWidth * start),
-            endX = (int)(workHeight * end);
+            endX = (int)(workWidth * end);
 
         var argsptr = new ShaderArgs.PointerGroup();
         var args = new ShaderArgs();
@@ -274,48 +261,76 @@ public unsafe class IsometricRenderer
 
         int maxHeightOffset = dstWidth * _maxHeight;
 
-        S32Vec3 location;
+        Vector3 location;
         RenderData cell;
 
         argsptr.Location = &location;
         argsptr.Cell = &cell;
 
+        var shader = Shader;
+        var uniforms = _uniforms;
+
+        argsptr.Uniforms = &uniforms;
+
+        bool usingZScale = uniforms.ZScale != 1;
+
         //for (int iy = 0; iy < heightSrc; iy += 1) //Upwards
-        for (int iy = (workHeight - 1); iy >= 0; iy -= 1) // Bottom -> Top                                              
+        for (int iy = (workHeight - 1) + MaxHeight; iy >= 0; iy -= 1) // Bottom -> Top                                              
         {
-            location.Y = iy;
+            int cy = (int)(iy * Uniforms.YScale) * dstWidth;
             for (int ix = beginX; ix < endX; ix++) // Left -> Right
             {
-                location.X = ix;
-                // get positions
-                int offSrc = (ix + iy * workWidth);
-                int offDst = (ix + (int)(iy * Tilt) * dstWidth);
-
                 if (!Sample(&cell, ix, iy))
                     continue;
 
-                int iz = Shader.HeightShader(cell.Height);
-                if (iz > _maxHeight)
-                    iz = _maxHeight;
-                while (iz > 0) // Downwards
+                int cx;
+                int cz;
+
+                if (shader.UseLocationShader)
+                {
+                    location = new Vector3(ix, iy, cell.Height);
+                    argsptr.Location = &location;
+                    shader.LocationShader(args);
+                    cy = (int)location.Y * dstWidth;
+                    cx = (int)location.X;
+                    cz = (int)location.Z;
+                }
+                else
+                {
+                    cx = ix;
+                    cz = (int)(cell.Height * uniforms.ZScale) + uniforms.ZOffset;
+                }
+
+                int offDst = (cx + cy);
+
+                if (cz > _maxHeight)
+                    cz = _maxHeight;
+
+                while (cz > 0) // Downwards
                 {
                     // get position on z axe
-                    int offDstZ = offDst - (dstWidth * iz) + maxHeightOffset;//pos + curent height
+                    int offDstZ = offDst - (dstWidth * cz) + maxHeightOffset;//pos + curent height
 
                     // pixel not yet drawn
                     if (pixels[offDstZ].A < 255)
                     {
-                        location.Z = iz;
-                        argsptr.Color = pixels + offDstZ;
-                        pixels[offDstZ].A = 255;
-                        Shader.PixelShader(args);
+                        location.Z = cz;
+                        if (shader.UsePixelShader)
+                        {
+                            argsptr.Color = pixels + offDstZ;
+                            shader.PixelShader(args);
+                        }
+                        else
+                        {
+                            pixels[offDstZ] = cell.Color;
+                        }
                     }
                     else
                     {
                         break;
                     }
 
-                    iz--;
+                    cz--;
                 }
             }
         }
@@ -331,21 +346,10 @@ public unsafe class IsometricRenderer
         if (_work == null)
             throw new InvalidOperationException();
 
-        if (Tilt < 0)
+        if (Uniforms.YScale < 0)
             throw new InvalidOperationException("Value must be >0.");
 
-
         profiler.Begin();
-
-        //work.Clear();
-
-        //Rotate();
-
-        if (Shader.EnabledRecalcNormalsAfterRotation)
-            _work.CalculateNormals();
-
-        //if (Shader.EnableHeightShadows)
-        //    CalcShadows(ShadowQuality);
 
         swapchain.LockActive();
         Elevate();

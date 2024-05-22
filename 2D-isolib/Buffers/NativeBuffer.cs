@@ -22,6 +22,14 @@ public unsafe class NativeBuffer<T> : IDisposable where T : unmanaged
 
     public static NativeBuffer<T> Empty { get; } = new NativeBuffer<T>(0, 0);
 
+    public NativeBuffer(int width, int height, T* ptr)
+    {
+        Width = width;
+        Height = height;
+        Length = width * height;
+        Pointer = ptr;
+    }
+
     public NativeBuffer(int width, int height)
     {
         Width = width;
@@ -63,10 +71,15 @@ public unsafe class NativeBuffer<T> : IDisposable where T : unmanaged
         return Pointer + idx;
     }
 
-    public ref T GetClamped(int x, int y)
+    public ref T GetClampedRef(int x, int y)
     {
         int idx = GetClampedIndex(x, y);
         return ref Pointer[idx];
+    }
+
+    public T Get(int idx)
+    {
+        return Pointer[idx];
     }
 
     public NativeBuffer<T> Copy()

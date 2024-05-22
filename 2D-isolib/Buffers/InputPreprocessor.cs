@@ -12,9 +12,9 @@ namespace Grille.Graphics.Isometric.Buffers;
 
 public static class InputPreprocessor
 {
-    public static unsafe void CalculateNormals<T>(this NativeBuffer<T> data) where T : unmanaged
+    public static unsafe void CalculateNormals(this NativeBuffer<InputData> data)
     {
-        InputData* Access(int x, int y) => (InputData*)data.GetClampedPointer(x, y);
+        InputData* Access(int x, int y) => data.GetClampedPointer(x, y);
 
         int GetHeight(int x, int y) => Access(x, y)->Height;
 

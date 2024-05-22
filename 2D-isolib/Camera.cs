@@ -18,7 +18,7 @@ public class Camera
 
     public Vector2 Position { get; set; }
 
-    float _angle;
+    float _angle = 45;
     public float Angle
     {
         set

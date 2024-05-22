@@ -86,6 +86,8 @@ public class GdiRenderer
 
     public void FillCircle(float radius, Brush brush, Vector3 position)
     {
+        AssertGraphics();
+
         var pos = Camera.WorldToScreenSpace(position);
         var rect = new RectangleF(pos.X - radius, pos.Y - radius, radius * 2, radius * 2);
         g.FillEllipse(brush, rect);
@@ -93,6 +95,8 @@ public class GdiRenderer
 
     public void DrawText(string text, Brush brush, Vector3 position)
     {
+        AssertGraphics();
+
         var pos = Camera.WorldToScreenSpace(position);
         g.DrawString(text, Font, brush, (PointF)pos);
     }

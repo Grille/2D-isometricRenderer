@@ -21,6 +21,7 @@ using Grille.Graphics.Isometric.WinForms;
 using Grille.Graphics.Isometric.Shading;
 using System.Numerics;
 using Grille.Graphics.Isometric.Buffers;
+using Grille.Graphics.Isometric.Numerics;
 using System.Globalization;
 
 /// <summary>-</summary>
@@ -30,7 +31,6 @@ namespace Program;
 //[System.ComponentModel.DesignerCategory("code")]
 public partial class FormEditor : Form
 {
-    const string ImageFilter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG;*.TIFF)|*.bmp;*.jpg;*.gif;*.png;*.tiff|All files (*.*)|*.*";
 
     //Graphic
     NativeBuffer<InputData> inputData;
@@ -52,14 +52,18 @@ public partial class FormEditor : Form
 
         _shaders = new Dictionary<string, ShaderProgram>
         {
-            { "Dynamic Shading", new ShaderProgram(ScaleHeight, pBResult.DemoShader.PixelShader) },
-            { "Fixed Shading", new ShaderProgram(ScaleHeight, Shaders.NormalShading) },
-            { "Debug_Normals", new ShaderProgram(ScaleHeight, Shaders.DebugNormals) },
-            { "Debug_Position", new ShaderProgram(ScaleHeight, Shaders.DebugPosition) },
-            { "Debug_Height", new ShaderProgram(ScaleHeight, Shaders.DebugHeight) },
-            { "Raw Color", new ShaderProgram(ScaleHeight, Shaders.RawColor) },
-            { "Alpha Blend", new ShaderProgram(ScaleHeight, Shaders.AlphaBlend) },
+            { "Dynamic Shading", new ShaderProgram(Shaders.DynamicShading) },
+            { "Fixed Shading", new ShaderProgram(Shaders.FixedShading) },
+            { "Debug_Normals", new ShaderProgram(Shaders.DebugNormals) },
+            { "Debug_Position", new ShaderProgram(Shaders.DebugPosition) },
+            { "Debug_Height", new ShaderProgram(Shaders.DebugHeight) },
+            { "Alpha Blend", new ShaderProgram(Shaders.AlphaBlend) },
+            { "Raw Color", new ShaderProgram() },
         };
+
+        pBResult.FancyBackgroundEnabled = false;
+        pBResult.DrawBoundings = false;
+        pBResult.DebugInfoEnabled = true;
 
         Icon = Properties.Resources.Cube;
 
@@ -81,26 +85,28 @@ public partial class FormEditor : Form
 
         camera = pBResult.Camera;
 
+
+        renderer = pBResult.Renderer;
+        renderer.Shader = _shaders["Dynamic Shading"];
+
+        Console.WriteLine("Init Renderer");
+        renderTimer.Start();
+
         if (File.Exists(settings.DefaultMap))
-            inputData = BitmapInputData.FromBitmap(settings.DefaultMap);
+        {
+            LoadBitmap(settings.DefaultMap);
+        }
         else
         {
             inputData = new(16, 16);
         }
-        renderer = pBResult.Renderer;
-        renderer.Shader = _shaders["Dynamic Shading"];
 
-        renderer.SetInput(inputData, false);
-
-
-        Console.WriteLine("Init Renderer");
-        renderTimer.Start();
         pBResult.InvalidateRender();
     }
 
-    private ushort ScaleHeight(ushort value)
+    private unsafe void ScaleHeight(ShaderArgs args)
     {
-        return (ushort)(value * _scale + 1);
+        args.Location->Z *= _scale;
     }
 
     //Draw rendered image
@@ -117,6 +123,11 @@ public partial class FormEditor : Form
         if (!TextBoxRotate.Focused)
         {
             TextBoxRotate.Text = camera.Angle.ToString();
+        }
+
+        if (!TextBoxTilt.Focused)
+        {
+            TextBoxTilt.Text = camera.Tilt.ToString();
         }
 
         if (autoRotateToolStripMenuItem.Checked)
@@ -161,56 +172,6 @@ public partial class FormEditor : Form
         }
     }
 
-    private void openHighMapToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        var dialog = new OpenFileDialog();
-        dialog.InitialDirectory = Path.GetFullPath(settings.DirectorySave);
-        dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
-        dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
-        {
-            /*
-            ByteStream bs = new ByteStream(dialog.FileName);
-            bs.ReadByte();
-            Program.MainForm.renderer.Data = new RenderData(bs.ReadInt(), bs.ReadInt());
-            //Program.MainForm.renderer.Data.HeightMap = bs.ReadByteArray();
-            //Program.MainForm.renderer.Data.TextureMap = bs.ReadByteArray();
-            Program.MainForm.Repainting = true;
-            settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
-            */
-        });
-        if (dialog.ShowDialog(this) == DialogResult.OK)
-        {
-
-        }
-    }
-
-    private void saveRenderToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        var dialog = new SaveFileDialog();
-        dialog.InitialDirectory = Path.GetFullPath(settings.DirectorySave);
-        dialog.AddExtension = true;
-        dialog.DefaultExt = "ihm";
-        dialog.Filter = "IsoHightMap(*.IHM)|*.ihm|All files (*.*)|*.*";
-        dialog.FileOk += new CancelEventHandler((object csender, CancelEventArgs ce) =>
-        {
-            /*
-            ByteStream bs = new ByteStream();
-            bs.WriteByte(0);
-            bs.WriteInt(Program.MainForm.renderer.Data.Width);
-            bs.WriteInt(Program.MainForm.renderer.Data.Height);
-            //bs.WriteByteArray(Program.MainForm.renderer.Data.HeightMap,CompressMode.Auto);
-            //bs.WriteByteArray(Program.MainForm.renderer.Data.TextureMap, CompressMode.Auto);
-            bs.Save(dialog.FileName);
-            settings.DirectorySave = Path.GetDirectoryName(dialog.FileName);
-            */
-        });
-        if (dialog.ShowDialog(this) == DialogResult.OK)
-        {
-
-        }
-        //ByteStream bs = new ByteStream();
-    }
-
     private void FormEditor_KeyUp(object sender, KeyEventArgs e)
     {
 
@@ -226,48 +187,40 @@ public partial class FormEditor : Form
         }
     }
 
-    private void rotateToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        FormTextureEditor form = new FormTextureEditor();
-        form.Show(this);
-    }
-
-    private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        FormRenderSettings form = new FormRenderSettings();
-        form.Show(this);
-    }
-
-    private void toolboxToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        FormToolbox form = new FormToolbox();
-        form.Show(this);
-    }
-
     private void toolStripButtonDrag_Click(object sender, EventArgs e)
     {
-        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.DragView;
-        toolStripButtonDrag.Checked = true;
-        toolStripButtonRotate.Checked = false;
-        toolStripButtonLight.Checked = false;
-        pBResult.Invalidate();
+        SetToolStripButton(sender, RenderSurface.LDownAction.DragView);
     }
 
     private void toolStripButtonRotate_Click(object sender, EventArgs e)
     {
-        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.RotateRender;
-        toolStripButtonDrag.Checked = false;
-        toolStripButtonRotate.Checked = true;
-        toolStripButtonLight.Checked = false;
-        pBResult.Invalidate();
+        SetToolStripButton(sender, RenderSurface.LDownAction.RotateRender);
     }
 
     private void toolStripButtonLight_Click(object sender, EventArgs e)
     {
-        pBResult.OnLeftMouseDown = RenderSurface.LDownAction.DragLight;
-        toolStripButtonRotate.Checked = false;
-        toolStripButtonDrag.Checked = false;
-        toolStripButtonLight.Checked = true;
+        SetToolStripButton(sender, RenderSurface.LDownAction.DragLight);
+    }
+
+    private void toolStripButtonTilt_Click(object sender, EventArgs e)
+    {
+        SetToolStripButton(sender, RenderSurface.LDownAction.Tilt);
+    }
+
+    void SetToolStripButton(object sender, RenderSurface.LDownAction action)
+    {
+        void SetIfEqual(ToolStripButton target)
+        {
+            target.Checked = target == sender;
+        }
+
+        pBResult.OnLeftMouseDown = action;
+
+        SetIfEqual(toolStripButtonRotate);
+        SetIfEqual(toolStripButtonDrag);
+        SetIfEqual(toolStripButtonLight);
+        SetIfEqual(toolStripButtonTilt);
+
         pBResult.Invalidate();
     }
 
@@ -289,62 +242,105 @@ public partial class FormEditor : Form
         }
     }
 
-    private void ImportMenuItemClick(object sender, EventArgs e)
+    private void ImportMenuItem_Click(object sender, EventArgs e)
     {
-        var dialog = new OpenFileDialog();
-        dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
-        dialog.Filter = ImageFilter;
-
-        if (dialog.ShowDialog(this) == DialogResult.OK)
+        try
         {
-            inputData = BitmapInputData.FromBitmap(dialog.FileName);
-            renderer.SetInput(inputData, false);
-            settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
-            pBResult.InvalidateRender();
-        }
-    }
-
-    private void ImportTextureMenuItemClick(object sender, EventArgs e)
-    {
-        var dialog = new OpenFileDialog();
-        dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
-        dialog.Filter = ImageFilter;
-
-        if (dialog.ShowDialog(this) == DialogResult.OK)
-        {
-            inputData.LoadTextureBitmap(dialog.FileName);
-            settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
-            pBResult.InvalidateRender();
-        }
-    }
-
-    private void ExportMenuItemClick(object sender, EventArgs e)
-    {
-        var dialog = new SaveFileDialog();
-        dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryExport);
-        dialog.AddExtension = true;
-        dialog.Filter = ImageFilter;
-        dialog.DefaultExt = ".png";
-
-        if (dialog.ShowDialog(this) == DialogResult.OK)
-        {
-            using var handle = pBResult.Image;
-            var bitmap = handle.Value;
-
-            var extension = Path.GetExtension(dialog.FileName).ToLower();
-            var format = extension switch
+            if (ImageFileDialog.TryOpenImage(this, out string path))
             {
-                ".bmp" => ImageFormat.Bmp,
-                ".jpg" => ImageFormat.Jpeg,
-                ".jpeg" => ImageFormat.Jpeg,
-                ".gif" => ImageFormat.Gif,
-                ".png" => ImageFormat.Png,
-                _ => ImageFormat.Png,
-            };
+                LoadBitmap(path);
 
-            bitmap.Save(dialog.FileName, format);
-            settings.DirectoryExport = Path.GetDirectoryName(dialog.FileName);
+                pBResult.InvalidateRender();
+            }
         }
+        catch (Exception ex)
+        {
+            ExceptionDialog.Show(this, ex);
+        }
+    }
+
+    private void ImportTextureMenuItem_Click(object sender, EventArgs e)
+    {
+        if (ImageFileDialog.TryOpenImage(this, out string path))
+        {
+            LoadTextureBitmap(path);
+            pBResult.InvalidateRender();
+        }
+    }
+
+    private void ImportNormalsMenuItem_Click(object sender, EventArgs e)
+    {
+        if (ImageFileDialog.TryOpenImage(this, out string path))
+        {
+            LoadNormalBitmap(path);
+            pBResult.InvalidateRender();
+        }
+    }
+
+    void LoadBitmap(string path)
+    {
+        try
+        {
+            inputData = BitmapInputData.FromHeightBitmap(path);
+            renderer.SetInput(inputData, false);
+
+            var extension = Path.GetExtension(path);
+            var basepath = Path.ChangeExtension(path, null);
+
+            var texturePath = $"{basepath}_texture{extension}";
+            var normalPath = $"{basepath}_normals{extension}";
+
+            if (File.Exists(texturePath))
+                LoadTextureBitmap(texturePath);
+
+            if (File.Exists(normalPath))
+                LoadNormalBitmap(normalPath);
+            else
+                inputData.CalculateNormals();
+        }
+        catch (Exception ex)
+        {
+            ExceptionDialog.Show(this, ex);
+        }
+    }
+
+    void LoadTextureBitmap(string path)
+    {
+        try
+        {
+            inputData.LoadTextureBitmap(path);
+            pBResult.InvalidateRender();
+        }
+        catch (Exception ex)
+        {
+            ExceptionDialog.Show(this, ex);
+        }
+    }
+
+    void LoadNormalBitmap(string path)
+    {
+        try
+        {
+            inputData.LoadNormalBitmap(path);
+            pBResult.InvalidateRender();
+        }
+        catch (Exception ex)
+        {
+            ExceptionDialog.Show(this, ex);
+        }
+    }
+
+    private void ExportMenuItem_Click(object sender, EventArgs e)
+    {
+        using var handle = pBResult.Image;
+        var image = handle.Value;
+        ImageFileDialog.SaveImage(this, image);
+    }
+
+    private void ExportNormalsMenuItem_Click(object sender, EventArgs e)
+    {
+        using var normalmap = inputData.NormalDataToBitmap();
+        ImageFileDialog.SaveImage(this, normalmap);
     }
     #endregion
 
@@ -358,6 +354,7 @@ public partial class FormEditor : Form
     {
         camera.Position = Vector2.Zero;
         camera.Angle = 45;
+        camera.Tilt = 0.5f;
         pBResult.InvalidateRender();
     }
 
@@ -454,6 +451,7 @@ public partial class FormEditor : Form
         if (TryGetNumberFromToolStripTextBox(sender, out float value))
         {
             _scale = value;
+            renderer.Uniforms.ZScale = value;
             pBResult.InvalidateRender();
         }
     }
@@ -463,7 +461,7 @@ public partial class FormEditor : Form
         var control = (ToolStripTextBox)sender;
         var text = control.Text;
 
-        if (float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+        if (float.TryParse(text, out value))
         {
             if (value >= 0)
             {
@@ -475,17 +473,14 @@ public partial class FormEditor : Form
         return false;
     }
 
-    private void importNormalsToolStripMenuItem_Click(object sender, EventArgs e)
+    private void rAToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var dialog = new OpenFileDialog();
-        dialog.InitialDirectory = Path.GetFullPath(settings.DirectoryImport);
-        dialog.Filter = ImageFilter;
+        pBResult.RenderAllways = rAToolStripMenuItem.Checked;
+    }
 
-        if (dialog.ShowDialog(this) == DialogResult.OK)
-        {
-            inputData.LoadNormalBitmap(dialog.FileName);
-            settings.DirectoryImport = Path.GetDirectoryName(dialog.FileName);
-            pBResult.InvalidateRender();
-        }
+    private void boundingsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        pBResult.DrawBoundings = boundingsToolStripMenuItem.Checked;
+        pBResult.Invalidate();
     }
 }

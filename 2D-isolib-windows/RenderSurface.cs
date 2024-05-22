@@ -22,6 +22,7 @@ public class RenderSurface : Control
         DragView,
         DragLight,
         RotateRender,
+        Tilt,
     }
 
     public GdiRenderer GdiRenderer { get; }
@@ -38,7 +39,7 @@ public class RenderSurface : Control
 
     public bool DefaultMouseEventsEnabled { get; set; } = true;
 
-    public bool DrawBoundingsEnabled {  get; set; } = true;
+    public bool DrawBoundings {  get; set; } = true;
 
     public bool FancyBackgroundEnabled { get; set; } = false;
 
@@ -48,9 +49,9 @@ public class RenderSurface : Control
 
     public float LightAngle { get; set; }
 
-    public Vector2 LightDirection { get; private set; }
-
     public ShaderProgram DemoShader { get; }
+
+    public bool RenderAllways { get; set; }
 
     public MonitorHandle<Bitmap> Image => Swapchain.Image;
 
@@ -64,7 +65,7 @@ public class RenderSurface : Control
     {
         DoubleBuffered = true;
 
-        DemoShader = new ShaderProgram(Shaders.RawHeight, PixelShader);
+        DemoShader = new ShaderProgram(Shaders.DynamicShading);
 
         Profiler = new Profiler();
         Camera = new Camera();
@@ -77,18 +78,8 @@ public class RenderSurface : Control
         Timer.TargetFPS = 1200;
         
         renderTaks = Task.CompletedTask;
-    }
-
-    unsafe void PixelShader(ShaderArgs args)
-    {
-        var cell = args.Cell;
-        var normal = cell->Normals.ToVector2();
-
-        float dotProduct = Vector2.Dot(normal, LightDirection);
-        float shading = dotProduct * 0.5f + 1f;
 
 
-        *args.Color = cell->Color.ApplyShadingClamped(shading);
     }
 
     public void InvalidateRender()
@@ -99,7 +90,8 @@ public class RenderSurface : Control
     void Render()
     {
         float angle = (LightAngle - Camera.Angle) * MathF.PI / 180f;
-        LightDirection = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+        var lightDirection = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+        Renderer.Uniforms.LightDirection = lightDirection;
         Renderer.ApplyCamera(Camera);
         Renderer.Render();
         _needRefresh = true;
@@ -110,6 +102,8 @@ public class RenderSurface : Control
     {
         lock (_lock)
         {
+            _needRender |= RenderAllways;
+
             if (_needRender && renderTaks.IsCompleted)
             {
                 renderTaks = Task.Run(Render);
@@ -142,7 +136,7 @@ public class RenderSurface : Control
             g.FillRectangle(windowBrush, windowRect);
         }
 
-        if (DrawBoundingsEnabled)
+        if (DrawBoundings)
         {
             GdiRenderer.DrawBoundings(Swapchain.ImageWidth / 2f * (1 / 1.41f), Renderer.MaxHeight);
             GdiRenderer.DrawCoords(Vector3.Zero);
@@ -235,6 +229,12 @@ public class RenderSurface : Control
                 else if (OnLeftMouseDown == LDownAction.DragLight)
                 {
                     LightAngle = Camera.AngleFromScreenPosition((Vector2)(PointF)e.Location);
+                    _needRender = true;
+                }
+                else if (OnLeftMouseDown == LDownAction.Tilt)
+                {
+                    var dist = ((e.Location.Y - Camera.LastLocation.Y) / 600) / Camera.Scale;
+                    Camera.Tilt = Math.Clamp(Camera.Tilt + dist, 0, 1);
                     _needRender = true;
                 }
             }

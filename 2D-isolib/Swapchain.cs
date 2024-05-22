@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
 using Grille.Graphics.Isometric.Numerics;
+using System.Runtime.CompilerServices;
 
 
 namespace Grille.Graphics.Isometric;
@@ -74,7 +75,8 @@ public abstract unsafe class Swapchain<T> : Swapchain where T : class
                 throw new InvalidOperationException("Last handle not disposed.");
 
             var index = GetIndex(Position - 1);
-            return new MonitorHandle<T>(_items[index], _locks[index]);
+            _handle = new MonitorHandle<T>(_items[index], _locks[index]);
+            return _handle;
         }
     }
 
@@ -126,6 +128,9 @@ public abstract unsafe class Swapchain<T> : Swapchain where T : class
 
         Monitor.Enter(_locks[index]);
         var ptr = OnLockActive(_items[index]);
+
+        new Span<ARGBColor>(ptr, ImageLength).Clear();
+
         imageData = ptr;
     }
 

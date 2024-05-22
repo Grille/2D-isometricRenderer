@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Grille.Graphics.Isometric.WinForms;
 
 namespace Program;
 
@@ -56,5 +57,8 @@ class SettingsFile : IniFile
 
         if (TryGetValue("default_map"))
             DefaultMap = value;
+
+        ImageFileDialog.DirectoryImport = DirectoryImport;
+        ImageFileDialog.DirectoryExport = DirectoryExport;
     }
 }

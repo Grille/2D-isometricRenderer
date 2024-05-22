@@ -12,62 +12,29 @@ using Grille.Graphics.Isometric.Numerics;
 
 using InputDataBuffer = Grille.Graphics.Isometric.Buffers.NativeBuffer<Grille.Graphics.Isometric.Buffers.InputData>;
 using Grille.Graphics.Isometric.Buffers;
+using System.Xml.Linq;
+using System.Security.Policy;
 
 namespace Grille.Graphics.Isometric.WinForms;
 
 public static class BitmapInputData
 {
-    public static InputDataBuffer FromBitmap(string pathHeight)
+    public static InputDataBuffer FromHeightBitmap(string path)
     {
-        var name = Path.GetFileNameWithoutExtension(pathHeight);
-        var ext = Path.GetExtension(pathHeight);
-        var path = Path.GetDirectoryName(pathHeight);
-        if (path == null)
-            throw new ArgumentException();
-
-        using var bitmapHeight = LoadBitmap(pathHeight);
-        var data = new InputDataBuffer(bitmapHeight.Width, bitmapHeight.Height);
-
-        data.LoadHeightBitmap(bitmapHeight);
-
-        string pathTexture = Path.Combine(path, name + "_tex" + ext);
-        if (File.Exists(pathTexture))
-        {
-            using var bitmapTexture = LoadBitmap(pathTexture);
-            data.LoadTextureBitmap(bitmapTexture);
-        }
-        else
-        {
-            var gray = new ARGBColor(127, 127, 127);
-            for (int i = 0; i < data.Length; i++)
-            {
-                data[i].Color = gray;
-            }
-        }
-
-        return data;
+        using var bitmap = LoadBitmap(path);
+        return FromHeightBitmap(bitmap);
     }
 
-    public static InputDataBuffer FromBitmap(string pathHeight, string pathTexture)
+    public static InputDataBuffer FromHeightBitmap(Bitmap bitmap)
     {
-        using var bitmapHeight = LoadBitmap(pathHeight);
+        var data = new InputDataBuffer(bitmap.Width, bitmap.Height);
+        data.LoadHeightBitmap(bitmap);
 
-        var data = new InputDataBuffer(bitmapHeight.Width, bitmapHeight.Height);
-
-        data.LoadHeightBitmap(bitmapHeight);
-
-        using var bitmapTexture = LoadBitmap(pathTexture);
-        data.LoadTextureBitmap(bitmapTexture);
-
-        return data;
-    }
-
-    public static InputDataBuffer FromBitmap(Bitmap bitmapHeight, Bitmap bitmapTexture)
-    {
-        var data = new InputDataBuffer(bitmapHeight.Width, bitmapHeight.Height);
-
-        data.LoadHeightBitmap(bitmapHeight);
-        data.LoadTextureBitmap(bitmapTexture);
+        var gray = new ARGBColor(127, 127, 127);
+        for (int i = 0; i < data.Length; i++)
+        {
+            data[i].Color = gray;
+        }
 
         return data;
     }
@@ -78,22 +45,24 @@ public static class BitmapInputData
         data.LoadTextureBitmap(bitmap);
     }
 
+    public static void LoadHeightBitmap(this InputDataBuffer data, string path)
+    {
+        using var bitmap = LoadBitmap(path);
+        data.LoadHeightBitmap(bitmap);
+    }
+
+    public static void LoadNormalBitmap(this InputDataBuffer data, string path)
+    {
+        using var bitmap = LoadBitmap(path);
+        data.LoadNormalBitmap(bitmap);
+    }
+
     public static unsafe void LoadTextureBitmap(this InputDataBuffer idata, Bitmap bitmap)
     {
-        if (bitmap.Width != idata.Width || bitmap.Height != idata.Height)
-        {
-            var newbitmap = new Bitmap(idata.Width, idata.Height);
-            using (var g = System.Drawing.Graphics.FromImage(newbitmap))
-            {
-                g.InterpolationMode = InterpolationMode.NearestNeighbor;
-                g.DrawImage(bitmap, new Rectangle(0, 0, idata.Width, idata.Height));
-            }
-            bitmap = newbitmap;
-        }
+        using var data = LockBits<byte>(idata, bitmap);
+        var ptr = data.Scan0;
 
-        var data = LockBits(bitmap);
-        byte* ptr = (byte*)data.Scan0;
-        int size = data.Width*data.Height;
+        int size = data.Length;
 
         switch (data.PixelFormat)
         {
@@ -148,42 +117,89 @@ public static class BitmapInputData
                 throw new InvalidDataException($"{data.PixelFormat}");
             }
         }
-
-        bitmap.UnlockBits(data);
-    }
-
-    public static void LoadHeightBitmap(this InputDataBuffer data, string path)
-    {
-        using var bitmap = LoadBitmap(path);
-        data.LoadHeightBitmap(bitmap);
     }
 
     public static unsafe void LoadHeightBitmap(this InputDataBuffer idata, Bitmap bitmap)
     {
-        var data = LockBits(bitmap);
-        int size = data.Width * data.Height;
-        int stride = data.Stride / data.Width;
+        using var data = LockBits<byte>(idata, bitmap);
+        var ptr = data.Scan0;
 
-        byte* ptr = (byte*)data.Scan0;
+        int size = data.Length;
+        int stride = data.Stride;
 
         for (int i = 0; i < size; i++)
         {
             idata[i].Height = ptr[i * stride];
         }
-
-        idata.CalculateNormals();
-
-        bitmap.UnlockBits(data);
-    }
-
-    public static void LoadNormalBitmap(this InputDataBuffer data, string path)
-    {
-        using var bitmap = LoadBitmap(path);
-        data.LoadNormalBitmap(bitmap);
     }
 
     public static unsafe void LoadNormalBitmap(this InputDataBuffer idata, Bitmap bitmap)
     {
+        using var data = LockBits<byte>(idata, bitmap);
+        var ptr = data.Scan0;
+
+        int length = data.Length;
+        int stride = data.Stride;
+        int offsetX;
+        int offsetY;
+
+        switch (data.PixelFormat)
+        {
+            case PixelFormat.Format24bppRgb:
+                offsetX = 2; offsetY = 1;
+            break;
+            case PixelFormat.Format32bppArgb:
+                offsetX = 2; offsetY = 1;
+            break;
+            default:
+                throw new InvalidDataException($"{data.PixelFormat}");
+        }
+
+        for (int i = 0; i < length; i++)
+        {
+            idata[i].Normals = S8Vec2.FromBytes(ptr[i * stride + offsetX], ptr[i * stride + offsetY]);
+        }
+    }
+
+    public unsafe static Bitmap NormalDataToBitmap(this InputDataBuffer idata)
+    {
+        var bitmap = new Bitmap(idata.Width, idata.Height, PixelFormat.Format32bppArgb);
+
+        using var data = LockBits<ARGBColor>(idata, bitmap);
+        var ptr = data.Scan0;
+
+        for (int i = 0; i < idata.Length; i++)
+        {
+            ptr[i] = (ARGBColor)idata[i].Normals;
+        }
+
+        return bitmap;
+    }
+
+    unsafe record struct BitmapEntry<T> (Bitmap Bitmap, BitmapData BitmapData, bool Owned) : IDisposable where T : unmanaged 
+    {
+        public int Width => BitmapData.Width;
+        public int Height => BitmapData.Height;
+        public int Length => BitmapData.Width * BitmapData.Height;
+        public int Stride => BitmapData.Stride / BitmapData.Width;
+        public PixelFormat PixelFormat => BitmapData.PixelFormat;
+
+        public T* Scan0 => (T*)BitmapData.Scan0;
+
+        public void Dispose()
+        {
+            if (Owned)
+            {
+                Bitmap.Dispose();
+                return;
+            }
+            Bitmap.UnlockBits(BitmapData);
+        }
+    }
+
+    static BitmapEntry<T> LockBits<T>(InputDataBuffer idata, Bitmap bitmap) where T : unmanaged
+    {
+        bool owned = false;
         if (bitmap.Width != idata.Width || bitmap.Height != idata.Height)
         {
             var newbitmap = new Bitmap(idata.Width, idata.Height, PixelFormat.Format24bppRgb);
@@ -193,35 +209,18 @@ public static class BitmapInputData
                 g.DrawImage(bitmap, new Rectangle(0, 0, idata.Width, idata.Height));
             }
             bitmap = newbitmap;
+            owned = true;
         }
 
-        var data = LockBits(bitmap);
-        byte* ptr = (byte*)data.Scan0;
-        int size = data.Width * data.Height;
-        int stride = data.Stride / data.Width;
-
-        if (stride < 2)
-            throw new ArgumentException();
-
-        for (int i = 0; i < size; i++)
-        {
-            idata[i].Normals = S8Vec2.FromBytes(ptr[i * stride + (stride - 1)], ptr[i * stride + (stride - 2)]);
-        }
-
-        bitmap.UnlockBits(data);
-    }
-
-
-    static BitmapData LockBits(Bitmap bitmap)
-    {
         var bitmapRect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-        return bitmap.LockBits(bitmapRect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
+        var data = bitmap.LockBits(bitmapRect, ImageLockMode.ReadOnly, bitmap.PixelFormat);
+
+        return new BitmapEntry<T>(bitmap, data, owned);
     }
 
     static Bitmap LoadBitmap(string path)
     {
         var bitmap = (Bitmap)Image.FromFile(path);
-        Console.WriteLine(bitmap.RawFormat);
         return bitmap;
     }
 }
