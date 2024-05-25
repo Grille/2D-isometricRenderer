@@ -71,10 +71,19 @@ public abstract unsafe class Swapchain<T> : Swapchain where T : class
     {
         get
         {
-            if (_handle?.disposed == false)
-                throw new InvalidOperationException("Last handle not disposed.");
-
             var index = GetIndex(Position - 1);
+
+            if (_handle != null) { 
+                if (!_handle.disposed)
+                {
+                    if (_handle.Value == _items[index])
+                    {
+                        return _handle;
+                    }
+                    throw new InvalidOperationException("Last handle not disposed.");
+                }
+            }
+
             _handle = new MonitorHandle<T>(_items[index], _locks[index]);
             return _handle;
         }
