@@ -432,7 +432,7 @@ public partial class FormEditor : Form
 
     private void TextBoxTilt_TextChanged(object sender, EventArgs e)
     {
-        if (TryGetNumberFromToolStripTextBox(sender, out float value))
+        if (TryGetNumberFromToolStripTextBox(sender, out float value, 10))
         {
             camera.Tilt = value;
             pBResult.InvalidateRender();
@@ -441,8 +441,9 @@ public partial class FormEditor : Form
 
     private void TextBoxHeight_TextChanged(object sender, EventArgs e)
     {
-        if (TryGetNumberFromToolStripTextBox(sender, out float value))
+        if (TryGetNumberFromToolStripTextBox(sender, out float value, ushort.MaxValue))
         {
+
             renderer.MaxHeight = (int)value;
             pBResult.InvalidateRender();
         }
@@ -458,14 +459,14 @@ public partial class FormEditor : Form
         }
     }
 
-    bool TryGetNumberFromToolStripTextBox(object sender, out float value)
+    bool TryGetNumberFromToolStripTextBox(object sender, out float value, float max = float.MaxValue)
     {
         var control = (ToolStripTextBox)sender;
         var text = control.Text;
 
         if (float.TryParse(text, out value))
         {
-            if (value >= 0)
+            if (value >= 0 && value <= max)
             {
                 control.ForeColor = Color.Black;
                 return true;
