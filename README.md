@@ -32,9 +32,7 @@ Since the image is rendered front to back, this is a relatively effective optimi
 - [Youtube Video](https://www.youtube.com/watch?v=cMj5tAFPiHg)
 
 ## Example
-
-<img src="https://imgur.com/W7dnPGW.gif"/>
-
+![Animation16](https://github.com/Grille/2D-isometricRenderer/assets/26384012/b4541b00-b4d4-4e0e-a9a6-983a1ff05d5e)
 
 ## HowTo Use Demo
 Download the latest demo https://github.com/Grille/2D-isometricRenderer/releases and run it.\
