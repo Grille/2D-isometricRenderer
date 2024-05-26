@@ -15,7 +15,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageIcon>Cube.png</PackageIcon>
-		<Version>0.2.2</Version>
+		<Version>0.2.3</Version>
 		<Authors>Grille</Authors>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
