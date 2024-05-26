@@ -14,9 +14,9 @@ namespace Grille.Graphics.Isometric;
 
 public abstract unsafe class Swapchain : IDisposable
 {
-    public int ImageWidth { get; private set; }
+    public int ImageWidth { get; protected set; }
 
-    public int ImageHeight { get; private set; }
+    public int ImageHeight { get; protected set; }
 
     public int ImageLength => ImageWidth * ImageHeight;
 
@@ -45,13 +45,10 @@ public abstract unsafe class Swapchain : IDisposable
         if (ImageWidth == width && ImageHeight == height)
             return;
 
-        ImageWidth = width;
-        ImageHeight = height;
-
-        OnResizeImages();
+        OnResizeImages(width, height);
     }
 
-    public abstract void OnResizeImages();
+    public abstract void OnResizeImages(int width, int height);
 
     public abstract void Dispose();
 }
@@ -99,10 +96,13 @@ public abstract unsafe class Swapchain<T> : Swapchain where T : class
         }
     }
 
-    public override sealed void OnResizeImages()
+    public override sealed void OnResizeImages(int width, int height)
     {
         foreach (var item in _locks)
             Monitor.Enter(item);
+
+        ImageWidth = width;
+        ImageHeight = height;
 
         DisposeItems();
         for (int i = 0; i < _items.Length; i++)

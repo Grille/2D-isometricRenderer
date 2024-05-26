@@ -85,8 +85,7 @@ public unsafe class NativeBuffer<T> : IDisposable where T : unmanaged
     public NativeBuffer<T> Copy()
     {
         var buffer = new NativeBuffer<T>(Width, Height);
-        uint size = (uint)(Length * sizeof(T));
-        Unsafe.CopyBlock(Pointer, buffer.Pointer, size);
+        AsSpan().CopyTo(buffer.AsSpan());
         return buffer;
     }
 

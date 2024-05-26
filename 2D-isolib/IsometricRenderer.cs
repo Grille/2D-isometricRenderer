@@ -49,6 +49,9 @@ public unsafe class IsometricRenderer
 
     int _maxHeight = 255;
 
+    /// <summary>
+    /// Max supported height, Set calls <see cref="InputChanged"/> after.
+    /// </summary>
     public int MaxHeight
     {
         get => _maxHeight;
@@ -124,6 +127,10 @@ public unsafe class IsometricRenderer
         SetInput(buffer, false);
     }
 
+    /// <summary>
+    /// Informs the renderer that the input may have changed, 
+    /// resizes <see cref="Swapchain"/> and internal buffers to accommodate the current settings if the current size is no longer adequate.
+    /// </summary>
     public void InputChanged()
     {
         bool rebuildBuffer = false;

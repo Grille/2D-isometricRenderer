@@ -281,8 +281,10 @@ public partial class FormEditor : Form
     {
         try
         {
+            var old = inputData;
             inputData = BitmapInputData.FromHeightBitmap(path);
             renderer.SetInput(inputData, false);
+            old?.Dispose();
 
             var extension = Path.GetExtension(path);
             var basepath = Path.ChangeExtension(path, null);
