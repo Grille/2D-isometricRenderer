@@ -153,6 +153,9 @@ public class GdiRenderer
 
     public void DrawInfo()
     {
+        if (Info.Length == 0)
+            return;
+
         var text = Info.ToString();
         var textsize = g.MeasureString(text, Font);
         var textrect = new RectangleF(PointF.Empty, textsize);
