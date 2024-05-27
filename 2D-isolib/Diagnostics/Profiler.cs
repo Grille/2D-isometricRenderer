@@ -58,4 +58,9 @@ public class Profiler
         Begin();
         End();
     }
+
+    public override string ToString()
+    {
+        return $"{FPS:F2}fps {FrameTime:F2}ms";
+    }
 }

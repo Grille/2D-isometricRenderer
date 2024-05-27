@@ -159,8 +159,7 @@ public class RenderSurface : Control
 
         if (DebugInfoEnabled)
         {
-            var sb = new StringBuilder();
-
+            var sb = GdiRenderer.Info;
             sb.AppendLine($"Render:");
             sb.AppendLine($"  {Renderer.FPS:F2}fps");
             sb.AppendLine($"  {Renderer.FrameTime:F2}ms");
@@ -168,16 +167,11 @@ public class RenderSurface : Control
             sb.AppendLine($"Display:");
             sb.AppendLine($"  {Profiler.FPS:F2}fps");
             sb.AppendLine($"  {Profiler.FrameTime:F2}ms");
-
-            var font = new Font("consolas", 11);
-            var text = sb.ToString();
-            var textsize = g.MeasureString(text, font);
-            var textrect = new RectangleF(PointF.Empty, textsize);
-            g.FillRectangle(new SolidBrush(Color.FromArgb(128, 0, 0, 0)), textrect);
-            g.DrawString(text, font, new SolidBrush(Color.White), textrect);
         }
 
         base.OnPaint(e);
+
+        GdiRenderer.DrawInfo();
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)

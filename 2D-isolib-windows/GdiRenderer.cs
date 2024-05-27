@@ -17,12 +17,19 @@ public class GdiRenderer
 {
     System.Drawing.Graphics? g;
 
+    /// <summary>
+    /// Information displayed in top left corner.
+    /// </summary>
+    public StringBuilder Info { get; }
+
     public Font Font { get; set; }
 
     public Camera Camera { get; }
 
     public GdiRenderer(Camera camera)
     {
+        Info = new StringBuilder();
+
         Font = new Font("consolas", 11);
 
         Camera = camera;
@@ -63,9 +70,8 @@ public class GdiRenderer
         g.DrawLine(pen, (PointF)tpos1, (PointF)tpos2);
     }
 
-    public void DrawCoords(Vector3 pos)
+    public void DrawCoords(Vector3 pos, float size = 100)
     {
-        float size = 100;
         var posX = pos + new Vector3(size, 0, 0);
         var posY = pos + new Vector3(0, size, 0);
         var posZ = pos + new Vector3(0, 0, size);
@@ -103,21 +109,35 @@ public class GdiRenderer
 
     public void DrawBoundings(float size, float height)
     {
-        void DrawQuad(float h)
+        var begin = new Vector3(-size, -size, 0);
+        var end = new Vector3(size, size, height);
+
+        DrawBoundings(begin, end);
+    }
+
+    public void DrawBoundings(Vector3 begin, Vector3 end)
+    {
+        void DrawRectangle(float z)
         {
-            DrawLine3D(new Vector3(-size, size, h), new Vector3(size, size, h));
-            DrawLine3D(new Vector3(-size, -size, h), new Vector3(size, -size, h));
-            DrawLine3D(new Vector3(-size, size, h), new Vector3(-size, -size, h));
-            DrawLine3D(new Vector3(size, size, h), new Vector3(size, -size, h));
+            void DrawLine(float x1, float y1, float x2, float y2)
+            {
+                DrawLine3D(new Vector3(x1, y1, z), new Vector3(x2, y2, z));
+            }
+            DrawLine(begin.X, begin.Y, end.X, begin.Y);
+            DrawLine(end.X, begin.Y, end.X, end.Y);
+            DrawLine(end.X, end.Y, begin.X, end.Y);
+            DrawLine(begin.X, end.Y, begin.X, begin.Y);
         }
-
-        DrawLine3D(new Vector3(size, size, 0), new Vector3(size, size, height));
-        DrawLine3D(new Vector3(-size, -size, 0), new Vector3(-size, -size, height));
-        DrawLine3D(new Vector3(-size, size, 0), new Vector3(-size, size, height));
-        DrawLine3D(new Vector3(size, -size, 0), new Vector3(size, -size, height));
-
-        DrawQuad(0);
-        DrawQuad(height);
+        DrawRectangle(begin.Z);
+        DrawRectangle(end.Z);
+        void DrawLine(float x, float y)
+        {
+            DrawLine3D(new Vector3(x, y, begin.Z), new Vector3(x, y, end.Z));
+        }
+        DrawLine(begin.X, begin.Y);
+        DrawLine(end.X, begin.Y);
+        DrawLine(end.X, end.Y);
+        DrawLine(begin.X, end.Y);
     }
 
     public RectangleF GetScreenSpaceBoundings(Bitmap bitmap, float offsetY)
@@ -129,6 +149,17 @@ public class GdiRenderer
         if (dstRect.Y is float.NaN)
             throw new Exception();
         return dstRect;
+    }
+
+    public void DrawInfo()
+    {
+        var text = Info.ToString();
+        var textsize = g.MeasureString(text, Font);
+        var textrect = new RectangleF(PointF.Empty, textsize);
+        g.FillRectangle(new SolidBrush(Color.FromArgb(128, 0, 0, 0)), textrect);
+        g.DrawString(text, Font, new SolidBrush(Color.White), textrect);
+
+        Info.Clear();
     }
 
 
