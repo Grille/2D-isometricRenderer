@@ -32,7 +32,7 @@ Since the image is rendered front to back, this is a relatively effective optimi
 - [Youtube Video](https://www.youtube.com/watch?v=cMj5tAFPiHg)
 
 ## Example
-![Animation16](https://private-user-images.githubusercontent.com/26384012/333878765-b4541b00-b4d4-4e0e-a9a6-983a1ff05d5e.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTY3NTM1ODYsIm5iZiI6MTcxNjc1MzI4NiwicGF0aCI6Ii8yNjM4NDAxMi8zMzM4Nzg3NjUtYjQ1NDFiMDAtYjRkNC00ZTBlLWE5YTYtOTgzYTFmZjA1ZDVlLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA1MjYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNTI2VDE5NTQ0NlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTJhZTVkYmJjMzRhY2I0MThkMjc3ZmVkODRhODExMmJjNDVjYTYyNmVhOWRiZDQ0OGQ2NDU2MmUzZDVmM2RkMjAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.6TTV1MOWrIICc3vn3q0J5cJTZu0JLAkRLjQKmmC4p48)
+![Animation16](https://raw.githubusercontent.com/Grille/grille.github.io/images/IsometricAnimation16.gif)
 
 ## HowTo Use Demo
 Download the latest demo https://github.com/Grille/2D-isometricRenderer/releases and run it.\
